@@ -78,7 +78,8 @@ if ! command -v rsync >/dev/null 2>&1; then
 fi
 
 # Keep flags compatible with older macOS rsync versions (e.g. 2.6.9).
-SYNC_FLAGS=(-az --delete --progress)
+# --itemize-changes lists only files whose content/permissions differ ("deleting" lines included).
+SYNC_FLAGS=(-az --delete --itemize-changes)
 if [[ "$DRY_RUN" == true ]]; then
   SYNC_FLAGS+=(--dry-run)
 fi
@@ -90,6 +91,9 @@ EXCLUDES=(
   --exclude ".DS_Store"
   --exclude ".cursor"
   --exclude ".vscode"
+  # The admin UI is built on the server (ops/deploy-admin-ui-fix.sh); never delete its build output.
+  --exclude ".output/"
+  --exclude ".nuxt/"
   # Preserve runtime uploads on server (do not delete with rsync --delete).
   # Exclude the directories themselves, not just their contents ("dir/**"), or
   # --delete still tries to remove an upload directory that is missing locally.
