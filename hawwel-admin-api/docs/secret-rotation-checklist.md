@@ -15,8 +15,8 @@ Use this checklist whenever credentials are exposed or on periodic key rotation.
 ## Rotation procedure
 
 1. Generate new secrets with strong randomness (`openssl rand -hex 32` or provider-generated tokens).
-2. Update `/opt/hawwel/dasco-backend/.env.production`.
-3. Update `/opt/hawwel/dasco-backend-dashboard/.env.production`.
+2. Update `/opt/hawwel/hawwel-api/.env.production`.
+3. Update `/opt/hawwel/hawwel-admin-api/.env.production`.
 4. Restart services:
    - `pm2 restart hawwel-admin-api hawwel-api --update-env`
 5. Validate:

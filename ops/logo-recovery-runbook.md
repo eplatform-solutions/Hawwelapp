@@ -5,7 +5,7 @@ Run on production server.
 ## 1) Detect missing files referenced by DB
 
 ```bash
-cd /opt/hawwel/dasco-backend-dashboard
+cd /opt/hawwel/hawwel-admin-api
 NODE_ENV=production npm run audit:payment-logos
 ```
 
@@ -27,7 +27,7 @@ For each method reported by the audit:
 ## 4) Re-check
 
 ```bash
-cd /opt/hawwel/dasco-backend-dashboard
+cd /opt/hawwel/hawwel-admin-api
 NODE_ENV=production npm run audit:payment-logos
 ```
 

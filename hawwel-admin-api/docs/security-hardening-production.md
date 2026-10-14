@@ -40,8 +40,8 @@ Apply equivalent host-specific blocks for `api.7awalaty.com` and `admin.7awalaty
 Set an explicit origin allowlist in both backend services:
 
 ```bash
-# /opt/hawwel/dasco-backend/.env.production
-# /opt/hawwel/dasco-backend-dashboard/.env.production
+# /opt/hawwel/hawwel-api/.env.production
+# /opt/hawwel/hawwel-admin-api/.env.production
 CORS_ALLOWED_ORIGINS=https://admin.7awalaty.com,https://api.7awalaty.com,https://admin-api.7awalaty.com
 ```
 

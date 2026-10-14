@@ -76,10 +76,10 @@ After cleanup and baseline seed:
 Payment method logos and other dashboard uploads are stored under `assets/images/`. These folders are gitignored and are created automatically on API startup. If you deploy without restarting PM2 after the first deploy, create them once manually:
 
 ```bash
-mkdir -p /opt/hawwel/dasco-backend-dashboard/assets/images/{payment_methods,app_identity,transfers}
-mkdir -p /opt/hawwel/dasco-backend/assets/images/{users,kyc,transfers}
-chmod -R 755 /opt/hawwel/dasco-backend-dashboard/assets/images
-chmod -R 755 /opt/hawwel/dasco-backend/assets/images
+mkdir -p /opt/hawwel/hawwel-admin-api/assets/images/{payment_methods,app_identity,transfers}
+mkdir -p /opt/hawwel/hawwel-api/assets/images/{users,kyc,transfers}
+chmod -R 755 /opt/hawwel/hawwel-admin-api/assets/images
+chmod -R 755 /opt/hawwel/hawwel-api/assets/images
 ```
 
 ## 7) Production domain matrix
@@ -133,7 +133,7 @@ Use the provided `/path/to/hawwel/ops/sync-production.sh` script, which already 
 Run after each deploy:
 
 ```bash
-cd /opt/hawwel/dasco-backend-dashboard
+cd /opt/hawwel/hawwel-admin-api
 NODE_ENV=production node scripts/audit-payment-method-logos.js
 ```
 

@@ -6,7 +6,7 @@ set -euo pipefail
 
 ROOT="${ROOT:-/opt/hawwel}"
 
-cd "${ROOT}/dasco-backend-dashboard"
+cd "${ROOT}/hawwel-admin-api"
 NODE_ENV=production node scripts/audit-payment-method-logos.js --clear-missing
 
 echo ""

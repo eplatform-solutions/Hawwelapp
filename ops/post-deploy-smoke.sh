@@ -13,7 +13,7 @@ curl -fsS https://admin.7awalaty.com/health
 
 echo ""
 echo "[post-deploy] Payment logos audit"
-cd "${ROOT}/dasco-backend-dashboard"
+cd "${ROOT}/hawwel-admin-api"
 NODE_ENV=production node scripts/audit-payment-method-logos.js
 
 echo ""

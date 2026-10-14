@@ -8,10 +8,10 @@ set -euo pipefail
 REMOTE_HOST="${REMOTE_HOST:-root@72.62.52.191}"
 REMOTE_ROOT="${REMOTE_ROOT:-/opt/hawwel}"
 LOCAL_ROOT="${LOCAL_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
-# Folder names of the two APIs on the server. They still carry the pre-rename names; change
-# them here (and in the server's pm2 setup) if the server folders are ever renamed.
-REMOTE_API_DIR="${REMOTE_API_DIR:-dasco-backend}"
-REMOTE_ADMIN_API_DIR="${REMOTE_ADMIN_API_DIR:-dasco-backend-dashboard}"
+# Folder names of the two APIs on the server (/opt/hawwel/<name>). If they are ever renamed, change
+# them here and in ops/ecosystem.config.js.
+REMOTE_API_DIR="${REMOTE_API_DIR:-hawwel-api}"
+REMOTE_ADMIN_API_DIR="${REMOTE_ADMIN_API_DIR:-hawwel-admin-api}"
 
 DRY_RUN=false
 RESTART_PM2=false
