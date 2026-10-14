@@ -16,6 +16,8 @@ All Hawwel code in one repository.
 - `main` is what runs in production. Nothing is deployed from any other branch.
 - New work goes on a short-lived branch (`fix/...`, `feature/...`), is merged into `main`, and the branch is deleted.
 - Every production deploy is tagged: `deploy-YYYY-MM-DD` (e.g. `git tag deploy-2026-10-14 && git push --tags`).
+- `Style-Demo` keeps the earlier mobile app design (v1.0.8, May 2026) for reference only. It is never deployed
+  or merged into `main`.
 
 ## Secrets
 
