@@ -1,6 +1,0 @@
-# Copy to android/key.properties (gitignored). Required for release builds.
-# Losing this keystore permanently blocks Play updates for this app id.
-storePassword=YOUR_STORE_PASSWORD
-keyPassword=YOUR_KEY_PASSWORD
-keyAlias=hawwel
-storeFile=/absolute/path/to/hawwel-release-key.jks

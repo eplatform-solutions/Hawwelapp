@@ -1,4 +1,4 @@
-import 'package:hawwel/featue/auth/welcomyou/data/model_airea.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_airea.dart';
 
 abstract class AreasState {}
 

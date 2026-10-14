@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
 
-import 'package:hawwel/featue/auth/welcomyou/data/repo_conversion_methods/repo.dart';
-import 'package:hawwel/featue/transaction_historu/data/model.dart';
+import 'package:usdt/featue/auth/welcomyou/data/repo_conversion_methods/repo.dart';
+import 'package:usdt/featue/transaction_historu/data/model.dart';
 
 // class PaymentMethodsRepoImpl implements PaymentMethodsRepo {
 //   final ApiService _apiService;

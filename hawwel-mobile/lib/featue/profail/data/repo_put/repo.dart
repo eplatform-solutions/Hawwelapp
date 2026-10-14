@@ -1,7 +1,7 @@
 // update_info_repo.dart
 
 import 'package:dartz/dartz.dart';
-import 'package:hawwel/constans/failear.dart';
+import 'package:usdt/constans/failear.dart';
 
 abstract class UpdateInfoRepo {
    Future<Either<Failur, Map<String, dynamic>>> sendotpchang({
@@ -17,11 +17,5 @@ abstract class UpdateInfoRepo {
     required String emailSession,
     required String phoneCode,
     required String phoneSession,
-    String? country,
-  });
-
-  /// تحديث بلد المرسل فقط (ISO code مثل SY/CH).
-  Future<Either<Failur, String>> updateSenderCountry({
-    required String country,
   });
 }

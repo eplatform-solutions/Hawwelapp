@@ -1,14 +1,14 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:google_fonts/google_fonts.dart';
-// import 'package:hawwel/constans/appr_images.dart';
-// import 'package:hawwel/constans/falidator.dart';
-// import 'package:hawwel/constans/localization/app_tranzaction.dart';
-// import 'package:hawwel/constans/style.dart';
-// import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-// import 'package:hawwel/featue/auth/login/widjt/top_screen.dart';
-// import 'package:hawwel/featue/auth/otp/otp_view.dart';
-// import 'package:hawwel/featue/auth/otp/widjt/top_screen.dart';
+// import 'package:usdt/constans/appr_images.dart';
+// import 'package:usdt/constans/falidator.dart';
+// import 'package:usdt/constans/localization/app_tranzaction.dart';
+// import 'package:usdt/constans/style.dart';
+// import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+// import 'package:usdt/featue/auth/login/widjt/top_screen.dart';
+// import 'package:usdt/featue/auth/otp/otp_view.dart';
+// import 'package:usdt/featue/auth/otp/widjt/top_screen.dart';
 
 // class Forgetpasswordprofail extends StatefulWidget {
 //   const Forgetpasswordprofail({super.key});

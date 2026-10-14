@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/style.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-import 'package:hawwel/featue/profail/data/cubit_put/cubit.dart';
-import 'package:hawwel/featue/profail/data/cubit_put/cubit_stat.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/profail/data/cubit_put/cubit.dart';
+import 'package:usdt/featue/profail/data/cubit_put/cubit_stat.dart';
 
 class EditProfileOtpPage extends StatelessWidget {
   final bool isEmailOtp;
@@ -120,7 +119,24 @@ class EditProfileOtpPage extends StatelessWidget {
                         padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
                         child: Row(
                           children: [
-                            AppBackButton(),
+                            GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Container(
+                                width: 38.w,
+                                height: 38.h,
+                                decoration: BoxDecoration(
+                                  color: branding.buttonText.withValues(alpha: 0.15),
+                                  borderRadius: BorderRadius.circular(10.r),
+                                ),
+                                child: Icon(
+                                  isArabic
+                                      ? Icons.arrow_forward_ios_rounded
+                                      : Icons.arrow_back_ios_rounded,
+                                  color: branding.buttonText,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
                             Expanded(
                               child: Text(
                                 AppTranslations.getText(context, 'verification_code'),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/colors.dart';
-import 'package:hawwel/constans/localization/lang_cubit.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/colors.dart';
+import 'package:usdt/constans/localization/lang_cubit.dart';
 
 class TextFieldCustompayment extends StatefulWidget {
   final TextEditingController? controller;
@@ -54,7 +54,7 @@ class _TextFieldCustomState extends State<TextFieldCustompayment> {
         borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
-            color: AppColors.grayColor.withValues(alpha: 0.3),
+            color: AppColors.grayColor.withOpacity(0.3),
             blurRadius: 10,
           ),
         ],

@@ -1,4 +1,4 @@
-import 'package:hawwel/featue/technical_support/data/model.dart';
+import 'package:usdt/featue/technical_support/data/model.dart';
 
  
 abstract class SupportState {}

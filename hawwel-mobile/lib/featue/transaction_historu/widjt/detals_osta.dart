@@ -1,8 +1,8 @@
 // import 'package:flutter/material.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:google_fonts/google_fonts.dart';
-// import 'package:hawwel/constans/appr_images.dart';
-// import 'package:hawwel/constans/localization/app_tranzaction.dart';
+// import 'package:usdt/constans/appr_images.dart';
+// import 'package:usdt/constans/localization/app_tranzaction.dart';
 
 // class Detalestranzationosta extends StatelessWidget {
 //   final String currency;
@@ -288,35 +288,28 @@
 //     // required this.reference,
 //   });
 // }
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
-import 'package:hawwel/constans/widgets/in_tree_capture.dart';
-import 'package:hawwel/featue/transaction_historu/widjt/transfer_photo_card.dart';
-import 'package:hawwel/featue/transaction_historu/widjt/transfer_receipt_pdf.dart';
-// ignore_for_file: non_constant_identifier_names
-
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/localization/lang_cubit.dart';
-import 'package:hawwel/constans/transfer_status_theme.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/cubit/cubit.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/localization/lang_cubit.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/cubit/cubit.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/cubit/cubit_stat.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/pdf_arabic_text.dart';
 
 class Detalestranzationosta extends StatefulWidget {
   final String currency;
   final double amount;
-  final double paidAmount;
   final bool isReceived;
   final String stat;
   final String senderName;
@@ -334,7 +327,6 @@ class Detalestranzationosta extends StatefulWidget {
   final String fee;
   final String paymentProofNote;
   final String paymentProofImagePath;
-  final String receivingPlaceImagePath;
 
   const Detalestranzationosta({
     super.key,
@@ -346,7 +338,6 @@ class Detalestranzationosta extends StatefulWidget {
     required this.City,
     required this.currency,
     required this.amount,
-    this.paidAmount = 0.0,
     required this.isReceived,
     required this.senderName,
     required this.senderPhone,
@@ -358,7 +349,6 @@ class Detalestranzationosta extends StatefulWidget {
     required this.transferNumber,
     this.paymentProofNote = '',
     this.paymentProofImagePath = '',
-    this.receivingPlaceImagePath = '',
   });
 
   @override
@@ -367,238 +357,38 @@ class Detalestranzationosta extends StatefulWidget {
 
 class _DetalestranzationostaState extends State<Detalestranzationosta> {
   bool _isSharingPdf = false;
-  bool _isSharingImage = false;
 
-  String get _resolvedCurrency {
-    final c = widget.currency.trim().toUpperCase();
-    return c.isEmpty ? 'USDT' : c;
-  }
+  bool get _hasPaymentProofDetails =>
+      widget.paymentProofNote.trim().isNotEmpty &&
+      widget.paymentProofImagePath.trim().isNotEmpty;
 
-  String get _deliveryCurrencyLabel {
-    switch (_resolvedCurrency) {
-      case 'USDT':
-      case 'USDC':
-      case 'USD':
-        return 'دولار أمريكي';
-      case 'SYP':
-      case 'SYR':
-        return 'ليرة سورية';
-      case 'TRY':
-      case 'TL':
-        return 'ليرة تركية';
-      default:
-        final raw = widget.currency.trim();
-        return raw.isEmpty ? 'دولار أمريكي' : raw;
-    }
-  }
-
-  String _dateOnly(String raw) {
-    final value = raw.trim();
-    if (value.isEmpty) return value;
-
-    final parsed = DateTime.tryParse(value);
-    if (parsed != null) {
-      return '${parsed.year}/${parsed.month.toString().padLeft(2, '0')}/${parsed.day.toString().padLeft(2, '0')}';
-    }
-
-    final ymd = RegExp(r'(\d{4}[/-]\d{1,2}[/-]\d{1,2})').firstMatch(value);
-    if (ymd != null) return ymd.group(1)!;
-
-    final dmy = RegExp(r'(\d{1,2}[/-]\d{1,2}[/-]\d{4})').firstMatch(value);
-    if (dmy != null) return dmy.group(1)!;
-
-    final parts = value.split(RegExp(r'\s+'));
-    return parts.isEmpty ? value : parts.last;
-  }
-
-  // The requested amount (widget.amount) never changes once the transfer is
-  // created - only the actually-received amount (widget.paidAmount) reflects
-  // what the sender really paid. Surface both explicitly whenever they
-  // differ, instead of letting the customer assume the requested amount is
-  // what went through.
-  bool get _hasAmountMismatch {
-    final normalized = normalizeTransferStatus(widget.stat);
-    return (normalized == 'under-paid' || normalized == 'over-paid') &&
-        widget.paidAmount > 0;
-  }
-
-  String _detailsStatusText(bool isArabic) {
-    final normalized = normalizeTransferStatus(widget.stat);
-    if (normalized == 'full-paid') {
-      return isArabic
-          ? 'تم الدفع - جاري اعداد عنوان الاستلام'
-          : 'Paid - pickup address is being prepared';
-    }
-    return transferStatusLabel(context, widget.stat);
-  }
-
-  String get _displayCurrency {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    return SendCurrencyHelper.displayLabelForSymbol(
-      _resolvedCurrency,
-      isArabic: isArabic,
-    );
-  }
-
-  // The notice is still worth sharing without a photo, so a failed download
-  // just leaves that section out instead of aborting the whole share.
-  Future<Uint8List?> _downloadImage(String path) async {
-    final trimmed = path.trim();
-    if (trimmed.isEmpty) return null;
-    try {
-      final response = await Dio().get<List<int>>(
-        ApiService.resolveAssetUrl(trimmed),
-        options: Options(responseType: ResponseType.bytes),
-      );
-      final data = response.data;
-      if (data == null || data.isEmpty) return null;
-      return Uint8List.fromList(data);
-    } catch (_) {
-      return null;
-    }
-  }
-
-  static const double _noticeWidth = 980;
-  static const double _noticePixelRatio = 1.5;
-
-  /// The payment-notice design (header, order details, notes + delivery
-  /// address photo, footer) exactly as before; only the rendering path
-  /// changed - see [captureWidgetPng].
-  Widget _buildNoticeWidget(Uint8List? deliveryImageBytes) {
-    final destinationParts = <String>[
-      if (widget.City.trim().isNotEmpty) widget.City.trim(),
-      if (widget.Area.trim().isNotEmpty) widget.Area.trim(),
-    ];
-    return TransferNoticeCard(
-      transferNumber: widget.transferNumber.trim(),
-      recipientName: widget.receiverName.trim(),
-      recipientPhone: widget.receiverPhone.trim(),
-      destination: destinationParts.join(' - '),
-      createdAt: _dateOnly(widget.createdAt),
-      amountLabel: '${widget.amount.toStringAsFixed(2)} $_deliveryCurrencyLabel',
-      adminNote: widget.paymentProofNote.trim(),
-      deliveryImageBytes: deliveryImageBytes,
-      orderDetailsTitle: AppTranslations.getTextStatic(
-        context,
-        'order_details_section',
-      ),
-      paymentNoticeTitle: AppTranslations.getTextStatic(
-        context,
-        'payment_notice_title',
-      ),
-    );
-  }
-
-  /// Renders the notice to PNG bytes (shared by the image and PDF actions).
-  Future<Uint8List?> _renderNoticePng() async {
-    // The delivery-address photo is what the beneficiary needs; fall back
-    // to the handover proof for transfers uploaded before the split.
-    final deliveryImage =
-        await _downloadImage(widget.receivingPlaceImagePath) ??
-            await _downloadImage(widget.paymentProofImagePath);
-    if (!mounted) return null;
-    if (deliveryImage != null) {
-      // Decode before capture so the snapshot doesn't catch an empty slot.
-      await precacheImage(MemoryImage(deliveryImage), context);
-      if (!mounted) return null;
-    }
-    return captureWidgetPng(
-      context,
-      _buildNoticeWidget(deliveryImage),
-      width: _noticeWidth,
-      pixelRatio: _noticePixelRatio,
-    );
-  }
-
-  void _showShareError() {
-    if (!mounted) return;
-    final branding = appBrandingNotifier.value;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.zero,
-        padding: EdgeInsets.zero,
-        content: CustomSnackBar(
-          backgroundColor: branding.iconPrimary,
-          message: AppTranslations.getTextStatic(context, 'image_load_error'),
-          imagePath: AppImages.eerorrimage,
-        ),
-      ),
-    );
-  }
-
-  /// Shares the same notice as a PNG - the quick "send it on WhatsApp" path.
-  Future<void> _shareTransferNoticeImage() async {
-    if (_isSharingImage) return;
-    setState(() => _isSharingImage = true);
-    try {
-      final number = widget.transferNumber.trim();
-      final shareTitle = AppTranslations.getTextStatic(
-        context,
-        'pdf_share_subject',
-      ).replaceAll('{number}', number);
-      final png = await _renderNoticePng();
-      if (png == null || !mounted) return;
-      await SharePlus.instance.share(
-        ShareParams(
-          files: [
-            XFile.fromData(
-              png,
-              mimeType: 'image/png',
-              name: 'hawwel_transfer_notice_$number.png',
-            ),
-          ],
-          subject: shareTitle,
-          title: shareTitle,
-        ),
-      );
-    } catch (_) {
-      _showShareError();
-    } finally {
-      if (mounted) setState(() => _isSharingImage = false);
-    }
-  }
-
-  Future<void> _shareTransferReceiptPdf() async {
+  Future<void> _shareTransferPdf() async {
     if (_isSharingPdf) return;
 
     setState(() => _isSharingPdf = true);
     try {
-      final number = widget.transferNumber.trim();
+      final proofUrl = ApiService.resolveAssetUrl(widget.paymentProofImagePath);
+      final response = await Dio().get<List<int>>(
+        proofUrl,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      final imageBytes = Uint8List.fromList(response.data ?? <int>[]);
+      if (!mounted) return;
+      final pdfBytes = await _buildTransferPdf(context, imageBytes);
+
+      if (!mounted) return;
       final shareTitle = AppTranslations.getTextStatic(
         context,
         'pdf_share_subject',
-      ).replaceAll('{number}', number);
-      final fileName = AppTranslations.getTextStatic(
-        context,
-        'pdf_filename',
-      ).replaceAll('{number}', number);
-
-      final png = await _renderNoticePng();
-      if (png == null || !mounted) return;
-      final decoded = await decodeImageFromList(png);
-      final pixelWidth = decoded.width;
-      final pixelHeight = decoded.height;
-      decoded.dispose();
-
-      final bytes = await wrapNoticeImageAsPdf(
-        png,
-        pixelWidth: pixelWidth,
-        pixelHeight: pixelHeight,
-        pixelRatio: _noticePixelRatio,
-        title: shareTitle,
-      );
-      if (!mounted) return;
+      ).replaceAll('{number}', widget.transferNumber);
 
       await SharePlus.instance.share(
         ShareParams(
           files: [
             XFile.fromData(
-              bytes,
+              pdfBytes,
               mimeType: 'application/pdf',
-              name: fileName,
+              name: _pdfFileName(),
             ),
           ],
           subject: shareTitle,
@@ -606,11 +396,464 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
         ),
       );
     } catch (_) {
-      _showShareError();
+      if (!mounted) return;
+      final branding = appBrandingNotifier.value;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          behavior: SnackBarBehavior.floating,
+          margin: EdgeInsets.zero,
+          padding: EdgeInsets.zero,
+          content: CustomSnackBar(
+            backgroundColor: branding.iconPrimary,
+            message: AppTranslations.getTextStatic(context, 'image_load_error'),
+            imagePath: AppImages.eerorrimage,
+          ),
+        ),
+      );
     } finally {
       if (mounted) {
         setState(() => _isSharingPdf = false);
       }
+    }
+  }
+
+  String _pdfFileName() {
+    final now = DateTime.now();
+    final ts =
+        '${now.year}${now.month.toString().padLeft(2, '0')}${now.day.toString().padLeft(2, '0')}-'
+        '${now.hour.toString().padLeft(2, '0')}${now.minute.toString().padLeft(2, '0')}';
+    return 'hawwel-transaction-$ts.pdf';
+  }
+
+  Future<Uint8List> _buildTransferPdf(
+    BuildContext context,
+    Uint8List proofImageBytes,
+  ) async {
+    final isArabic = context.read<LanguageCubit>().state == Language.arabic;
+    final pdfDir = isArabic ? pw.TextDirection.rtl : pw.TextDirection.ltr;
+
+    String tr(String key) => AppTranslations.getTextStatic(context, key);
+
+    String trNum(String key, String number) =>
+        tr(key).replaceAll('{number}', number);
+
+    final pdf = pw.Document();
+    final arabicFontData = await rootBundle.load('asset/arabic_pdf_font.ttf');
+    final arabicFont = pw.Font.ttf(arabicFontData);
+    final proofImage = pw.MemoryImage(proofImageBytes);
+    const primaryColor = PdfColor.fromInt(0xFF138372);
+    const darkColor = PdfColor.fromInt(0xFF263238);
+    const mutedColor = PdfColor.fromInt(0xFF6B7280);
+    const softBg = PdfColor.fromInt(0xFFF4F7F6);
+    const borderColor = PdfColor.fromInt(0xFFE1E7E5);
+
+    final textStyle = pw.TextStyle(
+      font: arabicFont,
+      fontSize: 11.5,
+      color: darkColor,
+    );
+    final titleStyle = pw.TextStyle(
+      font: arabicFont,
+      fontSize: 22,
+      fontWeight: pw.FontWeight.bold,
+      color: PdfColors.white,
+    );
+    final sectionStyle = pw.TextStyle(
+      font: arabicFont,
+      fontSize: 13.5,
+      fontWeight: pw.FontWeight.bold,
+      color: primaryColor,
+    );
+
+    pw.Widget infoRow(String label, String value, {bool forceLtr = false}) {
+      final labelAlign = isArabic ? pw.TextAlign.right : pw.TextAlign.left;
+      final hasArabic = !forceLtr && pdfTextContainsArabicScript(value);
+      final displayValue = hasArabic
+          ? preparePdfArabicDisplayText(value)
+          : value;
+      // Shaped Arabic from `bidi` is a visual LTR glyph stream; raw Latin stays logical.
+      final valueDirection = forceLtr
+          ? pw.TextDirection.ltr
+          : (hasArabic ? pw.TextDirection.ltr : pdfDir);
+      final valueAlign = forceLtr
+          ? pw.TextAlign.left
+          : (hasArabic
+                ? pw.TextAlign.right
+                : (isArabic ? pw.TextAlign.right : pw.TextAlign.left));
+
+      return pw.Container(
+        padding: const pw.EdgeInsets.symmetric(vertical: 7, horizontal: 10),
+        decoration: const pw.BoxDecoration(
+          border: pw.Border(
+            bottom: pw.BorderSide(color: borderColor, width: 0.6),
+          ),
+        ),
+        child: pw.Row(
+          crossAxisAlignment: pw.CrossAxisAlignment.start,
+          children: [
+            pw.Expanded(
+              child: pw.Text(
+                '$label:',
+                textAlign: labelAlign,
+                style: textStyle.copyWith(
+                  color: mutedColor,
+                  fontWeight: pw.FontWeight.bold,
+                ),
+              ),
+            ),
+            pw.SizedBox(width: 12),
+            pw.Expanded(
+              flex: 2,
+              child: pw.Directionality(
+                textDirection: valueDirection,
+                child: pw.Text(
+                  displayValue,
+                  textAlign: valueAlign,
+                  style: textStyle.copyWith(fontWeight: pw.FontWeight.bold),
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    pw.Widget sectionCard(String title, List<pw.Widget> children) {
+      return pw.Container(
+        margin: const pw.EdgeInsets.only(bottom: 14),
+        padding: const pw.EdgeInsets.all(14),
+        decoration: pw.BoxDecoration(
+          color: PdfColors.white,
+          borderRadius: pw.BorderRadius.circular(12),
+          border: pw.Border.all(color: borderColor, width: 0.8),
+        ),
+        child: pw.Column(
+          crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+          children: [
+            pw.Text(
+              title,
+              style: sectionStyle,
+              textAlign: isArabic ? pw.TextAlign.right : pw.TextAlign.left,
+            ),
+            pw.SizedBox(height: 8),
+            pw.Container(
+              decoration: pw.BoxDecoration(
+                color: softBg,
+                borderRadius: pw.BorderRadius.circular(8),
+              ),
+              child: pw.Column(children: children),
+            ),
+          ],
+        ),
+      );
+    }
+
+    pw.Widget summaryItem(String label, String value) {
+      return pw.Expanded(
+        child: pw.Container(
+          padding: const pw.EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+          decoration: pw.BoxDecoration(
+            color: PdfColors.white,
+            borderRadius: pw.BorderRadius.circular(10),
+          ),
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.center,
+            children: [
+              pw.Text(
+                label,
+                style: textStyle.copyWith(color: mutedColor, fontSize: 10.5),
+                textAlign: pw.TextAlign.center,
+              ),
+              pw.SizedBox(height: 4),
+              pdfTextContainsArabicScript(value)
+                  ? pw.Directionality(
+                      textDirection: pw.TextDirection.ltr,
+                      child: pw.Text(
+                        preparePdfArabicDisplayText(value),
+                        style: textStyle.copyWith(
+                          color: primaryColor,
+                          fontSize: 14,
+                          fontWeight: pw.FontWeight.bold,
+                        ),
+                        textAlign: pw.TextAlign.center,
+                      ),
+                    )
+                  : pw.Text(
+                      value,
+                      style: textStyle.copyWith(
+                        color: primaryColor,
+                        fontSize: 14,
+                        fontWeight: pw.FontWeight.bold,
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final noteAlign = isArabic ? pw.TextAlign.right : pw.TextAlign.left;
+
+    final statusLabelRaw = AppTranslations.transferStatusLabel(
+      context,
+      widget.stat,
+    );
+    final statusLabelPdf = pdfTextContainsArabicScript(statusLabelRaw)
+        ? preparePdfArabicDisplayText(statusLabelRaw)
+        : statusLabelRaw;
+    final statusArabicShaped = pdfTextContainsArabicScript(statusLabelRaw);
+    final paymentMethodHeader =
+        pdfTextContainsArabicScript(widget.paymentMethodName)
+        ? preparePdfArabicDisplayText(widget.paymentMethodName)
+        : widget.paymentMethodName;
+    final noteRaw = widget.paymentProofNote.trim();
+    final compactNote = noteRaw.length > 180
+        ? '${noteRaw.substring(0, 180)}...'
+        : noteRaw;
+
+    pdf.addPage(
+      pw.Page(
+        pageFormat: PdfPageFormat.a4,
+        margin: const pw.EdgeInsets.all(22),
+        theme: pw.ThemeData.withFont(base: arabicFont, bold: arabicFont),
+        build: (_) => pw.Directionality(
+          textDirection: pdfDir,
+          child: pw.Column(
+            crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+            children: [
+              pw.Container(
+                padding: const pw.EdgeInsets.all(14),
+                decoration: pw.BoxDecoration(
+                  color: primaryColor,
+                  borderRadius: pw.BorderRadius.circular(14),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                  children: [
+                    pw.Text(
+                      tr('pdf_transfer_proof_title'),
+                      style: titleStyle.copyWith(fontSize: 18),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                    pw.SizedBox(height: 6),
+                    pw.Text(
+                      trNum('pdf_transfer_number_line', widget.transferNumber),
+                      style: textStyle.copyWith(
+                        color: PdfColors.white,
+                        fontSize: 10.5,
+                      ),
+                      textAlign: pw.TextAlign.center,
+                    ),
+                    pw.SizedBox(height: 8),
+                    infoRow(
+                      tr('pdf_label_created_at'),
+                      widget.createdAt,
+                      forceLtr: true,
+                    ),
+                    infoRow(
+                      tr('pdf_label_payment_method'),
+                      paymentMethodHeader,
+                    ),
+                    pw.SizedBox(height: 8),
+                    pw.Center(
+                      child: pw.Container(
+                        padding: const pw.EdgeInsets.symmetric(
+                          vertical: 4,
+                          horizontal: 12,
+                        ),
+                        decoration: pw.BoxDecoration(
+                          color: PdfColors.white,
+                          borderRadius: pw.BorderRadius.circular(20),
+                        ),
+                        child: statusArabicShaped
+                            ? pw.Directionality(
+                                textDirection: pw.TextDirection.ltr,
+                                child: pw.Text(
+                                  statusLabelPdf,
+                                  style: textStyle.copyWith(
+                                    color: primaryColor,
+                                    fontWeight: pw.FontWeight.bold,
+                                  ),
+                                ),
+                              )
+                            : pw.Text(
+                                statusLabelPdf,
+                                style: textStyle.copyWith(
+                                  color: primaryColor,
+                                  fontWeight: pw.FontWeight.bold,
+                                ),
+                              ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 10),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(10),
+                decoration: pw.BoxDecoration(
+                  color: softBg,
+                  borderRadius: pw.BorderRadius.circular(12),
+                  border: pw.Border.all(color: borderColor, width: 0.8),
+                ),
+                child: pw.Row(
+                  children: [
+                    summaryItem(tr('pdf_summary_total'), widget.total),
+                    pw.SizedBox(width: 6),
+                    summaryItem(
+                      tr('pdf_summary_transfer_amount'),
+                      widget.transferamount,
+                    ),
+                    pw.SizedBox(width: 6),
+                    summaryItem(tr('pdf_summary_currency'), widget.currency),
+                  ],
+                ),
+              ),
+              pw.SizedBox(height: 10),
+              sectionCard(tr('pdf_section_recipient_details'), [
+                infoRow(tr('pdf_label_receiver_name'), widget.receiverName),
+                infoRow(
+                  tr('pdf_label_receiver_phone'),
+                  widget.receiverPhone,
+                  forceLtr: true,
+                ),
+                infoRow(tr('pdf_label_city'), widget.City),
+                infoRow(tr('pdf_label_area'), widget.Area),
+              ]),
+              if (compactNote.isNotEmpty)
+                pw.Container(
+                  margin: const pw.EdgeInsets.only(bottom: 10),
+                  padding: const pw.EdgeInsets.all(12),
+                  decoration: pw.BoxDecoration(
+                    color: PdfColors.white,
+                    borderRadius: pw.BorderRadius.circular(12),
+                    border: pw.Border.all(color: borderColor, width: 0.8),
+                  ),
+                  child: pw.Column(
+                    crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                    children: [
+                      pw.Text(
+                        tr('pdf_admin_note_heading'),
+                        style: sectionStyle,
+                        textAlign: noteAlign,
+                      ),
+                      pw.SizedBox(height: 6),
+                      pdfTextContainsArabicScript(compactNote)
+                          ? pw.Directionality(
+                              textDirection: pw.TextDirection.ltr,
+                              child: pw.Text(
+                                preparePdfArabicDisplayText(compactNote),
+                                style: textStyle.copyWith(fontSize: 10.5),
+                                textAlign: pw.TextAlign.right,
+                              ),
+                            )
+                          : pw.Text(
+                              compactNote,
+                              style: textStyle.copyWith(fontSize: 10.5),
+                              textAlign: noteAlign,
+                            ),
+                    ],
+                  ),
+                ),
+              pw.Container(
+                padding: const pw.EdgeInsets.all(10),
+                decoration: pw.BoxDecoration(
+                  color: PdfColors.white,
+                  borderRadius: pw.BorderRadius.circular(12),
+                  border: pw.Border.all(color: borderColor, width: 0.8),
+                ),
+                child: pw.Column(
+                  crossAxisAlignment: pw.CrossAxisAlignment.stretch,
+                  children: [
+                    pw.Text(
+                      tr('transfer_proof_photo'),
+                      style: sectionStyle,
+                      textAlign: noteAlign,
+                    ),
+                    pw.SizedBox(height: 6),
+                    pw.Center(
+                      child: pw.Container(
+                        padding: const pw.EdgeInsets.all(6),
+                        decoration: pw.BoxDecoration(
+                          color: softBg,
+                          borderRadius: pw.BorderRadius.circular(10),
+                          border: pw.Border.all(color: borderColor, width: 0.8),
+                        ),
+                        constraints: const pw.BoxConstraints(maxHeight: 185),
+                        child: pw.Image(proofImage, fit: pw.BoxFit.contain),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    return pdf.save();
+  }
+
+  // â”€â”€ Status color â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  Color _statusColor(dynamic branding) {
+    switch (widget.stat.trim().toLowerCase()) {
+      case 'full-paid':
+      case 'compleated':
+      case 'completed':
+      case 'received':
+      case 'is-received':
+      case 'is_received':
+        return branding.success;
+      case 'partial-paid':
+      case 'under-paid':
+        return const Color(0xFF2563EB);
+      case 'preparing-address':
+      case 'preparing_address':
+      case 'address-preparing':
+      case 'pending':
+      case 'can-receive':
+      case 'can_receive':
+      case 'ready-to-receive':
+      case 'ready_to_receive':
+        return const Color(0xFFF59E0B);
+      case 'rejected':
+      case 'cancelled':
+        return branding.error;
+      default:
+        return const Color(0xFFF59E0B);
+    }
+  }
+
+  IconData _statusIcon() {
+    switch (widget.stat.trim().toLowerCase()) {
+      case 'full-paid':
+      case 'compleated':
+      case 'completed':
+      case 'received':
+      case 'is-received':
+      case 'is_received':
+        return Icons.check_circle_rounded;
+      case 'partial-paid':
+      case 'under-paid':
+        return Icons.pause_circle_rounded;
+      case 'preparing-address':
+      case 'preparing_address':
+      case 'address-preparing':
+        return Icons.location_on_outlined;
+      case 'can-receive':
+      case 'can_receive':
+      case 'ready-to-receive':
+      case 'ready_to_receive':
+        return Icons.store_mall_directory_outlined;
+      case 'rejected':
+      case 'cancelled':
+        return Icons.cancel_rounded;
+      default:
+        return Icons.hourglass_top_rounded;
     }
   }
 
@@ -619,14 +862,13 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
     final branding = appBrandingNotifier.value;
     final bool isArabic =
         context.watch<LanguageCubit>().state == Language.arabic;
-    final statusVisual = resolveTransferStatusVisual(widget.stat, branding);
-    final statusColor = statusVisual.color;
+    final statusColor = _statusColor(branding);
 
     // â”€â”€ helper: info row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     // Label Ø¹Ù„Ù‰ Ø§Ù„ÙŠØ³Ø§Ø± (start) Ø«Ù… Ø§Ù„Ù†Ù‚Ø·ØªØ§Ù†ØŒ Ø§Ù„Ù‚ÙŠÙ…Ø© Ø¹Ù„Ù‰ Ø§Ù„ÙŠÙ…ÙŠÙ† (end)
     Widget infoRow(String label, String value, {bool ltr = false}) {
       return Padding(
-        padding: EdgeInsets.symmetric(vertical: 6.h),
+        padding: EdgeInsets.symmetric(vertical: 11.h),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -665,7 +907,7 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
 
     Widget sectionCard({required String title, required List<Widget> rows}) {
       return Container(
-        margin: EdgeInsets.only(bottom: 10.h),
+        margin: EdgeInsets.only(bottom: 14.h),
         decoration: BoxDecoration(
           color: branding.inputBorder.withValues(alpha: 0.45),
           borderRadius: BorderRadius.circular(18.r),
@@ -678,7 +920,7 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 10.h, 14.w, 7.h),
+              padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 10.h),
               child: Text(
                 title,
                 style: GoogleFonts.cairo(
@@ -693,13 +935,13 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
               height: 1,
             ),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 14.w),
+              padding: EdgeInsets.symmetric(horizontal: 16.w),
               child: Column(
                 children: rows.expand((w) => [w, divider()]).toList()
                   ..removeLast(),
               ),
             ),
-            SizedBox(height: 2.h),
+            SizedBox(height: 4.h),
           ],
         ),
       );
@@ -717,20 +959,39 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
               decoration: BoxDecoration(
                 gradient: branding.buildHeaderGradient(),
                 borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(18.r),
-                  bottomRight: Radius.circular(18.r),
+                  bottomLeft: Radius.circular(32.r),
+                  bottomRight: Radius.circular(32.r),
                 ),
               ),
               child: SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: EdgeInsets.fromLTRB(14.w, 2.h, 14.w, 8.h),
+                  padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 28.h),
                   child: Column(
                     children: [
                       // Back button row
                       Row(
                         children: [
-                          AppBackButton(),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              width: 38.r,
+                              height: 38.r,
+                              decoration: BoxDecoration(
+                                color: branding.buttonText.withValues(
+                                  alpha: 0.18,
+                                ),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: Icon(
+                                isArabic
+                                    ? Icons.arrow_forward_ios_rounded
+                                    : Icons.arrow_back_ios_new_rounded,
+                                color: branding.buttonText,
+                                size: 18,
+                              ),
+                            ),
+                          ),
                           Expanded(
                             child: Text(
                               AppTranslations.getText(
@@ -739,65 +1000,34 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                               ),
                               textAlign: TextAlign.center,
                               style: GoogleFonts.cairo(
-                                fontSize: 16.sp,
+                                fontSize: 17.sp,
                                 fontWeight: FontWeight.w700,
                                 color: branding.buttonText,
                               ),
                             ),
                           ),
-                          GestureDetector(
-                            onTap: _isSharingPdf
-                                ? null
-                                : _shareTransferReceiptPdf,
-                            child: Opacity(
-                              opacity: 1,
-                              child: Container(
-                                width: 34.r,
-                                height: 34.r,
-                                decoration: BoxDecoration(
-                                  color: branding.buttonText.withValues(
-                                    alpha: 0.18,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10.r),
-                                ),
-                                child: _isSharingPdf
-                                    ? Center(
-                                        child: SizedBox(
-                                          width: 15.r,
-                                          height: 15.r,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                            color: branding.buttonText,
-                                          ),
-                                        ),
-                                      )
-                                    : Icon(
-                                        Icons.share_rounded,
-                                        color: branding.buttonText,
-                                        size: 16,
-                                      ),
-                              ),
-                            ),
-                          ),
+                          SizedBox(width: 38.r),
                         ],
                       ),
 
-                      SizedBox(height: 5.h),
+                      SizedBox(height: 20.h),
 
                       // Amount + currency icon
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          SendCurrencyHelper.buildCoinIcon(
-                            symbol: _resolvedCurrency,
-                            height: 24.r,
-                            width: 24.r,
+                          Image.asset(
+                            widget.currency == 'USDC'
+                                ? AppImages.usdc
+                                : AppImages.usdt,
+                            height: 28.r,
+                            width: 28.r,
                           ),
-                          SizedBox(width: 6.w),
+                          SizedBox(width: 8.w),
                           Text(
-                            '${widget.amount.toStringAsFixed(2)} $_displayCurrency',
+                            '${widget.amount.toStringAsFixed(2)} ${widget.currency}',
                             style: GoogleFonts.cairo(
-                              fontSize: 22.sp,
+                              fontSize: 26.sp,
                               fontWeight: FontWeight.bold,
                               color: branding.buttonText,
                             ),
@@ -805,13 +1035,13 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                         ],
                       ),
 
-                      SizedBox(height: 5.h),
+                      SizedBox(height: 12.h),
 
                       // Status badge
                       Container(
                         padding: EdgeInsets.symmetric(
-                          horizontal: 14.w,
-                          vertical: 5.h,
+                          horizontal: 16.w,
+                          vertical: 6.h,
                         ),
                         decoration: BoxDecoration(
                           color: branding.buttonText.withValues(alpha: 0.18),
@@ -820,16 +1050,15 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              statusVisual.icon,
-                              color: statusColor,
-                              size: 16,
-                            ),
+                            Icon(_statusIcon(), color: statusColor, size: 16),
                             SizedBox(width: 6.w),
                             Text(
-                              _detailsStatusText(isArabic),
+                              AppTranslations.transferStatusLabel(
+                                context,
+                                widget.stat,
+                              ),
                               style: GoogleFonts.cairo(
-                                fontSize: 12.sp,
+                                fontSize: 13.sp,
                                 fontWeight: FontWeight.w700,
                                 color: branding.buttonText,
                               ),
@@ -847,76 +1076,10 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
             Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 22.h),
+                padding: EdgeInsets.fromLTRB(16.w, 20.h, 16.w, 30.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    // â”€â”€ Amount mismatch notice â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-                    if (_hasAmountMismatch) ...[
-                      Container(
-                        padding: EdgeInsets.all(14.r),
-                        decoration: BoxDecoration(
-                          color: statusColor.withValues(alpha: 0.08),
-                          borderRadius: BorderRadius.circular(16.r),
-                          border: Border.all(
-                            color: statusColor.withValues(alpha: 0.3),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Row(
-                              children: [
-                                Icon(statusVisual.icon,
-                                    color: statusColor, size: 18.sp),
-                                SizedBox(width: 8.w),
-                                Expanded(
-                                  child: Text(
-                                    _detailsStatusText(isArabic),
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: statusColor,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 10.h),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: infoRow(
-                                    AppTranslations.getText(
-                                      context,
-                                      'requested_amount_label',
-                                    ),
-                                    '${widget.amount.toStringAsFixed(2)} $_displayCurrency',
-                                    ltr: true,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: infoRow(
-                                    AppTranslations.getText(
-                                      context,
-                                      'actually_paid_amount_label',
-                                    ),
-                                    '${widget.paidAmount.toStringAsFixed(2)} $_displayCurrency',
-                                    ltr: true,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
-                    ],
-
                     // â”€â”€ Summary chips â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                     Row(
                       children: [
@@ -950,7 +1113,7 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                       ],
                     ),
 
-                    SizedBox(height: 10.h),
+                    SizedBox(height: 16.h),
 
                     // â”€â”€ Receiver details â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                     sectionCard(
@@ -975,107 +1138,6 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                         ),
                       ],
                     ),
-
-                    // Receiving place photo (attached while the transfer is
-                    // still on its way) - separate from the handover proof.
-                    if (widget.receivingPlaceImagePath.isNotEmpty) ...[
-                      TransferPhotoCard(
-                        imagePath: widget.receivingPlaceImagePath,
-                        title: AppTranslations.getText(
-                          context,
-                          'receiving_place_image',
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
-                    ],
-
-                    // Payment proof (note + image) directly after receiver
-                    if (widget.paymentProofNote.isNotEmpty ||
-                        widget.paymentProofImagePath.isNotEmpty) ...[
-                      Container(
-                        decoration: BoxDecoration(
-                          color: branding.inputBorder.withValues(alpha: 0.45),
-                          borderRadius: BorderRadius.circular(18.r),
-                          border: Border.all(
-                            color: branding.hintText.withValues(alpha: 0.1),
-                            width: 1,
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.fromLTRB(
-                                14.w,
-                                10.h,
-                                14.w,
-                                7.h,
-                              ),
-                              child: Text(
-                                AppTranslations.getText(
-                                  context,
-                                  widget.paymentProofImagePath.isNotEmpty
-                                      ? 'payment_proof_image'
-                                      : 'transfer_admin_note',
-                                ),
-                                style: GoogleFonts.cairo(
-                                  fontSize: 14.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: branding.iconPrimary,
-                                ),
-                              ),
-                            ),
-                            Divider(
-                              color: branding.iconPrimary.withValues(
-                                alpha: 0.15,
-                              ),
-                              height: 1,
-                            ),
-                            if (widget.paymentProofNote.isNotEmpty)
-                              Padding(
-                                padding: EdgeInsets.all(10.r),
-                                child: Container(
-                                  padding: EdgeInsets.all(10.r),
-                                  decoration: BoxDecoration(
-                                    color: branding.screenBg,
-                                    borderRadius: BorderRadius.circular(12.r),
-                                  ),
-                                  child: Directionality(
-                                    textDirection: isArabic
-                                        ? TextDirection.rtl
-                                        : TextDirection.ltr,
-                                    child: Text(
-                                      widget.paymentProofNote,
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 14.sp,
-                                        color: branding.secondaryText,
-                                        height: 1.6,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            if (widget.paymentProofImagePath.isNotEmpty)
-                              Padding(
-                                padding: EdgeInsets.fromLTRB(
-                                  10.w,
-                                  widget.paymentProofNote.isEmpty ? 10.h : 0,
-                                  10.w,
-                                  10.h,
-                                ),
-                                child: TransferPhotoCard(
-                                  imagePath: widget.paymentProofImagePath,
-                                  title: AppTranslations.getText(
-                                    context,
-                                    'payment_proof_image',
-                                  ),
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: 10.h),
-                    ],
 
                     // â”€â”€ Payment method â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                     sectionCard(
@@ -1142,6 +1204,115 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                       ],
                     ),
 
+                    // â”€â”€ Payment proof â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                    if (widget.paymentProofNote.isNotEmpty ||
+                        widget.paymentProofImagePath.isNotEmpty) ...[
+                      Container(
+                        decoration: BoxDecoration(
+                          color: branding.inputBorder.withValues(alpha: 0.45),
+                          borderRadius: BorderRadius.circular(18.r),
+                          border: Border.all(
+                            color: branding.hintText.withValues(alpha: 0.1),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: EdgeInsets.fromLTRB(
+                                16.w,
+                                14.h,
+                                16.w,
+                                10.h,
+                              ),
+                              child: Text(
+                                AppTranslations.getText(
+                                  context,
+                                  'transfer_admin_note',
+                                ),
+                                style: GoogleFonts.cairo(
+                                  fontSize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: branding.iconPrimary,
+                                ),
+                              ),
+                            ),
+                            Divider(
+                              color: branding.iconPrimary.withValues(
+                                alpha: 0.15,
+                              ),
+                              height: 1,
+                            ),
+                            if (widget.paymentProofNote.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsets.all(14.r),
+                                child: Container(
+                                  padding: EdgeInsets.all(12.r),
+                                  decoration: BoxDecoration(
+                                    color: branding.screenBg,
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  child: Directionality(
+                                    textDirection: isArabic
+                                        ? TextDirection.rtl
+                                        : TextDirection.ltr,
+                                    child: Text(
+                                      widget.paymentProofNote,
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 14.sp,
+                                        color: branding.secondaryText,
+                                        height: 1.6,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            if (widget.paymentProofImagePath.isNotEmpty)
+                              Padding(
+                                padding: EdgeInsets.fromLTRB(
+                                  14.w,
+                                  widget.paymentProofNote.isEmpty ? 14.h : 0,
+                                  14.w,
+                                  14.h,
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  child: Image.network(
+                                    ApiService.resolveAssetUrl(
+                                      widget.paymentProofImagePath,
+                                    ),
+                                    fit: BoxFit.contain,
+                                    loadingBuilder: (context, child, progress) {
+                                      if (progress == null) return child;
+                                      return Padding(
+                                        padding: EdgeInsets.all(24.r),
+                                        child: Center(
+                                          child: CircularProgressIndicator(
+                                            color: branding.badge,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    errorBuilder: (_, __, ___) => Text(
+                                      AppTranslations.getText(
+                                        context,
+                                        'image_load_error',
+                                      ),
+                                      style: GoogleFonts.cairo(
+                                        color: branding.iconPrimary,
+                                        fontSize: 14.sp,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: 14.h),
+                    ],
+
                     // â”€â”€ Action buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                     BlocListener<ReceiversCubit, ReceiversState>(
                       listener: (context, state) {
@@ -1187,19 +1358,29 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                       },
                       child: BlocBuilder<ReceiversCubit, ReceiversState>(
                         builder: (context, state) {
-                          // Beneficiaries are stored automatically with the
-                          // transfer, so the old "save information" button
-                          // was redundant; its slot now shares the notice as
-                          // an image (the PDF button next to it stays).
-                          final isLoading = _isSharingImage;
+                          final isLoading = state is ReceiversLoading;
                           return Row(
                             children: [
-                              // Share notice as image
+                              // Save receiver button
                               Expanded(
                                 child: GestureDetector(
                                   onTap: isLoading
                                       ? null
-                                      : _shareTransferNoticeImage,
+                                      : () {
+                                          context
+                                                  .read<ReceiversCubit>()
+                                                  .fullNameController
+                                                  .text =
+                                              widget.receiverName;
+                                          context
+                                                  .read<ReceiversCubit>()
+                                                  .mobilePhoneController
+                                                  .text =
+                                              widget.senderPhone;
+                                          context
+                                              .read<ReceiversCubit>()
+                                              .addReceiver();
+                                        },
                                   child: Container(
                                     height: 50.h,
                                     decoration: BoxDecoration(
@@ -1222,7 +1403,7 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
                                                 Icon(
-                                                  Icons.image_outlined,
+                                                  Icons.bookmark_add_rounded,
                                                   color: branding.buttonText,
                                                   size: 18,
                                                 ),
@@ -1230,7 +1411,7 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                                                 Text(
                                                   AppTranslations.getText(
                                                     context,
-                                                    'share_transfer_image',
+                                                    'Saving information',
                                                   ),
                                                   style: GoogleFonts.cairo(
                                                     color: branding.buttonText,
@@ -1246,13 +1427,13 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
                               ),
 
                               // Share PDF button
-                              ...[
+                              if (_hasPaymentProofDetails) ...[
                                 SizedBox(width: 10.w),
                                 Expanded(
                                   child: GestureDetector(
                                     onTap: _isSharingPdf
                                         ? null
-                                        : _shareTransferReceiptPdf,
+                                        : _shareTransferPdf,
                                     child: Ink(
                                       decoration: BoxDecoration(
                                         gradient: branding
@@ -1318,927 +1499,6 @@ class _DetalestranzationostaState extends State<Detalestranzationosta> {
   }
 }
 
-class ReceiptHeader extends StatelessWidget {
-  const ReceiptHeader({
-    super.key,
-    this.orderNumber,
-    this.transparentIconAsset,
-    this.title,
-  });
-
-  final String? orderNumber;
-  final String? transparentIconAsset;
-  final String? title;
-
-  static const Color darkTeal = Color(0xFF062224);
-  static const Color teal = Color(0xFF0A4A43);
-  static const Color gold = Color(0xFFD4AF37);
-  static const Color subtitleGray = Color(0xFF6F7782);
-  static const Color lightBg = Color(0xFFFAFAF8);
-  static const Color borderColor = Color(0xFFE3E8E6);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 138,
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: borderColor),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x10003D3A),
-            blurRadius: 10,
-            offset: Offset(0, 3),
-          ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Stack(
-              children: [
-                Container(color: Colors.white),
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: ReceiptHeaderPainter(),
-                  ),
-                ),
-                Positioned(
-                  left: 24,
-                  top: 0,
-                  bottom: 0,
-                  width: 248,
-                  child: HawwelHeaderLogo(
-                    iconAsset: transparentIconAsset,
-                  ),
-                ),
-                Positioned(
-                  right: 24,
-                  top: 34,
-                  width: 235,
-                  child: Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          title ??
-                              AppTranslations.getText(
-                                context,
-                                'payment_notice_title',
-                              ),
-                          maxLines: 1,
-                          overflow: TextOverflow.visible,
-                          textAlign: TextAlign.right,
-                          style: GoogleFonts.cairo(
-                            color: const Color(0xFF0A4A43),
-                            fontSize: 27,
-                            fontWeight: FontWeight.w900,
-                            height: 1.1,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        if (orderNumber != null && orderNumber!.trim().isNotEmpty) ...[
-                          Align(
-                            alignment: Alignment.centerRight,
-                            child: Container(
-                              constraints: const BoxConstraints(minWidth: 180),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 7,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color(0xFFF8FAF9),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: const Color(0xFFE3E8E6)),
-                              ),
-                              child: Text(
-                                'رقم الطلب: ${orderNumber!.trim()}',
-                                textDirection: TextDirection.rtl,
-                                textAlign: TextAlign.right,
-                                style: GoogleFonts.cairo(
-                                  color: const Color(0xFF004B45),
-                                  fontSize: 17,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
-  }
-}
-
-class HawwelHeaderLogo extends StatelessWidget {
-  const HawwelHeaderLogo({
-    super.key,
-    this.iconAsset,
-  });
-
-  final String? iconAsset;
-
-  @override
-  Widget build(BuildContext context) {
-    final bool hasIcon = iconAsset != null && iconAsset!.trim().isNotEmpty;
-
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Image.asset(
-        'asset/hawwel_header_logo_800x200.webp',
-        width: 232,
-        height: 82,
-        fit: BoxFit.contain,
-        errorBuilder: (_, __, ___) {
-          if (hasIcon) {
-            return Image.asset(
-              iconAsset!,
-              width: 232,
-              height: 82,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => const SizedBox(
-                width: 70,
-                height: 70,
-                child: HawwelMiniMark(),
-              ),
-            );
-          }
-          return const SizedBox(
-            width: 70,
-            height: 70,
-            child: HawwelMiniMark(),
-          );
-        },
-      ),
-    );
-  }
-}
-
-class HawwelMiniMark extends StatelessWidget {
-  const HawwelMiniMark({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return CustomPaint(
-      painter: HawwelMiniMarkPainter(),
-    );
-  }
-}
-
-class HawwelMiniMarkPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final greenPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [
-          Color(0xFF0E4A43),
-          Color(0xFF1C6258),
-        ],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-    final goldPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [
-          Color(0xFFF1D27A),
-          Color(0xFFD4AF37),
-          Color(0xFFB89245),
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
-
-    final leftPath = Path()
-      ..moveTo(size.width * 0.16, size.height * 0.15)
-      ..lineTo(size.width * 0.49, size.height * 0.15)
-      ..lineTo(size.width * 0.49, size.height * 0.56)
-      ..lineTo(size.width * 0.16, size.height * 0.88)
-      ..close();
-    canvas.drawPath(leftPath, greenPaint);
-
-    final rightShape = Path()
-      ..moveTo(size.width * 0.49, size.height * 0.56)
-      ..lineTo(size.width * 0.83, size.height * 0.22)
-      ..lineTo(size.width * 0.83, size.height * 0.92)
-      ..lineTo(size.width * 0.49, size.height * 0.92)
-      ..close();
-    canvas.drawPath(rightShape, goldPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class ReceiptHeaderPainter extends CustomPainter {
-  static const Color darkTeal = Color(0xFF062224);
-  static const Color teal = Color(0xFF003D3A);
-  static const Color deepTeal = Color(0xFF0A3A37);
-  static const Color gold = Color(0xFFD4AF37);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final tealPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [darkTeal, teal, deepTeal],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(
-        Rect.fromLTWH(0, 0, size.width, size.height),
-      );
-
-    final patternPaint = Paint()
-      ..color = const Color(0xFFD4AF37).withValues(alpha: 0.10)
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    final goldPaint = Paint()
-      ..shader = const LinearGradient(
-        colors: [
-          Color(0xFFF1D27A),
-          Color(0xFFD4AF37),
-          Color(0xFFB89245),
-        ],
-        begin: Alignment.topCenter,
-        end: Alignment.bottomCenter,
-      ).createShader(Rect.fromLTWH(0, 0, size.width, size.height))
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 3.2
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round;
-
-    final tealPath = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width * 0.63, 0)
-      ..cubicTo(
-        size.width * 0.56,
-        size.height * 0.04,
-        size.width * 0.50,
-        size.height * 0.33,
-        size.width * 0.44,
-        size.height * 0.66,
-      )
-      ..cubicTo(
-        size.width * 0.40,
-        size.height * 0.91,
-        size.width * 0.35,
-        size.height,
-        size.width * 0.25,
-        size.height,
-      )
-      ..lineTo(0, size.height)
-      ..close();
-
-    canvas.drawPath(tealPath, tealPaint);
-
-    for (double x = 14; x < size.width * 0.34; x += 22) {
-      canvas.drawLine(Offset(x, 6), Offset(x - 30, size.height - 8), patternPaint);
-    }
-
-    final goldPath = Path()
-      ..moveTo(size.width * 0.63, 0)
-      ..cubicTo(
-        size.width * 0.56,
-        size.height * 0.04,
-        size.width * 0.50,
-        size.height * 0.33,
-        size.width * 0.44,
-        size.height * 0.66,
-      )
-      ..cubicTo(
-        size.width * 0.40,
-        size.height * 0.91,
-        size.width * 0.35,
-        size.height,
-        size.width * 0.25,
-        size.height,
-      )
-      ..lineTo(0, size.height);
-
-    canvas.drawPath(goldPath, goldPaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
-
-class ReceiptSectionCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final List<Widget> children;
-
-  const ReceiptSectionCard({
-    super.key,
-    required this.title,
-    this.icon = Icons.article_outlined,
-    required this.children,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        Container(
-          margin: const EdgeInsets.only(top: 12),
-          padding: const EdgeInsets.fromLTRB(14, 30, 14, 14),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE3E8E6)),
-            boxShadow: const [
-              BoxShadow(
-                color: Color(0x12000000),
-                blurRadius: 6,
-                offset: Offset(0, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: children,
-          ),
-        ),
-        Positioned(
-          top: 0,
-          right: 10,
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: const Color(0xFF004B45),
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(
-                color: const Color(0xFFC9A24A).withValues(alpha: 0.35),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, size: 18, color: const Color(0xFFC9A24A)),
-                const SizedBox(width: 6),
-                Text(
-                  title,
-                  textDirection: TextDirection.rtl,
-                  style: GoogleFonts.cairo(
-                    fontSize: 22,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ReceiptInfoTile extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-
-  const ReceiptInfoTile({
-    super.key,
-    required this.label,
-    required this.value,
-    this.icon = Icons.info_outline_rounded,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      constraints: const BoxConstraints(minHeight: 50),
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAF9),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE3E8E6)),
-      ),
-      child: Row(
-        textDirection: TextDirection.rtl,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Container(
-            width: 28,
-            height: 28,
-            decoration: BoxDecoration(
-              color: const Color(0xFFC9A24A).withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, size: 15, color: const Color(0xFFC9A24A)),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: RichText(
-              textDirection: TextDirection.rtl,
-              text: TextSpan(
-                style: GoogleFonts.cairo(
-                  fontSize: 19,
-                  color: const Color(0xFF1F2937),
-                  fontWeight: FontWeight.w700,
-                ),
-                children: [
-                  TextSpan(
-                    text: '$label: ',
-                    style: GoogleFonts.cairo(
-                      fontSize: 18,
-                      color: const Color(0xFF6B7280),
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                  TextSpan(
-                    text: value,
-                    style: GoogleFonts.cairo(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w800,
-                      color: const Color(0xFF1F2937),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class DeliveryAddressCard extends StatelessWidget {
-  final String title;
-  final Uint8List imageBytes;
-  final String caption;
-
-  const DeliveryAddressCard({
-    super.key,
-    required this.title,
-    required this.imageBytes,
-    required this.caption,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ReceiptSectionCard(
-      title: title,
-      icon: Icons.place_outlined,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAF9),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE3E8E6)),
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxHeight: 190),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.memory(
-                  imageBytes,
-                  fit: BoxFit.contain,
-                ),
-              ),
-            ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          caption,
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.center,
-          style: GoogleFonts.cairo(
-            fontSize: 15,
-            color: const Color(0xFF6B7280),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class TransferSummaryCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-
-  const TransferSummaryCard({
-    super.key,
-    required this.label,
-    required this.value,
-    this.icon = Icons.info_outline_rounded,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 322,
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAF9),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE3E8E6)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            textDirection: TextDirection.rtl,
-            children: [
-              Container(
-                width: 28,
-                height: 28,
-                decoration: BoxDecoration(
-                  color: const Color(0xFFC9A24A).withValues(alpha: 0.14),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(icon, size: 15, color: const Color(0xFFC9A24A)),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  label,
-                  textDirection: TextDirection.rtl,
-                  textAlign: TextAlign.right,
-                  style: GoogleFonts.cairo(
-                    fontSize: 15,
-                    color: const Color(0xFF6B7280),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            textDirection: TextDirection.rtl,
-            textAlign: TextAlign.right,
-            style: GoogleFonts.cairo(
-              fontSize: 16,
-              color: const Color(0xFF1F2937),
-              fontWeight: FontWeight.w800,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class ImportantNotesCard extends StatelessWidget {
-  final String line1;
-  final String line2;
-  final String line3;
-
-  const ImportantNotesCard({
-    super.key,
-    required this.line1,
-    required this.line2,
-    required this.line3,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget noteLine(String text) {
-      return Row(
-        textDirection: TextDirection.rtl,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsetsDirectional.only(end: 6, top: 4),
-            child: Icon(Icons.circle, size: 7, color: Color(0xFF0B8A78)),
-          ),
-          Expanded(
-            child: Text(
-              text,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: GoogleFonts.cairo(
-                fontSize: 14,
-                color: const Color(0xFF374151),
-                fontWeight: FontWeight.w600,
-                height: 1.3,
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    return ReceiptSectionCard(
-      title: 'ملاحظات هامة',
-      icon: Icons.verified_outlined,
-      children: [
-        noteLine(line1),
-        const SizedBox(height: 4),
-        noteLine(line2),
-        const SizedBox(height: 4),
-        noteLine(line3),
-      ],
-    );
-  }
-}
-
-class DeliveryImageCard extends StatelessWidget {
-  final Uint8List? imageBytes;
-  final String caption;
-
-  const DeliveryImageCard({
-    super.key,
-    required this.imageBytes,
-    required this.caption,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return ReceiptSectionCard(
-      title: 'عنوان التسليم',
-      icon: Icons.place_outlined,
-      children: [
-        Container(
-          decoration: BoxDecoration(
-            color: const Color(0xFFF8FAF9),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: const Color(0xFFE3E8E6)),
-          ),
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            children: [
-              if (imageBytes != null)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxHeight: 240),
-                    child: Image.memory(
-                      imageBytes!,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                )
-              else
-                Container(
-                  constraints: const BoxConstraints(minHeight: 220),
-                  alignment: Alignment.center,
-                  child: Text(
-                    'لا توجد صورة مرفقة للعنوان',
-                    textDirection: TextDirection.rtl,
-                    style: GoogleFonts.cairo(
-                      color: const Color(0xFF6B7280),
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 8),
-              Text(
-                caption,
-                textDirection: TextDirection.rtl,
-                textAlign: TextAlign.center,
-                style: GoogleFonts.cairo(
-                  fontSize: 14,
-                  color: const Color(0xFF6B7280),
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class AdminNoteCard extends StatelessWidget {
-  final String note;
-
-  const AdminNoteCard({super.key, required this.note});
-
-  @override
-  Widget build(BuildContext context) {
-    return ReceiptSectionCard(
-      title: 'ملاحظة الإدارة',
-      icon: Icons.campaign_outlined,
-      children: [
-        Text(
-          note,
-          textDirection: TextDirection.rtl,
-          textAlign: TextAlign.right,
-          style: GoogleFonts.cairo(
-            fontSize: 15,
-            color: const Color(0xFF263238),
-            fontWeight: FontWeight.w600,
-            height: 1.35,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class ReceiptFooter extends StatelessWidget {
-  const ReceiptFooter({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 14),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE1E7E5)),
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            height: 1,
-            color: const Color(0xFFD4AF37).withValues(alpha: 0.45),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'حوّل ... تحويلك بأمان',
-            style: GoogleFonts.cairo(
-              fontSize: 21,
-              color: const Color(0xFF004B45),
-              fontWeight: FontWeight.w800,
-            ),
-            textDirection: TextDirection.rtl,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            '${DateTime.now().year}/${DateTime.now().month.toString().padLeft(2, '0')}/${DateTime.now().day.toString().padLeft(2, '0')} '
-            '${DateTime.now().hour.toString().padLeft(2, '0')}:${DateTime.now().minute.toString().padLeft(2, '0')}',
-            style: GoogleFonts.cairo(
-              fontSize: 16,
-              color: const Color(0xFF6B7280),
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class MergedNotesCard extends StatelessWidget {
-  final Uint8List? deliveryImageBytes;
-  final String adminNote;
-
-  const MergedNotesCard({
-    super.key,
-    required this.deliveryImageBytes,
-    required this.adminNote,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Widget noteLine(String text) {
-      return Row(
-        textDirection: TextDirection.rtl,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsetsDirectional.only(end: 6, top: 4),
-            child: Icon(Icons.circle, size: 7, color: Color(0xFF0B8A78)),
-          ),
-          Expanded(
-            child: Text(
-              text,
-              textDirection: TextDirection.rtl,
-              textAlign: TextAlign.right,
-              style: GoogleFonts.cairo(
-                fontSize: 17,
-                color: const Color(0xFF374151),
-                fontWeight: FontWeight.w600,
-                height: 1.35,
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    final boxDecoration = BoxDecoration(
-      color: const Color(0xFFF8FAF9),
-      borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: const Color(0xFFE3E8E6)),
-    );
-
-    return ReceiptSectionCard(
-      title: 'ملاحظات هامة',
-      icon: Icons.verified_outlined,
-      children: [
-        // Both boxes share one fixed height and the delivery photo fills its
-        // box - it used to sit as a small 220px thumbnail inside a much
-        // larger frame. (A fixed height rather than IntrinsicHeight: the
-        // photo's natural size must not dictate the layout.)
-        SizedBox(
-          height: 360,
-          child: Row(
-            textDirection: TextDirection.rtl,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Container(
-                  decoration: boxDecoration,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 10,
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (adminNote.isNotEmpty) ...[
-                        noteLine(adminNote),
-                        const SizedBox(height: 7),
-                      ],
-                      const SizedBox(height: 7),
-                      noteLine(
-                        AppTranslations.getText(
-                          context,
-                          'order_share_privacy_note',
-                        ),
-                      ),
-                      const SizedBox(height: 7),
-                      noteLine(
-                        AppTranslations.getText(
-                          context,
-                          'delivery_identity_note',
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 3,
-                child: Container(
-                  decoration: boxDecoration,
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: deliveryImageBytes != null
-                            ? ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: Image.memory(
-                                  deliveryImageBytes!,
-                                  fit: BoxFit.contain,
-                                ),
-                              )
-                            : Center(
-                                child: Text(
-                                  'لا توجد صورة مرفقة للعنوان',
-                                  textDirection: TextDirection.rtl,
-                                  style: GoogleFonts.cairo(
-                                    color: const Color(0xFF6B7280),
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        'عنوان التسليم',
-                        textAlign: TextAlign.center,
-                        textDirection: TextDirection.rtl,
-                        style: GoogleFonts.cairo(
-                          fontSize: 16,
-                          color: const Color(0xFF6B7280),
-                          fontWeight: FontWeight.w800,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 // â”€â”€ Summary chip helper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 class _SummaryChip extends StatelessWidget {
   final String label;
@@ -2288,172 +1548,6 @@ class _SummaryChip extends StatelessWidget {
                 color: branding.secondaryText,
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The transfer-notice design shared as PNG (image button) and wrapped as
-/// PDF (PDF button). Pure presentation: every value is passed in so the
-/// exact output can be rendered in a test without the details screen.
-class TransferNoticeCard extends StatelessWidget {
-  static const double width = 980;
-
-  final String transferNumber;
-  final String recipientName;
-  final String recipientPhone;
-  final String destination;
-  final String createdAt;
-  final String amountLabel;
-  final String adminNote;
-  final Uint8List? deliveryImageBytes;
-  final String orderDetailsTitle;
-  final String paymentNoticeTitle;
-
-  const TransferNoticeCard({
-    super.key,
-    required this.transferNumber,
-    required this.recipientName,
-    required this.recipientPhone,
-    required this.destination,
-    required this.createdAt,
-    required this.amountLabel,
-    required this.adminNote,
-    required this.deliveryImageBytes,
-    required this.orderDetailsTitle,
-    required this.paymentNoticeTitle,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
-      child: Container(
-        width: width,
-        color: const Color(0xFFF8FAF9),
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            ReceiptHeader(
-              orderNumber: transferNumber,
-              transparentIconAsset: null,
-              title: paymentNoticeTitle,
-            ),
-            const SizedBox(height: 10),
-            ReceiptSectionCard(
-              title: orderDetailsTitle,
-              icon: Icons.person_outline_rounded,
-              children: [
-                const SizedBox(height: 12),
-                Row(
-                  textDirection: TextDirection.rtl,
-                  children: [
-                    Expanded(
-                      child: ReceiptInfoTile(
-                        label: 'اسم المستفيد',
-                        value: recipientName.isEmpty ? '-' : recipientName,
-                        icon: Icons.person_outline_rounded,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ReceiptInfoTile(
-                        label: 'الجوال',
-                        value: recipientPhone.isEmpty
-                            ? '-'
-                            : '‎$recipientPhone',
-                        icon: Icons.phone_android_rounded,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  textDirection: TextDirection.rtl,
-                  children: [
-                    Expanded(
-                      child: ReceiptInfoTile(
-                        label: 'الوجهة',
-                        value: destination.isEmpty ? '-' : destination,
-                        icon: Icons.place_outlined,
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ReceiptInfoTile(
-                        label: 'التاريخ',
-                        value: createdAt.isEmpty ? '-' : createdAt,
-                        icon: Icons.calendar_today_rounded,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 9),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 11,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFF8FAF9),
-                    borderRadius: BorderRadius.circular(13),
-                    border: Border.all(color: const Color(0xFFE3E8E6)),
-                  ),
-                  child: SizedBox(
-                    height: 36,
-                    child: Stack(
-                      children: [
-                        Align(
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                            'المبلغ',
-                            textDirection: TextDirection.rtl,
-                            style: GoogleFonts.cairo(
-                              fontSize: 16,
-                              color: const Color(0xFF6B7280),
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ),
-                        Center(
-                          child: Text(
-                            amountLabel,
-                            textDirection: TextDirection.rtl,
-                            textAlign: TextAlign.center,
-                            style: GoogleFonts.cairo(
-                              fontSize: 28,
-                              color: const Color(0xFF004B45),
-                              fontWeight: FontWeight.w900,
-                              height: 1.15,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              textDirection: TextDirection.rtl,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: MergedNotesCard(
-                    deliveryImageBytes: deliveryImageBytes,
-                    adminNote: adminNote,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            const ReceiptFooter(),
           ],
         ),
       ),

@@ -1,13 +1,18 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/featue/auth/login/login_screen_view.dart';
-import 'package:hawwel/featue/first_screen/home_first_screen.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/featue/auth/login/login_screen_view.dart';
+import 'package:usdt/featue/auth/welcomyou/welcomyou_screen_view.dart';
+import 'package:usdt/featue/first_screen/home_first_screen.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/name_saved.dart';
+import 'package:usdt/featue/profail/profail_screen_view.dart';
+import 'package:usdt/featue/spend_mouny/spend_mouny_view.dart';
+import 'package:usdt/featue/the_wallate/walate_screen_view.dart';
+import 'package:usdt/featue/transaction_historu/transaction_haistoru_vew.dart';
 
 class Homefirstscreen extends StatefulWidget {
-  const Homefirstscreen({super.key});
+  const Homefirstscreen({Key? key}) : super(key: key);
 
   @override
   State<Homefirstscreen> createState() => _HomefirstscreenState();
@@ -60,27 +65,26 @@ class _HomefirstscreenState extends State<Homefirstscreen> {
   @override
   Widget build(BuildContext context) {
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final int visualPageIndex = isArabic ? _page : icons.length - 1 - _page;
     final branding = appBrandingNotifier.value;
 
     return SafeArea(
       top: false,
       child: Directionality(
         textDirection: TextDirection.ltr,
-        child: PopScope(
-          canPop: false,
-          onPopInvokedWithResult: (didPop, result) {
-            if (didPop) return;
+        child: WillPopScope(
+          onWillPop: () async {
             if (_page != 3) {
               _switchPage(3);
-              return;
+              return false;
             }
             final now = DateTime.now();
             if (_lastBackPressed == null ||
                 now.difference(_lastBackPressed!) > const Duration(seconds: 2)) {
               _lastBackPressed = now;
-              return;
+              return false;
             }
-            SystemNavigator.pop();
+            return true;
           },
           child: Scaffold(
             resizeToAvoidBottomInset: false,
@@ -98,7 +102,7 @@ class _HomefirstscreenState extends State<Homefirstscreen> {
                   right: 0,
                   child: _FloatingNavBar(
                     icons: icons,
-                    currentPage: _page,
+                    activeIndex: visualPageIndex,
                     isArabic: isArabic,
                     onTap: (i) => goToPage(i, isArabic),
                   ),
@@ -114,13 +118,13 @@ class _HomefirstscreenState extends State<Homefirstscreen> {
 
 class _FloatingNavBar extends StatelessWidget {
   final List<String> icons;
-  final int currentPage;
+  final int activeIndex;
   final bool isArabic;
   final void Function(int) onTap;
 
   const _FloatingNavBar({
     required this.icons,
-    required this.currentPage,
+    required this.activeIndex,
     required this.isArabic,
     required this.onTap,
   });
@@ -137,13 +141,13 @@ class _FloatingNavBar extends StatelessWidget {
         borderRadius: BorderRadius.circular(28.r),
         boxShadow: [
           BoxShadow(
-            color: glowColor.withValues(alpha: 0.35),
+            color: glowColor.withOpacity(0.35),
             blurRadius: 28,
             offset: const Offset(0, 10),
             spreadRadius: -4,
           ),
           BoxShadow(
-            color: glowColor.withValues(alpha: 0.12),
+            color: glowColor.withOpacity(0.12),
             blurRadius: 60,
             offset: const Offset(0, 20),
             spreadRadius: -8,
@@ -160,16 +164,15 @@ class _FloatingNavBar extends StatelessWidget {
               gradient: navGrad,
               borderRadius: BorderRadius.circular(28.r),
               border: Border.all(
-                color: Colors.white.withValues(alpha: 0.15),
+                color: Colors.white.withOpacity(0.15),
                 width: 1,
               ),
             ),
             child: Row(
-              key: ValueKey('nav-$isArabic-$currentPage'),
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: List.generate(icons.length, (i) {
                 final displayIndex = isArabic ? i : icons.length - 1 - i;
-                final isActive = displayIndex == currentPage;
+                final isActive = i == activeIndex;
                 return _NavItem(
                   iconPath: icons[displayIndex],
                   isActive: isActive,
@@ -203,94 +206,67 @@ class _NavItem extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.translucent,
-      child: SizedBox(
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 380),
+        curve: Curves.easeOutBack,
         width: isActive ? 60.w : 50.w,
         height: 50.h,
-        child: Stack(
-          clipBehavior: Clip.none,
-          alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: isActive ? Colors.white.withOpacity(0.18) : Colors.transparent,
+          borderRadius: BorderRadius.circular(18.r),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: activeColor.withOpacity(0.3),
+                    blurRadius: 12,
+                    spreadRadius: -2,
+                  ),
+                ]
+              : [],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AnimatedContainer(
+            TweenAnimationBuilder<double>(
+              tween: Tween(begin: 0, end: isActive ? 1.0 : 0.0),
               duration: const Duration(milliseconds: 380),
-              curve: Curves.easeOutCubic,
-              width: isActive ? 60.w : 50.w,
-              height: 50.h,
-              decoration: BoxDecoration(
-                color: isActive
-                    ? Colors.white.withValues(alpha: 0.18)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(18.r),
-              ),
+              curve: Curves.easeOutBack,
+              builder: (context, value, child) {
+                final scale = 1.0 + (value * 0.2);
+                return Transform.scale(
+                  scale: scale,
+                  child: Image.asset(
+                    iconPath,
+                    height: 22.h,
+                    width: 22.w,
+                    color: Color.lerp(
+                      Colors.white.withOpacity(0.5),
+                      activeColor,
+                      value,
+                    ),
+                  ),
+                );
+              },
             ),
-            if (isActive)
-              IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(18.r),
-                    boxShadow: [
-                      BoxShadow(
-                        color: activeColor.withValues(alpha: 0.3),
-                        blurRadius: 12,
-                        spreadRadius: 0,
-                      ),
-                    ],
-                  ),
-                  child: SizedBox(
-                    width: isActive ? 60.w : 50.w,
-                    height: 50.h,
-                  ),
-                ),
-              ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TweenAnimationBuilder<double>(
-                  tween: Tween(begin: 0, end: isActive ? 1.0 : 0.0),
-                  duration: const Duration(milliseconds: 380),
-                  curve: Curves.easeOutCubic,
-                  builder: (context, value, child) {
-                    final scale = 1.0 + (value * 0.2);
-                    return Transform.scale(
-                      scale: scale,
-                      child: Image.asset(
-                        iconPath,
-                        height: 22.h,
-                        width: 22.w,
-                        color: Color.lerp(
-                          Colors.white.withValues(alpha: 0.5),
-                          activeColor,
-                          value,
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeOut,
+              margin: EdgeInsets.only(top: isActive ? 5.h : 0),
+              width: isActive ? 5.w : 0,
+              height: isActive ? 5.h : 0,
+              decoration: BoxDecoration(
+                color: activeColor,
+                shape: BoxShape.circle,
+                boxShadow: isActive
+                    ? [
+                        BoxShadow(
+                          color: activeColor.withOpacity(0.6),
+                          blurRadius: 6,
+                          spreadRadius: 1,
                         ),
-                      ),
-                    );
-                  },
-                ),
-                AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  curve: Curves.easeOutCubic,
-                  margin: EdgeInsets.only(top: isActive ? 5.h : 0),
-                  width: isActive ? 5.w : 0,
-                  height: isActive ? 5.h : 0,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                  ),
-                  child: isActive
-                      ? DecoratedBox(
-                          decoration: BoxDecoration(
-                            color: activeColor,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: activeColor.withValues(alpha: 0.6),
-                                blurRadius: 6,
-                                spreadRadius: 0,
-                              ),
-                            ],
-                          ),
-                        )
-                      : null,
-                ),
-              ],
+                      ]
+                    : [],
+              ),
             ),
           ],
         ),

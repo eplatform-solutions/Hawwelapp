@@ -1,16 +1,12 @@
+import 'dart:developer';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:hawwel/constans/token.dart';
+import 'package:usdt/constans/token.dart';
 
 class ApiService {
-  static const isStoreReview = bool.fromEnvironment(
-    'IS_STORE_REVIEW',
-    defaultValue: false,
-  );
-
-  // Production default.
-  // Override explicitly for local/staging when needed, e.g.:
+  // Dev sync default:
+  // Mobile API (shared DB with dashboard via npm run dev:sync) => 127.0.0.1:3030
+  // Override to staging when needed:
   // --dart-define=API_BASE_URL=https://api-stage.7awalaty.com
   static const baseURL = String.fromEnvironment(
     'API_BASE_URL',
@@ -18,7 +14,7 @@ class ApiService {
   );
 
   /// Base URL of the **dashboard** API (where admin uploads live under `assets/`).
-  /// Order payment-proof images are stored on the dashboard disk, not the mobile API.
+  /// Transfer payment-proof images are stored on the dashboard disk, not the mobile API.
   /// Build with: `--dart-define=DASHBOARD_API_URL=https://your-dash-api.example.com`
   static const dashboardBaseURL = String.fromEnvironment(
     'DASHBOARD_API_URL',
@@ -26,16 +22,13 @@ class ApiService {
   );
 
   /// Resolves a relative `assets/...` path to a full URL. Paths under
-  /// `assets/images/orders/` or legacy `assets/images/transfers/` use [dashboardBaseURL] when it is set.
+  /// `assets/images/transfers/` use [dashboardBaseURL] when it is set.
   static String resolveAssetUrl(String relativePath) {
     final t = relativePath.trim();
     if (t.isEmpty) return t;
     if (t.startsWith('http://') || t.startsWith('https://')) return t;
     final p = t.replaceFirst(RegExp(r'^/+'), '');
-    final bool proofOnDashboard =
-        p.startsWith('assets/images/orders/') ||
-        p.startsWith('assets/images/transfers/') ||
-        p.startsWith('assets/images/payment_methods/');
+    final bool proofOnDashboard = p.startsWith('assets/images/transfers/');
     final String rawBase = (proofOnDashboard && dashboardBaseURL.isNotEmpty)
         ? dashboardBaseURL
         : baseURL;
@@ -44,29 +37,6 @@ class ApiService {
   }
 
   final Dio dio;
-
-  void _safeLog(String message) {
-    if (kDebugMode) {
-      debugPrint(message);
-    }
-  }
-
-  Future<Map<String, dynamic>> _buildAuthHeaders({
-    required bool needtoken,
-    Map<String, dynamic>? extra,
-    String? endpoint,
-  }) async {
-    final headers = <String, dynamic>{...?extra};
-    headers['X-App-Review-Mode'] = isStoreReview ? 'true' : 'false';
-    if (!needtoken) return headers;
-    final token = await Functions().getToken();
-    if (token == null || token.isEmpty) {
-      _safeLog('Missing token for protected request: ${endpoint ?? "unknown"}');
-      return headers;
-    }
-    headers['Authorization'] = 'Bearer $token';
-    return headers;
-  }
 
   dynamic _sanitizePayload(dynamic data) {
     if (data == null) return {};
@@ -100,11 +70,14 @@ class ApiService {
 
   // 🔹 GET
   Future<dynamic> get({required String endpoint, bool needtoken = true}) async {
-    _safeLog('GET $endpoint');
-    final headers = await _buildAuthHeaders(
-      needtoken: needtoken,
-      endpoint: endpoint,
-    );
+    String? token = await Functions().getToken();
+
+    log('🔹 GET $baseURL$endpoint');
+
+    final headers = <String, dynamic>{};
+    if (needtoken && token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
 
     final response = await dio.get(
       endpoint,
@@ -119,11 +92,15 @@ class ApiService {
     bool needtoken = true,
     Map<String, dynamic>? queryParameters, // إضافة هذا السطر
   }) async {
-    _safeLog('GET (search) $endpoint');
-    final headers = await _buildAuthHeaders(
-      needtoken: needtoken,
-      endpoint: endpoint,
-    );
+    String? token = await Functions().getToken();
+
+    // تسجيل الرابط مع البراميترز للتأكد من صحتها في الـ Log
+    log('🔹 GET $baseURL$endpoint | Params: $queryParameters');
+
+    final headers = <String, dynamic>{};
+    if (needtoken && token != null && token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $token';
+    }
 
     final cleanedQuery = _sanitizeQuery(queryParameters);
 
@@ -141,31 +118,28 @@ class ApiService {
     required String endpoint,
     required dynamic data,
     required bool needtoken,
-    CancelToken? cancelToken,
-    Duration? timeout,
   }) async {
+    String? token = await Functions().getToken();
     final packageInfo = await PackageInfo.fromPlatform();
     final appversion = packageInfo.version;
-    _safeLog('POST $endpoint');
 
-    final headers = await _buildAuthHeaders(
-      needtoken: needtoken,
-      endpoint: endpoint,
-      extra: {'app-version': appversion},
-    );
+    log("📤 POST → $baseURL$endpoint");
+    log("📦 DATA → $data");
+
+    final headers = {
+      'app-version': appversion,
+      if (needtoken) 'Authorization': 'Bearer $token',
+    };
 
     final payload = _sanitizePayload(data);
 
     final response = await dio.post(
       endpoint,
       data: payload,
-      options: Options(
-        headers: headers,
-        sendTimeout: timeout,
-        receiveTimeout: timeout,
-      ),
-      cancelToken: cancelToken,
+      options: Options(headers: headers),
     );
+
+    log("✅ RESPONSE: ${response.data}");
     return response;
   }
 
@@ -174,15 +148,17 @@ class ApiService {
     required dynamic data,
     required bool needtoken,
   }) async {
+    String? token = await Functions().getToken();
     final packageInfo = await PackageInfo.fromPlatform();
     final appversion = packageInfo.version;
-    _safeLog('POST multipart $endpoint');
 
-    final headers = await _buildAuthHeaders(
-      needtoken: needtoken,
-      endpoint: endpoint,
-      extra: {'app-version': appversion},
-    );
+    log("📤 POST → $baseURL$endpoint");
+    log("📦 DATA → $data");
+
+    final headers = {
+      'app-version': appversion,
+      if (needtoken) 'Authorization': 'Bearer $token',
+    };
 
     final payload = _sanitizePayload(data);
 
@@ -197,18 +173,21 @@ class ApiService {
             : 'application/json',
       ),
     );
+
+    log("✅ RESPONSE: ${response.data}");
     return response;
   }
 
   // 🔹 PUT
   Future<dynamic> put1({required String endpoint, required Map data}) async {
+    String? token = await Functions().getToken();
     final payload = _sanitizePayload(data);
-    final headers = await _buildAuthHeaders(needtoken: true, endpoint: endpoint);
     final response = await dio.put(
       endpoint,
       data: payload,
-      options: Options(headers: headers),
+      options: Options(headers: {'Authorization': 'Bearer $token'}),
     );
+    log("✅ RESPONSE: ${response.data}");
     return response;
   }
 
@@ -217,8 +196,9 @@ class ApiService {
     required dynamic data,
     bool isFormData = false,
   }) async {
+    String? token = await Functions().getToken();
+
     final payload = _sanitizePayload(data);
-    final headers = await _buildAuthHeaders(needtoken: true, endpoint: endpoint);
 
     final response = await dio.put(
       endpoint,
@@ -227,7 +207,7 @@ class ApiService {
         contentType: isFormData || payload is FormData
             ? 'multipart/form-data'
             : 'application/json',
-        headers: headers,
+        headers: {'Authorization': 'Bearer $token'},
       ),
     );
 
@@ -240,15 +220,17 @@ class ApiService {
     required dynamic data,
     required bool needtoken,
   }) async {
+    String? token = await Functions().getToken();
     final packageInfo = await PackageInfo.fromPlatform();
     final appversion = packageInfo.version;
-    _safeLog('PATCH $endpoint');
 
-    final headers = await _buildAuthHeaders(
-      needtoken: needtoken,
-      endpoint: endpoint,
-      extra: {'app-version': appversion},
-    );
+    log("📤 PATCH → $baseURL$endpoint");
+    log("📦 DATA → $data");
+
+    final headers = {
+      'app-version': appversion,
+      if (needtoken) 'Authorization': 'Bearer $token',
+    };
 
     final payload = _sanitizePayload(data);
 
@@ -257,6 +239,8 @@ class ApiService {
       data: payload,
       options: Options(headers: headers),
     );
+
+    log("✅ PATCH RESPONSE: ${response.data}");
     return response;
   }
 
@@ -264,22 +248,24 @@ class ApiService {
     required String endpoint,
     dynamic data, // اختياري في حال كان السيرفر يتطلب body
   }) async {
+    String? token = await Functions().getToken();
     final packageInfo = await PackageInfo.fromPlatform();
     final appversion = packageInfo.version;
-    _safeLog('DELETE $endpoint');
+
+    log("🗑️ DELETE → $baseURL$endpoint");
+    if (data != null) log("📦 DATA → $data");
 
     final payload = _sanitizePayload(data);
 
-    final headers = await _buildAuthHeaders(
-      needtoken: true,
-      endpoint: endpoint,
-      extra: {'app-version': appversion},
-    );
     final response = await dio.delete(
       endpoint,
       data: payload,
-      options: Options(headers: headers),
+      options: Options(
+        headers: {'Authorization': 'Bearer $token', 'app-version': appversion},
+      ),
     );
+
+    log("✅ DELETE RESPONSE: ${response.data}");
     return response;
   }
 }

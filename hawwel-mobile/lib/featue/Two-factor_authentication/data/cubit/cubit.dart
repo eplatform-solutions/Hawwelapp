@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/Two-factor_authentication/data/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/Two-factor_authentication/data/repo/repo.dart';
+import 'package:usdt/featue/Two-factor_authentication/data/cubit/cubit_stat.dart';
+import 'package:usdt/featue/Two-factor_authentication/data/repo/repo.dart';
 
 class Change2FACubit extends Cubit<Change2FAState> {
   Change2FACubit(this.repo) : super(Change2FAInitial());

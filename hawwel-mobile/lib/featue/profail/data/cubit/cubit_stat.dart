@@ -1,4 +1,4 @@
-import 'package:hawwel/featue/profail/data/modal.dart';
+import 'package:usdt/featue/profail/data/modal.dart';
 
 sealed class UserinfoState {}
 

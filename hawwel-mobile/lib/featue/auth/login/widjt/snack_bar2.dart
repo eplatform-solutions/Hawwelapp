@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hawwel/constans/app_branding.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class CustomSnackBar2 extends StatelessWidget {
   final String message;
@@ -34,7 +34,7 @@ class CustomSnackBar2 extends StatelessWidget {
             borderRadius: BorderRadius.circular(14.r),
             boxShadow: [
               BoxShadow(
-                color: branding.primaryText.withValues(alpha: 0.15),
+                color: branding.primaryText.withOpacity(0.15),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),

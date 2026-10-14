@@ -1,9 +1,9 @@
 // import 'package:dartz/dartz.dart';
 // import 'package:dio/dio.dart';
-// import 'package:hawwel/constans/api_servise.dart';
-// import 'package:hawwel/constans/failear.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/model_city.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/repo_city/repo_city.dart';
+// import 'package:usdt/constans/api_servise.dart';
+// import 'package:usdt/constans/failear.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/model_city.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/repo_city/repo_city.dart';
 
 // class CitiesRepoImpl implements CitiesRepo {
 //   final ApiService _apiService;
@@ -69,10 +69,10 @@
 // }
 // import 'package:dartz/dartz.dart';
 // import 'package:dio/dio.dart';
-// import 'package:hawwel/constans/api_servise.dart';
-// import 'package:hawwel/constans/failear.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/model_city.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/repo_city/repo_city.dart';
+// import 'package:usdt/constans/api_servise.dart';
+// import 'package:usdt/constans/failear.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/model_city.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/repo_city/repo_city.dart';
 
 // class CitiesRepoImpl implements CitiesRepo {
 //   final ApiService _apiService;
@@ -102,10 +102,10 @@
 // }
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/model_city.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/repo_city/repo_city.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_city.dart';
+import 'package:usdt/featue/auth/welcomyou/data/repo_city/repo_city.dart';
 
 class CitiesRepoImpl implements CitiesRepo {
   final ApiService _apiService;
@@ -119,18 +119,14 @@ class CitiesRepoImpl implements CitiesRepo {
         needtoken: false,
       );
 
-      // لا توجد مدن لهذا البلد (بلد يعتمد فقط على طريقة دفع على مستوى
-      // البلد) - السيرفر بيرجع error: true و data: {} بدل List، فنعتبرها
-      // قائمة فاضية بدل اعتبارها فشلاً حقيقياً في الطلب.
-      final bool isError = res.data['error'] ?? false;
-      final dynamic rawData = res.data['data'];
-      if (isError || rawData is! List) {
-        return const Right([]);
+      final List? data = res.data['data'];
+      if (data == null) {
+        return Left(ServierFailur('بيانات المدن غير متوفرة', 500));
       }
 
       // نمرر البيانات للـ Model (الذي سيحفظ اللغتين)
-      final cities = rawData.map((e) => CityModel.fromJson(e)).toList();
-
+      final cities = data.map((e) => CityModel.fromJson(e)).toList();
+      
       return Right(cities);
     } catch (e) {
       if (e is DioException) {

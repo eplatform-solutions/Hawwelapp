@@ -1,4 +1,4 @@
-import 'package:hawwel/featue/auth/welcomyou/data/model_rate.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_rate.dart';
 
 abstract class ExchangeRatesState {}
 

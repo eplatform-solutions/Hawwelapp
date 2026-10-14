@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/auth/conferm_password/data/cubit/conferm_cubit_stat.dart';
-import 'package:hawwel/featue/auth/conferm_password/data/repo/conferm_repo_implmantion.dart';
+import 'package:usdt/featue/auth/conferm_password/data/cubit/conferm_cubit_stat.dart';
+import 'package:usdt/featue/auth/conferm_password/data/repo/conferm_repo_implmantion.dart';
 
   
 
@@ -20,7 +20,7 @@ class ConfermCubit extends Cubit<ConfermState> {
     emit(ConfermLoading());
 
     final result = await repo.confirmPassword(
-      password: confermpassword.trim(),
+      password:confermpassword,
       otp: otp,
       session: session,
     );

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/paymant/paymant_done.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/paymant/paymant_done.dart';
 
 class Reviewtranzation extends StatefulWidget {
   const Reviewtranzation({super.key});
@@ -83,7 +83,7 @@ class _ReviewtranzationState extends State<Reviewtranzation> {
                     color: branding.inputBorder,
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3), // لون الظل
+                        color: Colors.black.withOpacity(0.3), // لون الظل
                         spreadRadius: 2, // مدى الانتشار
                         blurRadius: 10, // درجة التمويه
                         offset: const Offset(0, 4), // موقع الظل (x,y)
@@ -181,11 +181,8 @@ class _ReviewtranzationState extends State<Reviewtranzation> {
                     SizedBox(width: 80.w),
                     Transform(
                       alignment: Alignment.center,
-                      transform: Matrix4.diagonal3Values(
-                        isArabic ? -1.0 : 1.0,
-                        1.0,
-                        1.0,
-                      ),
+                      transform: Matrix4.identity()
+                        ..scale(isArabic ? -1.0 : 1.0, 1.0),
                       child: Image.asset(
                         AppImages.paymntnext,
                         height: 20.h,
@@ -201,6 +198,7 @@ class _ReviewtranzationState extends State<Reviewtranzation> {
                       context,
                       MaterialPageRoute(builder: (context) => Paymantdon()),
                     );
+                    // TODO: تنفيذ التسجيل
                   },
                   child: Container(
                     height: 58.h,

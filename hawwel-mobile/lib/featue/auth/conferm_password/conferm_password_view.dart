@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/widgets/password_requirements_hint.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/auth/conferm_password/data/cubit/conferm_cubit.dart';
-import 'package:hawwel/featue/auth/conferm_password/data/cubit/conferm_cubit_stat.dart';
-import 'package:hawwel/featue/auth/login/login_screen_view.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/auth/conferm_password/data/cubit/conferm_cubit.dart';
+import 'package:usdt/featue/auth/conferm_password/data/cubit/conferm_cubit_stat.dart';
+import 'package:usdt/featue/auth/login/login_screen_view.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
 
 class Conferampassword extends StatefulWidget {
   const Conferampassword(
@@ -97,7 +95,25 @@ class _ConferampasswordState extends State<Conferampassword> {
                             EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 28.h),
                         child: Row(
                           children: [
-                            AppBackButton(),
+                            GestureDetector(
+                              onTap: () => Navigator.pop(context),
+                              child: Container(
+                                width: 38.r,
+                                height: 38.r,
+                                decoration: BoxDecoration(
+                                  color: branding.buttonText
+                                      .withValues(alpha: 0.18),
+                                  borderRadius: BorderRadius.circular(12.r),
+                                ),
+                                child: Icon(
+                                  isArabic
+                                      ? Icons.arrow_forward_ios_rounded
+                                      : Icons.arrow_back_ios_new_rounded,
+                                  color: branding.buttonText,
+                                  size: 18,
+                                ),
+                              ),
+                            ),
                             Expanded(
                               child: Text(
                                 AppTranslations.getText(
@@ -120,11 +136,7 @@ class _ConferampasswordState extends State<Conferampassword> {
                   // ── Body ──────────────────────────────────────────────
                   Expanded(
                     child: SingleChildScrollView(
-                      // No overscroll bounce: a tap during the bounce-back
-                      // animation is swallowed by the scroll view.
-                      physics: const ClampingScrollPhysics(),
-                      keyboardDismissBehavior:
-                          ScrollViewKeyboardDismissBehavior.onDrag,
+                      physics: const BouncingScrollPhysics(),
                       padding: EdgeInsets.symmetric(
                           horizontal: 20.w, vertical: 24.h),
                       child: Column(
@@ -207,7 +219,6 @@ class _ConferampasswordState extends State<Conferampassword> {
                                   setState(() => _newVisible = !_newVisible),
                             ),
                           ),
-                          const PasswordRequirementsHint(),
 
                           SizedBox(height: 20.h),
 

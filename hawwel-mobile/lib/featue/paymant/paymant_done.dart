@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/bootom_navigator.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/bootom_navigator.dart';
 
 class Paymantdon extends StatefulWidget {
   const Paymantdon({super.key});
@@ -141,11 +141,8 @@ class _PaymantdonState extends State<Paymantdon> {
                         SizedBox(width: 55.w),
                         Transform(
                           alignment: Alignment.center,
-                          transform: Matrix4.diagonal3Values(
-                            isArabic ? 1.0 : -1.0,
-                            -1.0,
-                            1.0,
-                          ),
+                          transform: Matrix4.identity()
+                            ..scale(isArabic ? 1.0 : -1.0, -1.0),
                           child: Image.asset(
                             AppImages.paymntnext,
                             height: 20.h,
@@ -164,6 +161,7 @@ class _PaymantdonState extends State<Paymantdon> {
                       MaterialPageRoute(builder: (context) => HomeScreen()),
                     );
                     //رقم صفحة Spendmouny بالـ list,
+                    // TODO: تنفيذ التسجيل
                   },
                   child: Container(
                     height: 58.h,

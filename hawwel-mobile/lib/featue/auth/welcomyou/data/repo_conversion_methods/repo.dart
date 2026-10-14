@@ -1,7 +1,7 @@
 import 'package:dartz/dartz.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/transaction_historu/data/model.dart' show PaymentMethodModel;
-//import 'package:hawwel/featue/auth/welcomyou/data/model_conversion_methods.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/transaction_historu/data/model.dart' show PaymentMethodModel;
+//import 'package:usdt/featue/auth/welcomyou/data/model_conversion_methods.dart';
  
  
 

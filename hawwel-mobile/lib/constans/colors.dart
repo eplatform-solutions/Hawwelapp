@@ -14,7 +14,7 @@ class AppColors
   static const Color grayopciatyColor = Color(0xffD9D9D9);
   static const Color yellowColor =Color(0xffFFCC00);
   static const Color yellowBoldColor =Color(0xffFBBC05);
-  static const Color primary2Color = Color(0x80050145);
+  static const Color primary2Color =Color(0xff05014580);
   static const Color successColor = Color(0xFF4CAF50);
   static const Color errorColor = Color(0xFFE53935);
 

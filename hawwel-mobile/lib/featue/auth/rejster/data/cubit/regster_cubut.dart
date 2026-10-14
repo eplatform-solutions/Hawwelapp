@@ -1,24 +1,13 @@
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
-import 'package:hawwel/featue/auth/rejster/data/repo/rejster_repo_implmantion.dart';
+import 'package:usdt/constans/token.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
+import 'package:usdt/featue/auth/rejster/data/repo/rejster_repo_implmantion.dart';
 
 class RegisterCubit extends Cubit<RegisterState> {
   RegisterCubit(this.repo) : super(RegisterInitial());
 
   final ImplmentReporejster repo;
-
-  /// Owns the in-flight OTP verify request so the UI can actually abort it
-  /// (leaving the screen used to just drop the listener while the request
-  /// kept running to a 120s timeout with no feedback).
-  CancelToken? _otpVerifyCancelToken;
-
-  void cancelOtpVerification() {
-    _otpVerifyCancelToken?.cancel();
-    _otpVerifyCancelToken = null;
-  }
 
   // Controllers
   final TextEditingController email = TextEditingController();
@@ -118,20 +107,7 @@ class RegisterCubit extends Cubit<RegisterState> {
   }) async {
     emit(RegisterOTPLoading());
 
-    final cancelToken = CancelToken();
-    _otpVerifyCancelToken = cancelToken;
-
-    final result = await repo.verifyOtp(
-      code: otp,
-      session: session,
-      cancelToken: cancelToken,
-    );
-
-    // A cancelled request means the user backed out of the screen - the
-    // listener is gone by now anyway, but skip emitting so no stray error
-    // state lingers on the cubit.
-    if (cancelToken.isCancelled) return;
-    _otpVerifyCancelToken = null;
+    final result = await repo.verifyOtp(code: otp, session: session);
 
     result.fold((fail) => emit(RegisterOTPError(fail.errMassage)), (success) {
       final data = success["data"];
@@ -214,8 +190,8 @@ class RegisterCubit extends Cubit<RegisterState> {
       lastname: lastName.text,
       email: email.text,
       country: country.text,
-      password: password.text.trim(),
-      confirmpassword: confirmPassword.text.trim(),
+      password: password.text,
+      confirmpassword: confirmPassword.text,
       emailverificationcode: otpEmail.text,
       sessionForEmail: sessionForEmail ?? "",
       mobilePhoneCode: otpphone.text,
@@ -231,8 +207,8 @@ class RegisterCubit extends Cubit<RegisterState> {
 
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter/material.dart';
-// import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
-// import 'package:hawwel/featue/auth/rejster/data/repo/rejster_repo_implmantion.dart';
+// import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
+// import 'package:usdt/featue/auth/rejster/data/repo/rejster_repo_implmantion.dart';
 
 // class RegisterCubit extends Cubit<RegisterState> {
 //   RegisterCubit(this.repo) : super(RegisterInitial());
@@ -370,8 +346,8 @@ class RegisterCubit extends Cubit<RegisterState> {
 
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter/material.dart';
-// import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
-// import 'package:hawwel/featue/auth/rejster/data/repo/rejster_repo_implmantion.dart';
+// import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
+// import 'package:usdt/featue/auth/rejster/data/repo/rejster_repo_implmantion.dart';
 
 // class RegisterCubit extends Cubit<RegisterState> {
 //   RegisterCubit(this.repo) : super(RegisterInitial());
@@ -448,8 +424,8 @@ class RegisterCubit extends Cubit<RegisterState> {
 // }
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter/material.dart';
-// import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
-// import 'package:hawwel/featue/auth/rejster/data/repo/rejster_repo_implmantion.dart';
+// import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
+// import 'package:usdt/featue/auth/rejster/data/repo/rejster_repo_implmantion.dart';
 
 // class RegisterCubit extends Cubit<RegisterState> {
 //   RegisterCubit(this.repo) : super(RegisterInitial());

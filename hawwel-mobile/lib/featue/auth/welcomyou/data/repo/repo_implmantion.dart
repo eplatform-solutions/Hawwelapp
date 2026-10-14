@@ -1,11 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/model_country.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/repo/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_country.dart';
+import 'package:usdt/featue/auth/welcomyou/data/repo/repo.dart';
 
 // class CountriesRepoImpl implements CountriesRepo {
 //   final ApiService _apiService;
@@ -52,7 +51,11 @@ class CountriesRepoImpl implements CountriesRepo {
   @override
   Future<Either<Failur, List<CountryModel>>> getCountries() async {
     try {
-      debugPrint('--- إرسال طلب GET إلى /countries/all ---');
+      // 1. جلب اللغة الحالية من الإعدادات
+      final prefs = await SharedPreferences.getInstance();
+      final String lang = prefs.getString("app_language") ?? "ar";
+
+      print('--- إرسال طلب GET إلى /countries/all ---');
       final response = await _apiService.get(
         endpoint: '/countries/all',
         needtoken: false,

@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
 
 class TransferDetailsCard extends StatelessWidget {
   final double amount;

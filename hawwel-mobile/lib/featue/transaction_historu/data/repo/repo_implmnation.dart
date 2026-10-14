@@ -1,10 +1,10 @@
+import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/transaction_historu/data/model.dart';
-import 'package:hawwel/featue/transaction_historu/data/repo/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/transaction_historu/data/model.dart';
+import 'package:usdt/featue/transaction_historu/data/repo/repo.dart';
 
 class TransfersRepoImpl implements TransfersRepo {
   final ApiService _api;
@@ -17,17 +17,17 @@ Future<Either<Failur, List<TransfersByDateModel>>> getTransfers({
   required int pageSize,
 }) async {
   try {
-    debugPrint("📤 GET TRANSFERS REQUEST");
-    debugPrint("➡️ pageNumber: $pageNumber");
-    debugPrint("➡️ pageSize  : $pageSize");
+    print("📤 GET TRANSFERS REQUEST");
+    print("➡️ pageNumber: $pageNumber");
+    print("➡️ pageSize  : $pageSize");
 
     final response = await _api.get(
       endpoint:
           "/transfers/all-transfers-inside-the-page?pageNumber=$pageNumber&pageSize=$pageSize",
     );
 
-    debugPrint("✅ RESPONSE STATUS: ${response.statusCode}");
-    debugPrint("✅ FULL RESPONSE : ${response.data}");
+    print("✅ RESPONSE STATUS: ${response.statusCode}");
+    print("✅ FULL RESPONSE : ${response.data}");
 
     final list = (response.data['data']['transfers'] as List)
         .map((e) => TransfersByDateModel.fromJson(e))
@@ -35,17 +35,17 @@ Future<Either<Failur, List<TransfersByDateModel>>> getTransfers({
 
     return Right(list);
   } catch (e) {
-    debugPrint("❌ DIO ERROR WHILE FETCHING TRANSFERS");
+    print("❌ DIO ERROR WHILE FETCHING TRANSFERS");
 
     if (e is DioException) {
-      debugPrint("Status Code : ${e.response?.statusCode}");
-      debugPrint("Message     : ${e.message}");
-      debugPrint("Response    : ${e.response?.data}");
+      print("Status Code : ${e.response?.statusCode}");
+      print("Message     : ${e.message}");
+      print("Response    : ${e.response?.data}");
 
       return Left(ServierFailur.fromDioError(e));
     }
 
-    debugPrint("Unknown Error: $e");
+    print("Unknown Error: $e");
     return Left(ServierFailur(e.toString(), 500));
   }
 }

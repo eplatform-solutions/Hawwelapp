@@ -1,33 +1,26 @@
-// ignore_for_file: file_names, non_constant_identifier_names
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/localization/langhelper.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/auth/login/login_screen_view.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit/cubit.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_airea/cubit.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_city/cubit_city.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_conversion_methods/cubit.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_country_payment_methods/cubit.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_transfers/cubit.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_transfers/cubit_stat.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubite_rate/cubit.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubite_rate/cubit_state.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/resolved_payment_selection.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/cubit/cubit.dart';
-import 'package:hawwel/featue/sender_information/data/repo/cubit/cubit.dart';
-import 'package:hawwel/featue/idintity_veryfation/idinty_verv.dart';
-import 'package:hawwel/featue/transfer_execution/page_view.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/localization/langhelper.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit/cubit.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_airea/cubit.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_airea/cubit_stat.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_city/cubit_city.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_city/cubit_stat_city.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_conversion_methods/cubit.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_conversion_methods/cubit_stat.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_transfers/cubit.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_transfers/cubit_stat.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubite_rate/cubit.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubite_rate/cubit_state.dart';
+import 'package:usdt/featue/transfer_execution/page_view.dart';
 
 class Transferdetails extends StatefulWidget {
   const Transferdetails({
@@ -97,15 +90,12 @@ class _TransferdetailsState extends State<Transferdetails>
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return BlocListener<TransferCubit, TransferState>(
-      listener: (context, state) async {
+      listener: (context, state) {
         if (state is TransferSuccess) {
-          await _autoSaveReceiverAfterTransfer();
-          if (!context.mounted) return;
           context.read<CountriesCubit>().reset();
           context.read<CitiesCubit>().reset();
           context.read<AreasCubit>().reset();
           context.read<PaymentMethodsCubit>().reset();
-          context.read<CountryPaymentMethodsCubit>().reset();
           context.read<CurrencyCubit>().reset();
           Navigator.push(
             context,
@@ -121,83 +111,6 @@ class _TransferdetailsState extends State<Transferdetails>
           );
         }
         if (state is TransferFailure) {
-          if (state.statusCode == 401) {
-            await Functions().deleteToken();
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.zero,
-              padding: EdgeInsets.zero,
-              content: CustomSnackBar(
-                backgroundColor: branding.error,
-                message: AppTranslations.getTextStatic(
-                  context,
-                  'session_expired_login_again',
-                ),
-                imagePath: AppImages.eerorrimage,
-              ),
-            ));
-            await Future<void>.delayed(const Duration(milliseconds: 350));
-            if (!context.mounted) return;
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const Loginview()),
-              (_) => false,
-            );
-            return;
-          }
-          if (state.statusCode == 403 &&
-              (state.errorCode == 'KYC_REQUIRED' || state.error.contains('KYC'))) {
-            if (!context.mounted) return;
-            final isArabic =
-                Localizations.localeOf(context).languageCode == 'ar';
-            showDialog<void>(
-              context: context,
-              builder: (dialogContext) => AlertDialog(
-                backgroundColor: branding.cardBg,
-                title: Text(
-                  AppTranslations.getTextStatic(context, 'kyc_required_title'),
-                  style: GoogleFonts.cairo(
-                    color: branding.primaryText,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                content: Text(
-                  state.error,
-                  style: GoogleFonts.cairo(color: branding.secondaryText),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(dialogContext),
-                    child: Text(
-                      AppTranslations.getTextStatic(context, 'Ok'),
-                      style: GoogleFonts.cairo(color: branding.secondaryText),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(dialogContext);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => idintyview()),
-                      );
-                    },
-                    child: Text(
-                      isArabic ? 'إكمال KYC' : 'Complete KYC',
-                      style: GoogleFonts.cairo(
-                        color: branding.accent,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-            return;
-          }
-          if (!context.mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -233,47 +146,24 @@ class _TransferdetailsState extends State<Transferdetails>
     );
   }
 
-  Future<void> _autoSaveReceiverAfterTransfer() async {
-    try {
-      final receiversCubit = context.read<ReceiversCubit>();
-      receiversCubit.fullNameController.text = widget.full_name.trim();
-      receiversCubit.mobilePhoneController.text = widget.number.trim();
-      await receiversCubit.addReceiver();
-      if (!mounted) return;
-      await context.read<ReceiversDisplayCubit>().getAllReceiversDisplay();
-    } catch (_) {
-      // Never block transfer success navigation because of auto-save failures.
-    }
-  }
-
   Widget _buildPage(
       BuildContext context, bool isArabic, AppBrandingConfig branding) {
     final cityState = context.read<CitiesCubit>().state;
     final areaState = context.read<AreasCubit>().state;
     final paymentState = context.read<PaymentMethodsCubit>().state;
-    final countryPaymentState = context.read<CountryPaymentMethodsCubit>().state;
-    final currencyState = context.watch<CurrencyCubit>().state;
+    final currencyState = context.read<CurrencyCubit>().state;
 
-    final resolvedSelection = resolvePaymentSelection(
-      cityState: cityState,
-      areaState: areaState,
-      paymentState: paymentState,
-      countryPaymentState: countryPaymentState,
-    );
-
-    if (resolvedSelection == null) {
+    if (cityState is! CitiesSuccess ||
+        paymentState is! PaymentMethodsSuccess ||
+        areaState is! AreasSuccess) {
       return const SizedBox.shrink();
     }
 
-    final area = resolvedSelection.area;
-    final city = resolvedSelection.city;
-    final method = resolvedSelection.method;
+    final area = areaState.selected!;
+    final city = cityState.selected!;
+    final method = paymentState.selected!;
     final currencyName =
-        SendCurrencyHelper.apiSymbolFor(currencyState.currency);
-    final displayCurrencyName = SendCurrencyHelper.displayLabelForType(
-      currencyState.currency,
-      isArabic: isArabic,
-    );
+        currencyState.currency == CurrencyType.usdt ? "USDT" : "USDC";
     final double sendAmount =
         double.tryParse(currencyState.amount) ?? 0.0;
     final double feeAmount = sendAmount * (method.fee.toInt() / 100);
@@ -284,6 +174,7 @@ class _TransferdetailsState extends State<Transferdetails>
       buildWhen: (prev, curr) =>
           curr is ExchangeRatesSuccess || curr is ExchangeRatesInitial,
       builder: (context, rateState) {
+        String exchangeRateText = "";
         double rateValue = 1.0;
 
         // نفس منطق _resolveRate في الصفحة الرئيسية بالضبط
@@ -306,6 +197,10 @@ class _TransferdetailsState extends State<Transferdetails>
             if (parsed != null && parsed > 0) rateValue = parsed;
           }
 
+          if (rateValue > 1.0) {
+            exchangeRateText =
+                "1 $currencyName = ${rateValue.round()} $sym";
+          }
         }
 
         final double localAmount = netAmount * rateValue;
@@ -329,8 +224,6 @@ class _TransferdetailsState extends State<Transferdetails>
               localSymbol: method.symbol,
               hasConversion: hasConversion,
               context: context,
-              onEditAmount: () =>
-                  _showEditAmountDialog(branding, currencyState.amount),
             ),
           ),
         ),
@@ -352,21 +245,18 @@ class _TransferdetailsState extends State<Transferdetails>
                       branding: branding,
                       name: widget.full_name,
                       phone: widget.number,
-                      city: city == null
-                          ? null
-                          : (LangHelper.isArabic(context)
-                              ? city.nameAr
-                              : city.nameEn),
-                      area: area == null
-                          ? null
-                          : (LangHelper.isArabic(context)
-                              ? area.nameAr
-                              : area.nameEn),
+                      city: LangHelper.isArabic(context)
+                          ? city.nameAr
+                          : city.nameEn,
+                      area: LangHelper.isArabic(context)
+                          ? area.nameAr
+                          : area.nameEn,
                       pickupPoint: LangHelper.isArabic(context)
                           ? method.nameAr
                           : method.nameEn,
                       receivedAmount: localAmount.round().toDouble(),
                       symbol: method.symbol,
+                      exchangeRate: exchangeRateText,
                       context: context,
                     ),
 
@@ -375,7 +265,7 @@ class _TransferdetailsState extends State<Transferdetails>
                     // ── Notice ─────────────────────────────────
                     _NoticeCard(
                         branding: branding,
-                        currencyName: displayCurrencyName,
+                        currencyName: currencyName,
                         context: context),
 
                     SizedBox(height: 24.h),
@@ -393,7 +283,7 @@ class _TransferdetailsState extends State<Transferdetails>
                             context.read<TransferCubit>().submitTransfer(
                                   context: context,
                                   fullName: widget.full_name,
-                                  receiverPhone: widget.number,
+                                  phone: widget.number,
                                 );
                           },
                           onTapCancel: () => _btnCtrl.reverse(),
@@ -445,71 +335,6 @@ class _TransferdetailsState extends State<Transferdetails>
       }, // end BlocBuilder builder
     ); // end BlocBuilder
   }
-
-  Future<void> _showEditAmountDialog(
-      AppBrandingConfig branding, String currentAmount) async {
-    final controller = TextEditingController(text: currentAmount);
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-
-    final updated = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-          title: Text(
-            AppTranslations.getText(context, 'transfer_amount'),
-            textAlign: isArabic ? TextAlign.right : TextAlign.left,
-            style: GoogleFonts.cairo(fontWeight: FontWeight.w700),
-          ),
-          content: TextField(
-            controller: controller,
-            autofocus: true,
-            keyboardType:
-                const TextInputType.numberWithOptions(decimal: true),
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-            ],
-            decoration: InputDecoration(
-              hintText: AppTranslations.getText(context, 'enter_amount_to_send'),
-              border: const OutlineInputBorder(),
-            ),
-            textAlign: isArabic ? TextAlign.right : TextAlign.left,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text(AppTranslations.getText(context, 'cancel')),
-            ),
-            FilledButton(
-              style: FilledButton.styleFrom(
-                backgroundColor: branding.accent,
-              ),
-              onPressed: () {
-                Navigator.pop(dialogContext, controller.text.trim());
-              },
-              child: Text(AppTranslations.getText(context, 'save')),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (updated == null) return;
-    if (!mounted) return;
-    final parsed = double.tryParse(updated);
-    if (parsed == null || parsed <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            isArabic ? 'يرجى إدخال كمية صحيحة' : 'Please enter a valid amount',
-          ),
-        ),
-      );
-      return;
-    }
-
-    context.read<CurrencyCubit>().changeAmount(parsed.toString());
-  }
 }
 
 // ── Header with amount summary ────────────────────────────────────────────────
@@ -524,7 +349,6 @@ class _Header extends StatelessWidget {
   final String localSymbol;
   final bool hasConversion;
   final BuildContext context;
-  final VoidCallback onEditAmount;
 
   const _Header({
     required this.isArabic,
@@ -537,7 +361,6 @@ class _Header extends StatelessWidget {
     required this.localSymbol,
     required this.hasConversion,
     required this.context,
-    required this.onEditAmount,
   });
 
   @override
@@ -553,18 +376,33 @@ class _Header extends StatelessWidget {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 6.h, 20.w, 16.h),
+          padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 28.h),
           child: Column(
             children: [
               // ── Nav row ──────────────────────────────────────
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  AppBackButton(
+                  GestureDetector(
                     onTap: () {
                       HapticFeedback.selectionClick();
                       Navigator.pop(ctx);
                     },
+                    child: Container(
+                      width: 38.w,
+                      height: 38.w,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isArabic
+                            ? Icons.arrow_forward_ios_rounded
+                            : Icons.arrow_back_ios_new_rounded,
+                        color: Colors.white,
+                        size: 16.sp,
+                      ),
+                    ),
                   ),
                   Text(
                     AppTranslations.getText(context, 'transfer_details'),
@@ -578,79 +416,130 @@ class _Header extends StatelessWidget {
                 ],
               ),
 
-              SizedBox(height: 10.h),
+              SizedBox(height: 24.h),
 
-              // ── Amount row: label (كمية الطلب) + value side by side (RTL/LTR via parent) ──
-              GestureDetector(
-                onTap: onEditAmount,
+              // ── Send amount pill ──────────────────────────────
+              Container(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 24.w, vertical: 10.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(40.r),
+                  border: Border.all(
+                      color: Colors.white.withValues(alpha: 0.25)),
+                ),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.12),
-                      borderRadius: BorderRadius.circular(40.r),
-                      border: Border.all(
-                        color: Colors.white.withValues(alpha: 0.25),
+                    Icon(Icons.account_balance_wallet_rounded,
+                        color: Colors.white.withValues(alpha: 0.8),
+                        size: 16.sp),
+                    SizedBox(width: 6.w),
+                    Text(
+                      AppTranslations.getText(context, 'transfer_amount'),
+                      style: GoogleFonts.cairo(
+                        fontSize: 12.sp,
+                        color: Colors.white.withValues(alpha: 0.8),
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.account_balance_wallet_rounded,
-                          color: Colors.white.withValues(alpha: 0.85),
-                          size: 15.sp,
-                        ),
-                        SizedBox(width: 6.w),
-                        Text(
-                          AppTranslations.getText(context, 'transfer_amount'),
-                          style: GoogleFonts.cairo(
-                            fontSize: 11.5.sp,
-                            color: Colors.white.withValues(alpha: 0.88),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Row(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
-                    children: [
-                      Text(
-                        '$sendAmount',
-                        style: GoogleFonts.cairo(
-                          fontSize: 30.sp,
-                          fontWeight: FontWeight.w900,
-                          color: Colors.white,
-                          height: 1.05,
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
-                      Text(
-                        currencyName,
-                        style: GoogleFonts.cairo(
-                          fontSize: 13.sp,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white.withValues(alpha: 0.82),
-                        ),
-                      ),
-                    ],
-                  ),
                   ],
                 ),
               ),
 
-              SizedBox(height: 10.h),
+              SizedBox(height: 12.h),
+
+              // ── Big amount ────────────────────────────────────
+              Text(
+                '$sendAmount',
+                style: GoogleFonts.cairo(
+                  fontSize: 42.sp,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white,
+                  height: 1.1,
+                ),
+              ),
+              Text(
+                currencyName,
+                style: GoogleFonts.cairo(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
+
+              SizedBox(height: 20.h),
+
+              // ── Fee row ───────────────────────────────────────
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _AmountChip(
+                    label: AppTranslations.getText(context, 'fees_label'),
+                    value:
+                        '- ${feeAmount.toStringAsFixed(2)} $currencyName',
+                    valueColor: Colors.redAccent.shade100,
+                  ),
+                  SizedBox(width: 12.w),
+                  Container(
+                    width: 1,
+                    height: 32.h,
+                    color: Colors.white.withValues(alpha: 0.25),
+                  ),
+                  SizedBox(width: 12.w),
+                  _AmountChip(
+                    label: AppTranslations.getText(
+                        context, 'recipient receives'),
+                    // إذا كانت العملة مختلفة → اعرض المبلغ بالعملة المحلية
+                    // وإلا → اعرض netAmount بنفس العملة
+                    value: hasConversion
+                        ? '${localAmount.round()} $localSymbol'
+                        : '${netAmount.toStringAsFixed(2)} $currencyName',
+                    valueColor: const Color(0xFF86EFAC),
+                  ),
+                ],
+              ),
             ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AmountChip extends StatelessWidget {
+  final String label;
+  final String value;
+  final Color valueColor;
+
+  const _AmountChip({
+    required this.label,
+    required this.value,
+    required this.valueColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.cairo(
+            fontSize: 11.sp,
+            color: Colors.white.withValues(alpha: 0.65),
+            fontWeight: FontWeight.w400,
+          ),
+        ),
+        SizedBox(height: 2.h),
+        Text(
+          value,
+          style: GoogleFonts.cairo(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: valueColor,
+          ),
+        ),
+      ],
     );
   }
 }
@@ -660,24 +549,24 @@ class _ReceiverCard extends StatelessWidget {
   final AppBrandingConfig branding;
   final String name;
   final String phone;
-  // Null for a country-level transfer (no city/region was chosen) - those
-  // rows are simply omitted below instead of showing an empty value.
-  final String? city;
-  final String? area;
+  final String city;
+  final String area;
   final String pickupPoint;
   final double receivedAmount;
   final String symbol;
+  final String exchangeRate;
   final BuildContext context;
 
   const _ReceiverCard({
     required this.branding,
     required this.name,
     required this.phone,
-    this.city,
-    this.area,
+    required this.city,
+    required this.area,
     required this.pickupPoint,
     required this.receivedAmount,
     required this.symbol,
+    required this.exchangeRate,
     required this.context,
   });
 
@@ -699,24 +588,80 @@ class _ReceiverCard extends StatelessWidget {
         ),
         child: Column(
           children: [
+            // ── Header row ──────────────────────────────────────
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    branding.accent.withValues(alpha: 0.12),
+                    branding.accent.withValues(alpha: 0.04),
+                  ],
+                ),
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(24.r),
+                  topRight: Radius.circular(24.r),
+                ),
+              ),
+              padding:
+                  EdgeInsets.symmetric(horizontal: 18.w, vertical: 14.h),
+              child: Row(
+                children: [
+                  Container(
+                    width: 40.w,
+                    height: 40.w,
+                    decoration: BoxDecoration(
+                      gradient: branding.buildHeaderGradient(),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(Icons.person_rounded,
+                        color: Colors.white, size: 20.sp),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppTranslations.getText(context, 'recipient'),
+                          style: GoogleFonts.cairo(
+                            fontSize: 11.sp,
+                            color: branding.secondaryText,
+                            fontWeight: FontWeight.w400,
+                          ),
+                        ),
+                        Text(
+                          name,
+                          style: GoogleFonts.cairo(
+                            fontSize: 15.sp,
+                            fontWeight: FontWeight.w800,
+                            color: branding.primaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // received amount badge
+                  Container(
+                    padding: EdgeInsets.symmetric(
+                        horizontal: 12.w, vertical: 6.h),
+                    decoration: BoxDecoration(
+                      gradient: branding.buildHeaderGradient(),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      '$receivedAmount $symbol',
+                      style: GoogleFonts.cairo(
+                        fontSize: 13.sp,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
             // ── Detail rows ─────────────────────────────────────
-            _InfoRow(
-              icon: Icons.person_rounded,
-              iconColor: const Color(0xFF0F9D8A),
-              label: AppTranslations.getText(context, 'recipient'),
-              value: name,
-              branding: branding,
-            ),
-            _HDivider(branding: branding),
-            _InfoRow(
-              icon: Icons.account_balance_wallet_rounded,
-              iconColor: const Color(0xFF0EA5E9),
-              label: AppTranslations.getText(context, 'received_amount_label'),
-              value: '${receivedAmount.toStringAsFixed(1)} $symbol',
-              ltr: true,
-              branding: branding,
-            ),
-            _HDivider(branding: branding),
             _InfoRow(
               icon: Icons.phone_rounded,
               iconColor: const Color(0xFF10B981),
@@ -725,26 +670,22 @@ class _ReceiverCard extends StatelessWidget {
               ltr: true,
               branding: branding,
             ),
-            if (city != null) ...[
-              _HDivider(branding: branding),
-              _InfoRow(
-                icon: Icons.location_city_rounded,
-                iconColor: const Color(0xFF6366F1),
-                label: AppTranslations.getText(context, 'city'),
-                value: city!,
-                branding: branding,
-              ),
-            ],
-            if (area != null) ...[
-              _HDivider(branding: branding),
-              _InfoRow(
-                icon: Icons.map_rounded,
-                iconColor: const Color(0xFFEC4899),
-                label: AppTranslations.getText(context, 'Area'),
-                value: area!,
-                branding: branding,
-              ),
-            ],
+            _HDivider(branding: branding),
+            _InfoRow(
+              icon: Icons.location_city_rounded,
+              iconColor: const Color(0xFF6366F1),
+              label: AppTranslations.getText(context, 'city'),
+              value: city,
+              branding: branding,
+            ),
+            _HDivider(branding: branding),
+            _InfoRow(
+              icon: Icons.map_rounded,
+              iconColor: const Color(0xFFEC4899),
+              label: AppTranslations.getText(context, 'Area'),
+              value: area,
+              branding: branding,
+            ),
             _HDivider(branding: branding),
             _InfoRow(
               icon: Icons.storefront_rounded,
@@ -753,6 +694,16 @@ class _ReceiverCard extends StatelessWidget {
               value: pickupPoint,
               branding: branding,
             ),
+            if (exchangeRate.isNotEmpty) ...[
+              _HDivider(branding: branding),
+              _InfoRow(
+                icon: Icons.currency_exchange_rounded,
+                iconColor: const Color(0xFFF59E0B),
+                label: AppTranslations.getText(context, 'exchange_rate'),
+                value: exchangeRate,
+                branding: branding,
+              ),
+            ],
             SizedBox(height: 4.h),
           ],
         ),
@@ -783,67 +734,52 @@ class _InfoRow extends StatelessWidget {
     final bool isArabic =
         Localizations.localeOf(context).languageCode == 'ar';
 
-    final iconBox = Container(
-      width: 33.w,
-      height: 33.w,
-      decoration: BoxDecoration(
-        color: iconColor.withValues(alpha: 0.1),
-        shape: BoxShape.circle,
-      ),
-      child: Icon(icon, color: iconColor, size: 15.sp),
-    );
-
-    final valueDirection = (ltr || _isNumericOrRate(value))
-        ? TextDirection.ltr
-        : (isArabic ? TextDirection.rtl : TextDirection.ltr);
-
-    final valueWidget = Directionality(
-      textDirection: valueDirection,
-      child: Align(
-        alignment: isArabic ? Alignment.centerRight : Alignment.centerLeft,
-        child: Text(
-          value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          textAlign: isArabic ? TextAlign.right : TextAlign.left,
-          style: GoogleFonts.cairo(
-            fontSize: 13.5.sp,
-            fontWeight: FontWeight.w700,
-            color: branding.primaryText,
-          ),
-        ),
-      ),
-    );
-
-    final labelStyle = GoogleFonts.cairo(
-      fontSize: 10.5.sp,
-      color: branding.secondaryText,
-      fontWeight: FontWeight.w400,
-    );
-
-    final textBlock = Expanded(
-      child: Row(
-        textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Text(
-            label,
-            style: labelStyle,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          SizedBox(width: 8.w),
-          Expanded(child: valueWidget),
-        ],
-      ),
-    );
-
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 9.h),
+      padding: EdgeInsets.symmetric(horizontal: 18.w, vertical: 12.h),
       child: Row(
-        children: isArabic
-            ? [textBlock, SizedBox(width: 12.w), iconBox]
-            : [iconBox, SizedBox(width: 12.w), textBlock],
+        children: [
+          Container(
+            width: 36.w,
+            height: 36.w,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 17.sp),
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: isArabic
+                  ? CrossAxisAlignment.end
+                  : CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: GoogleFonts.cairo(
+                    fontSize: 10.5.sp,
+                    color: branding.secondaryText,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+                // أرقام + سعر الصرف + هاتف → دائماً LTR
+                Directionality(
+                  textDirection: (ltr || _isNumericOrRate(value))
+                      ? TextDirection.ltr
+                      : (isArabic ? TextDirection.rtl : TextDirection.ltr),
+                  child: Text(
+                    value,
+                    style: GoogleFonts.cairo(
+                      fontSize: 13.5.sp,
+                      fontWeight: FontWeight.w700,
+                      color: branding.primaryText,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -860,12 +796,11 @@ class _HDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Divider(
       height: 1,
       color: branding.divider.withValues(alpha: 0.4),
-      indent: isArabic ? 18.w : 66.w,
-      endIndent: isArabic ? 66.w : 18.w,
+      indent: 66.w,
+      endIndent: 18.w,
     );
   }
 }

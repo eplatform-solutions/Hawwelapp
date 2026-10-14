@@ -4,21 +4,20 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/digit_utils.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/auth/conferm_password/conferm_password_view.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/otp/widjt/top_screen.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubut.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/auth/conferm_password/conferm_password_view.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/otp/widjt/top_screen.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubut.dart';
 
 class Otpscreen extends StatefulWidget {
   final String email;
-  final String session;
+  String session;
 
-  const Otpscreen({super.key, required this.email, required this.session});
+  Otpscreen({super.key, required this.email, required this.session});
 
   @override
   State<Otpscreen> createState() => _OtpscreenState();
@@ -36,10 +35,6 @@ class _OtpscreenState extends State<Otpscreen> {
   void dispose() {
     //otpController.dispose(); // ✅ مهم جدًا
     timer?.cancel();
-    // Leaving the screen (back arrow, system back, etc.) must actually abort
-    // any in-flight verify request instead of letting it keep running for
-    // up to the network timeout with no listener left to hear the result.
-    context.read<RegisterCubit>().cancelOtpVerification();
     super.dispose();
   }
 
@@ -66,10 +61,6 @@ class _OtpscreenState extends State<Otpscreen> {
 
   String otp = '';
 
-  void _setNormalizedOtp(String value) {
-    otp = normalizeAuthDigits(value).trim();
-  }
-
   @override
   Widget build(BuildContext context) {
     final branding = appBrandingNotifier.value;
@@ -81,7 +72,7 @@ class _OtpscreenState extends State<Otpscreen> {
         backgroundColor: Colors.white,
         body: BlocConsumer<RegisterCubit, RegisterState>(
           listener: (context, state) {
-            debugPrint("STATE => $state");
+            print("STATE => $state");
 
             if (state is RegisterOTPVerified) {
               //  final otp = otpController.text;
@@ -144,7 +135,7 @@ class _OtpscreenState extends State<Otpscreen> {
                     appContext: context,
                     length: 4,
                     onCompleted: (value) {
-                      _setNormalizedOtp(value);
+                      otp = value; // ✅ نخزن الـ OTP هنا
                     },
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     animationType: AnimationType.fade,
@@ -170,9 +161,7 @@ class _OtpscreenState extends State<Otpscreen> {
                     animationDuration: const Duration(milliseconds: 300),
                     backgroundColor: Colors.transparent,
                     enableActiveFill: true,
-                    onChanged: (value) {
-                      _setNormalizedOtp(value);
-                    },
+                    onChanged: (value) {},
                   ),
 
                   SizedBox(height: 20.h),
@@ -210,7 +199,6 @@ class _OtpscreenState extends State<Otpscreen> {
                               await context.read<RegisterCubit>().sendOtpAgain(
                                 widget.email,
                               );
-                              if (!context.mounted) return;
                               startTimer();
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
@@ -267,7 +255,6 @@ class _OtpscreenState extends State<Otpscreen> {
                     padding: EdgeInsets.symmetric(horizontal: 32.w),
                     child: GestureDetector(
                       onTap: () {
-                        _setNormalizedOtp(otp);
                         context.read<RegisterCubit>().verifyOtpAndGetSession(
                           otp: otp, // ✅
                           session: widget.session,
@@ -299,24 +286,6 @@ class _OtpscreenState extends State<Otpscreen> {
                       ),
                     ),
                   ),
-
-                  if (state is RegisterOTPLoading) ...[
-                    SizedBox(height: 16.h),
-                    GestureDetector(
-                      onTap: () {
-                        context.read<RegisterCubit>().cancelOtpVerification();
-                        Navigator.maybePop(context);
-                      },
-                      child: Text(
-                        AppTranslations.getText(context, 'cancel'),
-                        style: GoogleFonts.cairo(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: branding.secondaryText,
-                        ),
-                      ),
-                    ),
-                  ],
 
                   SizedBox(height: 20.h),
                 ],

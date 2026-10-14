@@ -4,18 +4,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/digit_utils.dart';
-import 'package:hawwel/constans/localization/app_locale.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/otp/widjt/top_screen.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubut.dart';
-import 'package:hawwel/featue/bootom_navigator.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/auth/otp/widjt/top_screen.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubut.dart';
+import 'package:usdt/featue/bootom_navigator.dart';
 
 /// شاشة إدخال رمز التحقق المرسل للجوال بعد الضغط على «سجل الآن» في التسجيل.
 class RegisterPhoneVerifyView extends StatefulWidget {
@@ -27,37 +26,10 @@ class RegisterPhoneVerifyView extends StatefulWidget {
 }
 
 class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
+  final _formKey = GlobalKey<FormState>();
   bool _resendLocked = false;
   int _secondsRemaining = 60;
   Timer? _timer;
-
-  String _normalizedPhone(RegisterCubit cubit) {
-    final raw = normalizePhoneLikeInput(
-      cubit.submittedMobilePhone ?? cubit.phonee.text,
-    ).trim();
-    if (raw.isEmpty) return '';
-    return raw.startsWith('+') ? raw : '+$raw';
-  }
-
-  String _extractCountryCode(String normalizedPhone) {
-    if (normalizedPhone.isEmpty) return '+966';
-    final digits = normalizeAuthDigits(
-      normalizedPhone,
-    ).replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.isEmpty) return '+966';
-    if (digits.length <= 9) return '+$digits';
-    final countryCode = digits.substring(0, digits.length - 9);
-    return '+$countryCode';
-  }
-
-  String _extractLocalPhone(String normalizedPhone) {
-    if (normalizedPhone.isEmpty) return '';
-    final digits = normalizeAuthDigits(
-      normalizedPhone,
-    ).replaceAll(RegExp(r'[^0-9]'), '');
-    if (digits.length <= 9) return digits;
-    return digits.substring(digits.length - 9);
-  }
 
   void _startResendCooldown() {
     setState(() {
@@ -96,7 +68,7 @@ class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
     final cubit = context.read<RegisterCubit>();
 
     return Directionality(
-      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      textDirection: isArabic ? TextDirection.ltr : TextDirection.rtl,
       child: Scaffold(
         backgroundColor: branding.screenBg,
         body: BlocConsumer<RegisterCubit, RegisterState>(
@@ -104,30 +76,8 @@ class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
             if (curr is RegisterOTPSent) return prev is RegisterOTPLoading;
             return true;
           },
-          listener: (context, state) async {
+          listener: (context, state) {
             if (state is RegisterSuccess) {
-              final token = await Functions().getToken();
-              if (!context.mounted) return;
-              if (token == null || token.isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    behavior: SnackBarBehavior.floating,
-                    margin: EdgeInsets.zero,
-                    padding: EdgeInsets.zero,
-                    content: CustomSnackBar(
-                      backgroundColor: branding.error,
-                      message: AppTranslations.getTextStatic(
-                        context,
-                        'session_start_failed',
-                      ),
-                      imagePath: AppImages.eerorrimage,
-                    ),
-                  ),
-                );
-                return;
-              }
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (_) => const HomeScreen()),
@@ -150,14 +100,6 @@ class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
               );
             }
             if (state is RegisterOTPError) {
-              final message = AppLocaleHelper.isPhoneAlreadyRegisteredMessage(
-                    state.error,
-                  )
-                  ? AppTranslations.getText(
-                      context,
-                      'phone_already_registered',
-                    )
-                  : state.error;
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   backgroundColor: Colors.transparent,
@@ -167,7 +109,7 @@ class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
                   padding: EdgeInsets.zero,
                   content: CustomSnackBar(
                     backgroundColor: branding.error,
-                    message: message,
+                    message: state.error,
                     imagePath: AppImages.eerorrimage,
                   ),
                 ),
@@ -194,10 +136,8 @@ class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
             }
           },
           builder: (context, state) {
-            final fullPhone = _normalizedPhone(cubit);
-            final countryCode = _extractCountryCode(fullPhone);
-            final localPhone = _extractLocalPhone(fullPhone);
             return Form(
+              key: _formKey,
               child: Column(
                 children: [
                   GradientHeader2(
@@ -205,9 +145,8 @@ class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
                       context,
                       'confirm_mobile_title',
                     ),
-                    topLeftImage: AppImages.iconback,
-                    v: 78,
-                    headerHeight: 205,
+                    topLeftImage: AppImages.backleft,
+                    v: 100,
                   ),
                   Expanded(
                     child: SingleChildScrollView(
@@ -232,107 +171,27 @@ class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
                             ),
                           ),
                           SizedBox(height: 12.h),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 14.w,
-                              vertical: 10.h,
-                            ),
-                            decoration: BoxDecoration(
-                              color: branding.cardBg,
-                              borderRadius: BorderRadius.circular(14.r),
-                              border: Border.all(
-                                color: branding.iconPrimary.withValues(
-                                  alpha: 0.2,
-                                ),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 10.w,
-                                    vertical: 5.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: branding.iconPrimary.withValues(
-                                      alpha: 0.1,
-                                    ),
-                                    borderRadius: BorderRadius.circular(20.r),
-                                  ),
-                                  child: Text(
-                                    countryCode,
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 13.sp,
-                                      fontWeight: FontWeight.w700,
-                                      color: branding.iconPrimary,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 10.w),
-                                Text(
-                                  localPhone.isNotEmpty ? localPhone : fullPhone,
-                                  textAlign: TextAlign.center,
-                                  textDirection: TextDirection.ltr,
-                                  style: GoogleFonts.cairo(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: branding.primaryText,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 30.h),
-                          Directionality(
+                          Text(
+                            cubit.phonee.text,
+                            textAlign: TextAlign.center,
                             textDirection: TextDirection.ltr,
-                            child: PinCodeTextField(
-                            appContext: context,
-                            length: 4,
-                            controller: cubit.otpphone,
-                            keyboardType: TextInputType.number,
-                            autoDisposeControllers: false,
-                            autoDismissKeyboard: true,
-                            animationType: AnimationType.fade,
-                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                            textStyle: GoogleFonts.cairo(
-                              fontSize: 22.sp,
+                            style: GoogleFonts.cairo(
+                              fontSize: 16.sp,
                               fontWeight: FontWeight.w700,
                               color: branding.primaryText,
                             ),
-                            pinTheme: PinTheme(
-                              shape: PinCodeFieldShape.box,
-                              borderRadius: BorderRadius.circular(14.r),
-                              fieldHeight: 58.h,
-                              fieldWidth: 58.w,
-                              borderWidth: 1.7,
-                              inactiveColor: branding.iconPrimary.withValues(
-                                alpha: 0.35,
-                              ),
-                              selectedColor: branding.iconPrimary,
-                              activeColor: branding.iconPrimary,
-                              inactiveFillColor: branding.inputBorder,
-                              selectedFillColor: branding.inputBorder
-                                  .withValues(alpha: 0.9),
-                              activeFillColor: branding.inputBorder
-                                  .withValues(alpha: 0.95),
-                            ),
-                            enableActiveFill: true,
-                            cursorColor: branding.iconPrimary,
-                            animationDuration: const Duration(milliseconds: 200),
-                            backgroundColor: Colors.transparent,
-                            onChanged: (value) {
-                              final normalized = normalizeAuthDigits(value);
-                              if (normalized != value) {
-                                cubit.otpphone.value = TextEditingValue(
-                                  text: normalized,
-                                  selection: TextSelection.collapsed(
-                                    offset: normalized.length,
-                                  ),
-                                );
-                              }
-                            },
                           ),
+                          SizedBox(height: 28.h),
+                          TextFieldCustom(
+                            validator: (value) =>
+                                valedatotp(value, context),
+                            controller: cubit.otpphone,
+                            hintText: AppTranslations.getText(
+                              context,
+                              'enter_otp',
+                            ),
+                            type: TextInputType.number,
+                            hintStyle: AppStyle.meduim16grey,
                           ),
                           SizedBox(height: 20.h),
                           if (_resendLocked)
@@ -378,33 +237,7 @@ class _RegisterPhoneVerifyViewState extends State<RegisterPhoneVerifyView> {
                             onTap: state is RegisterLoading
                                 ? null
                                 : () {
-                                    final otp = normalizeAuthDigits(
-                                      cubit.otpphone.text,
-                                    ).trim();
-                                    cubit.otpphone.value = TextEditingValue(
-                                      text: otp,
-                                      selection: TextSelection.collapsed(
-                                        offset: otp.length,
-                                      ),
-                                    );
-                                    if (otp.length != 4) {
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          backgroundColor: Colors.transparent,
-                                          elevation: 0,
-                                          behavior: SnackBarBehavior.floating,
-                                          margin: EdgeInsets.zero,
-                                          padding: EdgeInsets.zero,
-                                          content: CustomSnackBar(
-                                            backgroundColor: branding.error,
-                                            message: AppTranslations.getText(
-                                              context,
-                                              'enter_otp',
-                                            ),
-                                            imagePath: AppImages.eerorrimage,
-                                          ),
-                                        ),
-                                      );
+                                    if (!_formKey.currentState!.validate()) {
                                       return;
                                     }
                                     cubit.register();

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hawwel/constans/app_branding.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class CustomBorderPainter extends CustomPainter {
   final double leftGap;

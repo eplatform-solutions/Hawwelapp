@@ -1,4 +1,4 @@
-import 'package:hawwel/featue/transaction_historu/data/model.dart';
+import 'package:usdt/featue/transaction_historu/data/model.dart';
 
 abstract class PaymentMethodsState {}
 
@@ -18,7 +18,7 @@ class PaymentMethodsSuccess extends PaymentMethodsState {
 
   PaymentMethodsSuccess({required this.methods, this.selected,this.message=""});
 }
-// import 'package:hawwel/featue/transaction_historu/data/model.dart';
+// import 'package:usdt/featue/transaction_historu/data/model.dart';
 
 // abstract class PaymentMethodsState {}
 

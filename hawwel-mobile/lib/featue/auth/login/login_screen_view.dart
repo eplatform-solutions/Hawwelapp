@@ -1,29 +1,28 @@
 import 'package:country_picker/country_picker.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/country_defaults_helper.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/feature_flags.dart';
-import 'package:hawwel/constans/colors.dart';
-import 'package:hawwel/constans/digit_utils.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/style.dart';
-import 'package:hawwel/constans/localization/app_locale.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/auth/forgeat_password/forget_password_view.dart';
-import 'package:hawwel/featue/auth/login/data/cubit/login_cubir.dart';
-import 'package:hawwel/featue/auth/login/data/cubit/login_cubit_state.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-import 'package:hawwel/featue/auth/login/widjt/top_screen.dart';
-import 'package:hawwel/featue/auth/otp/otp_Two-factor_authentication.dart';
-import 'package:hawwel/featue/auth/rejster/regster_screen_view.dart';
-import 'package:hawwel/featue/bootom_navigator.dart';
-import 'package:hawwel/featue/first_screen/bootom_navigatot_first_screen.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/colors.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/ip_country_lookup.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/token.dart';
+import 'package:usdt/featue/auth/forgeat_password/forget_password_view.dart';
+import 'package:usdt/featue/auth/login/data/cubit/login_cubir.dart';
+import 'package:usdt/featue/auth/login/data/cubit/login_cubit_state.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/auth/login/widjt/top_screen.dart';
+import 'package:usdt/featue/auth/otp/otp_Two-factor_authentication.dart';
+import 'package:usdt/featue/auth/rejster/regster_screen_view.dart';
+import 'package:usdt/featue/bootom_navigator.dart';
 
 class Loginview extends StatefulWidget {
   const Loginview({super.key});
@@ -36,28 +35,37 @@ class _LoginviewState extends State<Loginview> {
   final _formKey = GlobalKey<FormState>();
   bool _viewpoassword = true;
   bool isPhone = true;
+  bool _dialCountryPinnedByUser = false;
 
   Country selectedCountry = Country(
-    phoneCode: '49',
-    countryCode: 'DE',
+    phoneCode: '966',
+    countryCode: 'SA',
     e164Sc: 0,
     geographic: true,
     level: 1,
-    name: 'Germany',
-    example: '15123456789',
-    displayName: 'Germany',
-    displayNameNoCountryCode: 'Germany',
+    name: 'Saudi Arabia',
+    example: '512345678',
+    displayName: 'Saudi Arabia',
+    displayNameNoCountryCode: 'Saudi Arabia',
     e164Key: '',
   );
 
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || _dialCountryPinnedByUser) return;
+      final code = await IpCountryLookup.fetchCountryIso2();
+      if (!mounted || _dialCountryPinnedByUser) return;
+      final parsed = code != null ? Country.tryParse(code) : null;
+      if (parsed != null) {
+        setState(() => selectedCountry = parsed);
+      }
+    });
+  }
+
   void detectInputType(String value) {
-    // Email login is retired: the field never switches to email mode, so no
-    // "Email" hint / validator / keyboard can surface while the flag is off.
-    if (!kEmailFeaturesEnabled) {
-      if (!isPhone) setState(() => isPhone = true);
-      return;
-    }
-    final trimmed = normalizePhoneLikeInput(value).trim();
+    final trimmed = value.trim();
     if (trimmed.isEmpty) {
       if (!isPhone) {
         setState(() => isPhone = true);
@@ -74,33 +82,11 @@ class _LoginviewState extends State<Loginview> {
     }
   }
 
-  void _onLoginIdentifierChanged(String value) {
-    final cubit = context.read<LoginCubit>();
-    final normalized = normalizePhoneLikeInput(value);
-    if (normalized != value) {
-      cubit.email.value = TextEditingValue(
-        text: normalized,
-        selection: TextSelection.collapsed(offset: normalized.length),
-      );
-    }
-    detectInputType(normalized);
-  }
-
   String countryEmoji(String countryCode) {
     return countryCode.toUpperCase().replaceAllMapped(
       RegExp(r'[A-Z]'),
       (match) => String.fromCharCode(match.group(0)!.codeUnitAt(0) + 127397),
     );
-  }
-
-  String _resolveLoginErrorMessage(BuildContext context, String rawMessage) {
-    if (AppLocaleHelper.isInvalidCredentialsMessage(rawMessage)) {
-      return AppTranslations.getTextStatic(
-        context,
-        isPhone ? 'invalid_phone_credentials' : 'invalid_email_credentials',
-      );
-    }
-    return rawMessage;
   }
 
   @override
@@ -111,19 +97,19 @@ class _LoginviewState extends State<Loginview> {
     // context.read<LoginCubit>().password.clear();
 
     return Directionality(
-      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      textDirection: isArabic ? TextDirection.ltr : TextDirection.rtl,
       child: Scaffold(
         body: Form(
           key: _formKey,
           child: BlocConsumer<LoginCubit, LoginState>(
             listener: (context, state) async {
+              print("🔥 State Changed: $state");
+
               if (state is LoginSuccess) {
                 final response = state.data;
 
                 final loginCubit = context.read<LoginCubit>();
-                final identifier = loginCubit.lastLoginIdentifier.isNotEmpty
-                    ? loginCubit.lastLoginIdentifier
-                    : loginCubit.email.text;
+                final email = loginCubit.email.text;
 
                 // 🔐 2FA
                 if (response["status"] == "2fa_required") {
@@ -132,7 +118,7 @@ class _LoginviewState extends State<Loginview> {
                     MaterialPageRoute(
                       builder: (_) => OtpTwofactorauthentication(
                         session: response["session"],
-                        email: identifier,
+                        email: email,
                       ),
                     ),
                   );
@@ -143,30 +129,18 @@ class _LoginviewState extends State<Loginview> {
                 loginCubit.password.clear();
 
                 String? userAuthToken = await Functions().getToken();
-                if ((userAuthToken == null || userAuthToken.isEmpty) &&
-                    response["status"] == "success") {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      behavior: SnackBarBehavior.floating,
-                      margin: EdgeInsets.zero,
-                      padding: EdgeInsets.zero,
-                      content: CustomSnackBar(
-                        backgroundColor: branding.error,
-                        message: AppTranslations.getTextStatic(
-                          context,
-                          'session_start_failed',
-                        ),
-                        imagePath: AppImages.eerorrimage,
-                      ),
-                    ),
-                  );
-                  return;
-                }
 
-                if (!context.mounted) return;
+                if (!kIsWeb) {
+                  try {
+                    String? fcmToken = await FirebaseMessaging.instance
+                        .getToken();
+                    if (fcmToken != null && userAuthToken != null) {
+                      String dataToCopy =
+                          "--- Auth Token ---\n$userAuthToken\n\n--- FCM Token ---\n$fcmToken";
+                      await Clipboard.setData(ClipboardData(text: dataToCopy));
+                    }
+                  } catch (_) {}
+                }
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => HomeScreen()),
@@ -174,7 +148,6 @@ class _LoginviewState extends State<Loginview> {
               }
 
               if (state is LoginFailure) {
-                if (!context.mounted) return;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     backgroundColor: Colors.transparent,
@@ -185,10 +158,7 @@ class _LoginviewState extends State<Loginview> {
 
                     content: CustomSnackBar(
                       backgroundColor: branding.buttonBg,
-                      message: _resolveLoginErrorMessage(
-                        context,
-                        state.errMessage,
-                      ),
+                      message: state.errMessage,
                       imagePath: AppImages.eerorrimage,
                     ),
                     // Text(state.message)
@@ -203,18 +173,8 @@ class _LoginviewState extends State<Loginview> {
                   children: [
                     GradientHeader(
                       title: AppTranslations.getText(context, 'login_title'),
-                      v: 86,
+                      v: 120,
                       h: 0,
-                      topLeftImage: AppImages.iconback,
-                      useModernBackButton: true,
-                      onLeadingTap: () {
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const Homefirstscreen(),
-                          ),
-                        );
-                      },
                     ),
 
                     SizedBox(height: 50.h),
@@ -230,67 +190,14 @@ class _LoginviewState extends State<Loginview> {
 
                     Padding(
                       padding: EdgeInsets.symmetric(
-                        horizontal: 50.w,
+                        horizontal: 48.w,
                         vertical: 30.h,
                       ),
-                      // Forced LTR so the dial-code box always sits on the
-                      // left and the number on the right, in both languages.
-                      child: Directionality(
-                        textDirection: TextDirection.ltr,
-                        child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          if (isPhone) ...[
-                            GestureDetector(
-                              onTap: () => _showCustomPicker(context),
-                              child: Container(
-                                height: 50.h,
-                                width: 86.w,
-                                padding: EdgeInsets.symmetric(horizontal: 4.w),
-                                decoration: BoxDecoration(
-                                  color: branding.inputBorder,
-                                  border: Border.all(
-                                    color: branding.iconPrimary,
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CountryDefaultsHelper.countryFlag(
-                                        selectedCountry.countryCode,
-                                        size: 16.sp,
-                                      ),
-                                      SizedBox(width: 4.w),
-                                      Flexible(
-                                        child: Text(
-                                          '+${selectedCountry.phoneCode}',
-                                          textDirection: TextDirection.ltr,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: GoogleFonts.cairo(
-                                            fontSize: 13.sp,
-                                            fontWeight: FontWeight.w600,
-                                            color: branding.primaryText,
-                                          ),
-                                        ),
-                                      ),
-                                      Icon(
-                                        Icons.arrow_drop_down,
-                                        size: 20.sp,
-                                        color: branding.secondaryText,
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                            SizedBox(width: 8.w),
-                          ],
+                          if (isPhone) SizedBox(width: 8.w),
+
                           Expanded(
                             child: TextFieldCustom(
                               controller: context.read<LoginCubit>().email,
@@ -309,11 +216,73 @@ class _LoginviewState extends State<Loginview> {
                                 }
                                 return validateEmail(value, context);
                               },
-                              onChanged: _onLoginIdentifierChanged,
+                              onChanged: detectInputType,
                             ),
                           ),
+                          //  SizedBox(width: 10.w),
+                          if (isPhone)
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 5.w),
+                              child: GestureDetector(
+                                onTap: () {
+                                  // showCountryPicker(
+                                  //   context: context,
+                                  //   showPhoneCode: true,
+                                  //   onSelect: (Country country) {
+                                  //     setState(() {
+                                  //       selectedCountry = country;
+                                  //     });
+                                  //   },
+                                  // );
+                                  _showCustomPicker(context);
+                                },
+                                child: Container(
+                                  height: 55.h,
+                                  width: 75.w,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 0.w,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: branding.inputBorder,
+                                    border: Border.all(
+                                      color: branding.iconPrimary,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Icon(Icons.arrow_drop_down),
+                                      Text(
+                                        '${selectedCountry.phoneCode}+',
+                                        style: TextStyle(fontSize: 10),
+                                      ),
+                                      selectedCountry.countryCode == "SY"
+                                          ? Image.asset(
+                                              "asset/syrianewsyria.png",
+                                              width: 15.w,
+                                              height: 15.h,
+                                            )
+                                          : Text(
+                                              selectedCountry.flagEmoji,
+                                              style: const TextStyle(
+                                                fontSize: 15,
+                                              ),
+                                            ),
+
+                                      // Text(
+
+                                      //   // countryEmoji(
+                                      //   //   selectedCountry.countryCode,
+                                      //   // ),
+                                      //   style: TextStyle(fontSize: 15),
+                                      // ),
+                                      SizedBox(width: 3.w),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
                         ],
-                        ),
                       ),
                     ),
 
@@ -321,10 +290,6 @@ class _LoginviewState extends State<Loginview> {
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 50.w),
                       child: TextFieldCustom(
-                        // Full rules on purpose: the owner wants a typed
-                        // password that is too short / missing a digit etc.
-                        // to say so explicitly (the message renders under the
-                        // field) instead of only a red border.
                         validator: (value) => validatePassword(value, context),
                         controller: BlocProvider.of<LoginCubit>(
                           context,
@@ -404,14 +369,13 @@ class _LoginviewState extends State<Loginview> {
 
                           if (isPhone) {
                             final phone = buildPhoneNumberWithCountryCode(
-                              phone: normalizePhoneLikeInput(cubit.email.text),
+                              phone: cubit.email.text,
                               phoneCode: selectedCountry.phoneCode,
                             );
                             bool isValid = await validatePhoneWithCountry(
                               phone: phone,
                               countryCode: selectedCountry.countryCode,
                             );
-                            if (!context.mounted) return;
 
                             if (!isValid) {
                               ScaffoldMessenger.of(context).showSnackBar(
@@ -424,7 +388,7 @@ class _LoginviewState extends State<Loginview> {
 
                                   content: CustomSnackBar(
                                     backgroundColor: branding.buttonBg,
-                                    message: AppTranslations.getTextStatic(
+                                    message: AppTranslations.getText(
                                       context,
                                       'mobile_number_invalid',
                                     ),
@@ -478,15 +442,6 @@ class _LoginviewState extends State<Loginview> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Text(
-                          AppTranslations.getText(context, 'dont_have_account'),
-                          style: GoogleFonts.cairo(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w700,
-                            color: branding.secondaryText,
-                          ),
-                        ),
-                        SizedBox(width: 6.w),
                         GestureDetector(
                           onTap: () {
                             Navigator.push(
@@ -501,9 +456,22 @@ class _LoginviewState extends State<Loginview> {
                           child: Text(
                             AppTranslations.getText(context, 'register_now'),
                             style: GoogleFonts.cairo(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w700,
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
                               color: branding.iconPrimary,
+                            ),
+                          ),
+                        ),
+                        GestureDetector(
+                          child: Text(
+                            AppTranslations.getText(
+                              context,
+                              'dont_have_account',
+                            ),
+                            style: GoogleFonts.cairo(
+                              fontSize: 13.sp,
+                              fontWeight: FontWeight.w600,
+                              color: branding.secondaryText,
                             ),
                           ),
                         ),
@@ -571,11 +539,10 @@ class _LoginviewState extends State<Loginview> {
                         filteredCountries = allCountries.where((country) {
                           // جلب الاسم المترجم للبحث فيه
                           final String localizedName =
-                              CountryDefaultsHelper.localizedCountryName(
-                                context,
-                                country.countryCode,
-                                fallback: country.name,
-                              );
+                              CountryLocalizations.of(context)?.countryName(
+                                countryCode: country.countryCode,
+                              ) ??
+                              country.name;
 
                           final searchLower = val.toLowerCase();
                           return localizedName.toLowerCase().contains(
@@ -597,18 +564,25 @@ class _LoginviewState extends State<Loginview> {
                       itemBuilder: (context, index) {
                         final country = filteredCountries[index];
 
+                        // ✅ الحل الآمن لجلب الاسم المترجم:
+                        // نستخدم CountryLocalizations.of(context) للحصول على الاسم بناءً على لغة التطبيق الحالية
                         final String displayCountryName =
-                            CountryDefaultsHelper.localizedCountryName(
+                            CountryLocalizations.of(
                               context,
-                              country.countryCode,
-                              fallback: country.name,
-                            );
+                            )?.countryName(countryCode: country.countryCode) ??
+                            country.name;
 
                         return ListTile(
-                          leading: CountryDefaultsHelper.countryFlag(
-                            country.countryCode,
-                            size: 24,
-                          ),
+                          leading: country.countryCode == "SY"
+                              ? Image.asset(
+                                  "asset/syrianewsyria.png",
+                                  width: 30.w,
+                                  height: 20.h,
+                                )
+                              : Text(
+                                  country.flagEmoji,
+                                  style: const TextStyle(fontSize: 24),
+                                ),
                           title: Text(
                             displayCountryName,
                             style: GoogleFonts.cairo(
@@ -625,7 +599,10 @@ class _LoginviewState extends State<Loginview> {
                             ),
                           ),
                           onTap: () {
-                            setState(() => selectedCountry = country);
+                            setState(() {
+                              _dialCountryPinnedByUser = true;
+                              selectedCountry = country;
+                            });
                             Navigator.pop(context);
                           },
                         );

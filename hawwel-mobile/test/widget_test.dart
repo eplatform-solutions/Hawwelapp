@@ -1,63 +1,30 @@
+// This is a basic Flutter widget test.
+//
+// To perform an interaction with a widget in your test, use the WidgetTester
+// utility in the flutter_test package. For example, you can send tap and scroll
+// gestures. You can also use WidgetTester to find child widgets in the widget
+// tree, read text, and verify that the values of widget properties are correct.
+
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:hawwel/constans/localization/lang_cubit.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
+
+import 'package:usdt/main.dart';
 
 void main() {
-  testWidgets('TextFieldCustom renders and updates controller', (
-    WidgetTester tester,
-  ) async {
-    final controller = TextEditingController();
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const MyApp());
 
-    await tester.pumpWidget(_buildTestApp(controller: controller));
+    // Verify that our counter starts at 0.
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
 
-    expect(find.byType(TextFormField), findsOneWidget);
-    expect(find.text('Email'), findsOneWidget);
+    // Tap the '+' icon and trigger a frame.
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
 
-    await tester.enterText(find.byType(TextFormField), 'test@example.com');
-    expect(controller.text, 'test@example.com');
+    // Verify that our counter has incremented.
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
   });
-
-  testWidgets('TextFieldCustom uses RTL when language is Arabic', (
-    WidgetTester tester,
-  ) async {
-    await tester.pumpWidget(
-      _buildTestApp(controller: TextEditingController()),
-    );
-
-    final editable = tester.widget<EditableText>(find.byType(EditableText));
-    expect(editable.textDirection, TextDirection.rtl);
-  });
-}
-
-class _TestLanguageCubit extends LanguageCubit {
-  _TestLanguageCubit() : super();
-
-  @override
-  Future<void> toggleLanguage() async {}
-
-  @override
-  Future<void> setLanguage(Language lang) async {}
-}
-
-Widget _buildTestApp({required TextEditingController controller}) {
-  return ScreenUtilInit(
-    designSize: const Size(375, 866),
-    minTextAdapt: true,
-    splitScreenMode: true,
-    child: MaterialApp(
-      home: BlocProvider<LanguageCubit>(
-        create: (_) => _TestLanguageCubit(),
-        child: Scaffold(
-          body: TextFieldCustom(
-            controller: controller,
-            hintText: 'Email',
-            onChanged: (_) {},
-          ),
-        ),
-      ),
-    ),
-  );
 }

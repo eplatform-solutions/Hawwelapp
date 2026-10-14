@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/material.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/repo/repo_implmantion.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/cubit/cubit_stat.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/repo/repo_implmantion.dart';
 
 class ReceiversCubit extends Cubit<ReceiversState> {
   ReceiversCubit(this.repo) : super(ReceiversInitial());

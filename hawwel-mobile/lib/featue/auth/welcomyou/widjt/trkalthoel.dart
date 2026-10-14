@@ -1,128 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/app_branding.dart';
-
-List<String> paymentLogoUrlCandidates(String imagePath) {
-  final trimmed = imagePath.trim();
-  if (trimmed.isEmpty) return const [];
-  final dashboardBase = ApiService.dashboardBaseURL.replaceAll(
-    RegExp(r'/$'),
-    '',
-  );
-
-  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
-    final normalized = Uri.tryParse(trimmed);
-    if (normalized != null &&
-        normalized.path.startsWith('/assets/images/payment_methods/')) {
-      final fromDashboard = '$dashboardBase${normalized.path}';
-      return [fromDashboard];
-    }
-    return [trimmed];
-  }
-  final clean = trimmed.replaceFirst(RegExp(r'^/+'), '');
-  if (clean.startsWith('assets/images/payment_methods/')) {
-    return ['$dashboardBase/$clean'];
-  }
-  return [ApiService.resolveAssetUrl(trimmed)];
-}
-
-Widget _paymentLogoWithFallback({
-  required List<String> urls,
-  required Color fallbackColor,
-  required double fallbackSize,
-  BoxFit fit = BoxFit.contain,
-}) {
-  if (urls.isEmpty) {
-    return Icon(
-      Icons.account_balance_wallet_rounded,
-      size: fallbackSize,
-      color: fallbackColor,
-    );
-  }
-
-  Widget buildAt(int index) {
-    if (index >= urls.length) {
-      return Icon(
-        Icons.account_balance_wallet_rounded,
-        size: fallbackSize,
-        color: fallbackColor,
-      );
-    }
-    return Image.network(
-      urls[index],
-      fit: fit,
-      errorBuilder: (_, __, ___) => buildAt(index + 1),
-      frameBuilder: (_, child, frame, _) {
-        if (frame == null) {
-          return Icon(
-            Icons.account_balance_wallet_rounded,
-            size: fallbackSize,
-            color: fallbackColor,
-          );
-        }
-        return AnimatedSwitcher(
-          duration: const Duration(milliseconds: 150),
-          child: child,
-        );
-      },
-    );
-  }
-
-  return buildAt(0);
-}
-
-class RoundedLogoImage extends StatelessWidget {
-  final String imagePath;
-  final double width;
-  final double height;
-  final double radius;
-  final BoxFit fit;
-  final Color fallbackColor;
-  final double fallbackSize;
-  final EdgeInsetsGeometry padding;
-  final Color backgroundColor;
-
-  const RoundedLogoImage({
-    super.key,
-    required this.imagePath,
-    required this.fallbackColor,
-    required this.fallbackSize,
-    this.width = 48,
-    this.height = 48,
-    this.radius = 14,
-    this.fit = BoxFit.contain,
-    this.padding = EdgeInsets.zero,
-    this.backgroundColor = Colors.transparent,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final imageUrls = paymentLogoUrlCandidates(imagePath);
-    return SizedBox(
-      width: width,
-      height: height,
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(radius),
-        child: DecoratedBox(
-          decoration: BoxDecoration(color: backgroundColor),
-          child: Padding(
-            padding: padding,
-            child: Center(
-              child: _paymentLogoWithFallback(
-                urls: imageUrls,
-                fallbackColor: fallbackColor,
-                fallbackSize: fallbackSize,
-                fit: fit,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class Trkalthoel extends StatelessWidget {
   final String image;
@@ -141,6 +21,7 @@ class Trkalthoel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final branding = appBrandingNotifier.value;
+    final imageUrl = '${ApiService.baseURL}/$image';
 
     return GestureDetector(
       onTap: onTap,
@@ -170,21 +51,54 @@ class Trkalthoel extends StatelessWidget {
           ],
         ),
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
           child: Row(
             children: [
               // ── Logo from API ──────────────────────────────────────
-              RoundedLogoImage(
-                imagePath: image,
-                width: 46.w,
-                height: 46.h,
-                radius: 14.r,
-                fit: BoxFit.contain,
-                fallbackColor: branding.accent.withValues(alpha: 0.5),
-                fallbackSize: 26.sp,
+              Container(
+                width: 44.w,
+                height: 44.h,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(10.r),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 6,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                padding: EdgeInsets.all(6.r),
+                child: Image.network(
+                  imageUrl,
+                  fit: BoxFit.contain,
+                  loadingBuilder: (_, child, progress) {
+                    if (progress == null) return child;
+                    return Center(
+                      child: SizedBox(
+                        width: 14,
+                        height: 14,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          value: progress.expectedTotalBytes != null
+                              ? progress.cumulativeBytesLoaded /
+                                  progress.expectedTotalBytes!
+                              : null,
+                          color: branding.accent,
+                        ),
+                      ),
+                    );
+                  },
+                  errorBuilder: (_, __, ___) => Icon(
+                    Icons.account_balance_wallet_rounded,
+                    size: 20.sp,
+                    color: branding.accent.withValues(alpha: 0.5),
+                  ),
+                ),
               ),
 
-              SizedBox(width: 9.w),
+              SizedBox(width: 10.w),
 
               // ── Name ──────────────────────────────────────────────
               Expanded(
@@ -193,10 +107,10 @@ class Trkalthoel extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: GoogleFonts.cairo(
-                    fontSize: 11.5.sp,
+                    fontSize: 12.sp,
                     fontWeight: FontWeight.w600,
                     color: selected ? branding.accent : branding.primaryText,
-                    height: 1.25,
+                    height: 1.35,
                   ),
                 ),
               ),
@@ -229,12 +143,9 @@ class Trkalthoel extends StatelessWidget {
 
 // ── Legacy variants ──────────────────────────────────────────────────────────
 
-Widget buildRowItem({
-  required String namer,
-  required String image,
-  Color? color,
-}) {
+Widget buildRowItem({required String namer, required String image, Color? color}) {
   final branding = appBrandingNotifier.value;
+  final imageUrl = '${ApiService.baseURL}/$image';
   return Row(
     mainAxisAlignment: MainAxisAlignment.end,
     children: [
@@ -253,14 +164,16 @@ Widget buildRowItem({
         ),
       ),
       SizedBox(width: 10.w),
-      RoundedLogoImage(
-        imagePath: image,
-        width: 44.w,
-        height: 44.h,
-        radius: 14.r,
-        fit: BoxFit.contain,
-        fallbackColor: branding.hintText,
-        fallbackSize: 25.sp,
+      ClipRRect(
+        borderRadius: BorderRadius.circular(4),
+        child: Image.network(
+          imageUrl,
+          height: 30.h,
+          width: 45.w,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) =>
+              Icon(Icons.account_balance_wallet, size: 25.sp, color: branding.hintText),
+        ),
       ),
       SizedBox(width: 12.w),
     ],

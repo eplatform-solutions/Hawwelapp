@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
- import 'package:hawwel/constans/colors.dart';
+ import 'package:usdt/constans/colors.dart';
 
 class AppStyle {
   static const medium12grey = TextStyle(

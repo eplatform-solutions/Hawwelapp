@@ -1,9 +1,9 @@
 // import 'package:dartz/dartz.dart';
 // import 'package:dio/dio.dart';
-// import 'package:hawwel/constans/api_servise.dart';
-// import 'package:hawwel/constans/failear.dart';
-// import 'package:hawwel/featue/profail/data/modal.dart';
-// import 'package:hawwel/featue/profail/data/repo/repo.dart';
+// import 'package:usdt/constans/api_servise.dart';
+// import 'package:usdt/constans/failear.dart';
+// import 'package:usdt/featue/profail/data/modal.dart';
+// import 'package:usdt/featue/profail/data/repo/repo.dart';
 
 // class Implemntuserinfo implements Repouserinfo {
 //   final ApiService _apiService;
@@ -60,16 +60,13 @@
 //     }
 //   }
 // }
-// ignore_for_file: non_constant_identifier_names
-
 import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/constans/localization/app_locale.dart';
-import 'package:hawwel/featue/profail/data/modal.dart';
-import 'package:hawwel/featue/profail/data/repo/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/profail/data/modal.dart';
+import 'package:usdt/featue/profail/data/repo/repo.dart';
 
 class Implemntuserinfo implements Repouserinfo {
   final ApiService _apiService;
@@ -87,23 +84,7 @@ class Implemntuserinfo implements Repouserinfo {
       // حالة النجاح (عادة 200 أو 201)
       if (response.statusCode == 200 || response.statusCode == 201) {
         log("✅ [SUCCESS] User Info Received");
-        log("✅ [SUCCESS] User Info Received");
-        final rawUser = responseData["data"];
-        if (rawUser is Map<String, dynamic>) {
-          log(
-            '🧾 [/users/info raw country] country=${rawUser["country"]} | countryId=${rawUser["countryId"]} | mobilePhone=${rawUser["mobilePhone"]}',
-          );
-          log(
-            '🧾 [/users/info raw country] country=${rawUser["country"]} | countryId=${rawUser["countryId"]} | mobilePhone=${rawUser["mobilePhone"]}',
-          );
-        }
         final data = StudentInfo.fromJson(responseData["data"]);
-        log(
-          '🧩 [Parsed StudentInfo country] country=${data.country} | countryId=${data.countryId}',
-        );
-        log(
-          '🧩 [Parsed StudentInfo country] country=${data.country} | countryId=${data.countryId}',
-        );
         return Right(data);
       } else {
         // إذا رجع السيرفر كود فشل (مثلاً 403 أو 503 صيانة)
@@ -118,8 +99,7 @@ class Implemntuserinfo implements Repouserinfo {
     } on DioException catch (e) {
       log("❌ [DIO_ERROR] => ${e.response?.data}");
       // الاعتماد على الميثود اللي بتعالج الـ Timeout والـ Connection
-      final lang = await AppLocaleHelper.getLanguageCode();
-      return Left(ServierFailur.fromDioError(e, lang: lang));
+      return Left(ServierFailur.fromDioError(e));
     } catch (e, stacktrace) {
       log("💥 [UNKNOWN_ERROR] => $e");
       log("🚩 StackTrace: $stacktrace");

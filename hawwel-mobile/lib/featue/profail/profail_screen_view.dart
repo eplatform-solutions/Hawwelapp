@@ -1,7 +1,6 @@
 // lib/featue/profail/profail_screen_view.dart
 import 'dart:io';
 
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -11,27 +10,27 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:url_launcher/url_launcher.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/feature_flags.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/localization/lang_cubit.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/Two-factor_authentication/view.dart';
-import 'package:hawwel/featue/auth/login/login_screen_view.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/resst_passwrd/rest_password_n_.dart';
-import 'package:hawwel/featue/idintity_veryfation/idinty_verv.dart';
-import 'package:hawwel/featue/profail/block.dart';
-import 'package:hawwel/featue/profail/data/cubit/cubit.dart';
-import 'package:hawwel/featue/profail/data/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/profail/data/cubit_image/cubi.dart';
-import 'package:hawwel/featue/profail/data/cubit_image/cubit_stat.dart';
-import 'package:hawwel/featue/profail/data/modal.dart';
-import 'package:hawwel/featue/profail/edit_information.dart';
-import 'package:hawwel/featue/technical_support/technicle_support.dart';
-import 'package:hawwel/constans/api_servise.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/localization/lang_cubit.dart';
+import 'package:usdt/constans/token.dart';
+import 'package:usdt/featue/Two-factor_authentication/data/repo/repo_implmntion.dart';
+import 'package:usdt/featue/Two-factor_authentication/view.dart';
+import 'package:usdt/featue/auth/forgeat_password/forget_password_view.dart';
+import 'package:usdt/featue/auth/login/login_screen_view.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/resst_passwrd/rest_password_n_.dart';
+import 'package:usdt/featue/bootom_navigator.dart';
+import 'package:usdt/featue/idintity_veryfation/idinty_verv.dart';
+import 'package:usdt/featue/profail/block.dart';
+import 'package:usdt/featue/profail/data/cubit/cubit.dart';
+import 'package:usdt/featue/profail/data/cubit/cubit_stat.dart';
+import 'package:usdt/featue/profail/data/cubit_image/cubi.dart';
+import 'package:usdt/featue/profail/data/cubit_image/cubit_stat.dart';
+import 'package:usdt/featue/profail/edit_information.dart';
+import 'package:usdt/featue/technical_support/technicle_support.dart';
+import 'package:usdt/constans/api_servise.dart';
 
 class Profail extends StatefulWidget {
   final VoidCallback onViewTransactions;
@@ -42,8 +41,6 @@ class Profail extends StatefulWidget {
 }
 
 class _ProfailState extends State<Profail> {
-  static const String _deleteAccountRequestEndpoint = '/users/delete-request';
-
   @override
   void initState() {
     super.initState();
@@ -112,36 +109,12 @@ class _ProfailState extends State<Profail> {
 
     return Directionality(
       textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-      child: BlocListener<Userinfogcubit, UserinfoState>(
-        listener: (context, state) async {
-          if (state is UserinfoFailureState && state.statusCode == 401) {
-            final expiredMessage = AppTranslations.getTextStatic(
-              context,
-              'session_expired_login_again',
-            );
-            await Functions().deleteToken();
-            if (!context.mounted) return;
-            _showErrorSnackBar(context, expiredMessage);
-            await Future<void>.delayed(const Duration(milliseconds: 350));
-            if (!context.mounted) return;
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const Loginview()),
-              (_) => false,
-            );
-            return;
-          }
-          if (state is UserinfoFailureState) {
-            if (!context.mounted) return;
-            _showErrorSnackBar(context, state.error);
-          }
-        },
-        child: Scaffold(
-          backgroundColor: branding.screenBg,
-          body: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: Column(
-              children: [
+      child: Scaffold(
+        backgroundColor: branding.screenBg,
+        body: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Column(
+            children: [
               // ══════════════════════════════════════════════════
               // Header gradient + avatar
               // ══════════════════════════════════════════════════
@@ -154,7 +127,7 @@ class _ProfailState extends State<Profail> {
                 padding: EdgeInsets.symmetric(horizontal: 18.w),
                 child: Column(
                   children: [
-                    SizedBox(height: 16.h),
+                    SizedBox(height: 20.h),
 
                     // ── KYC Level card ────────────────────────
                     _buildKycCard(context, branding, isArabic),
@@ -178,8 +151,7 @@ class _ProfailState extends State<Profail> {
                   ],
                 ),
               ),
-              ],
-            ),
+            ],
           ),
         ),
       ),
@@ -208,166 +180,207 @@ class _ProfailState extends State<Profail> {
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 16.h),
+          padding: EdgeInsets.fromLTRB(20.w, 16.h, 20.w, 32.h),
           child: Column(
             children: [
-              SizedBox(
-                height: 38.r,
-                child: Stack(
-                  children: [
-                    Align(
-                      alignment: Alignment.center,
-                      child: Text(
-                        AppTranslations.getText(context, 'profile'),
-                        style: GoogleFonts.cairo(
-                          fontSize: 20.sp,
-                          fontWeight: FontWeight.w700,
-                          color: branding.buttonText,
-                        ),
+              // Top bar
+              Row(
+                children: [
+                  Text(
+                    AppTranslations.getText(context, 'profile'),
+                    style: GoogleFonts.cairo(
+                      fontSize: 20.sp,
+                      fontWeight: FontWeight.w700,
+                      color: branding.buttonText,
+                    ),
+                  ),
+                  const Spacer(),
+                  // Edit button
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => Editinformation()),
+                    ),
+                    child: Container(
+                      width: 38.r,
+                      height: 38.r,
+                      decoration: BoxDecoration(
+                        color: branding.buttonText.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        Icons.edit_rounded,
+                        color: branding.buttonText,
+                        size: 18,
                       ),
                     ),
-                    Align(
-                      alignment: AlignmentDirectional.centerEnd,
-                      child: GestureDetector(
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => Editinformation()),
-                        ),
-                        child: Container(
-                          width: 38.r,
-                          height: 38.r,
-                          decoration: BoxDecoration(
-                            color: branding.buttonText.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Icon(
-                            Icons.edit_rounded,
-                            color: branding.buttonText,
-                            size: 18,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              SizedBox(height: 12.h),
+
+              SizedBox(height: 20.h),
+
+              // Avatar
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  BlocBuilder<Userinfogcubit, UserinfoState>(
+                    builder: (context, userState) =>
+                        BlocBuilder<ChangeImageCubit, ChangeImageState>(
+                          builder: (context, imgState) {
+                            String? localImage;
+                            if (imgState is ChangeImageSuccess) {
+                              localImage = imgState.imagePath;
+                            }
+                            String? apiImage;
+                            if (userState is UserinfoSuccessState) {
+                              apiImage = userState.user.imagePath;
+                            }
+
+                            ImageProvider? imageProvider;
+                            if (localImage != null &&
+                                localImage.isNotEmpty &&
+                                File(localImage).existsSync()) {
+                              imageProvider = FileImage(File(localImage));
+                            } else if (apiImage != null &&
+                                apiImage.isNotEmpty) {
+                              final finalUrl = apiImage.startsWith('http')
+                                  ? apiImage
+                                  : buildImageUrlFromApiPath(apiImage);
+                              imageProvider = NetworkImage(finalUrl);
+                            }
+
+                            return Container(
+                              width: 100.r,
+                              height: 100.r,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: branding.buttonText.withValues(
+                                  alpha: 0.2,
+                                ),
+                                border: Border.all(
+                                  color: branding.buttonText.withValues(
+                                    alpha: 0.6,
+                                  ),
+                                  width: 3,
+                                ),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.18),
+                                    blurRadius: 16,
+                                    offset: const Offset(0, 6),
+                                  ),
+                                ],
+                              ),
+                              child: ClipOval(
+                                child: imageProvider != null
+                                    ? Image(
+                                        image: imageProvider,
+                                        fit: BoxFit.cover,
+                                        errorBuilder: (_, __, ___) =>
+                                            _AvatarFallback(branding: branding),
+                                      )
+                                    : _AvatarFallback(branding: branding),
+                              ),
+                            );
+                          },
+                        ),
+                  ),
+                  // Camera badge
+                  Positioned(
+                    bottom: 0,
+                    right: isArabic ? null : 0,
+                    left: isArabic ? 0 : null,
+                    child: GestureDetector(
+                      onTap: _pickAndUploadImage,
+                      child: Container(
+                        width: 30.r,
+                        height: 30.r,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: branding.screenBg,
+                          border: Border.all(
+                            color: branding.badge.withValues(alpha: 0.4),
+                            width: 1.5,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.camera_alt_rounded,
+                          size: 14,
+                          color: branding.iconPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              SizedBox(height: 14.h),
+
+              // User name + info
               BlocBuilder<Userinfogcubit, UserinfoState>(
                 builder: (context, state) {
-                  if (state is UserinfoInitialState ||
-                      state is UserinfoLoadingState) {
-                    final avatarFirstInRow = !isArabic;
-                    final avatar = _buildAvatarSection(
-                      branding,
-                      cameraOnStartSide: avatarFirstInRow,
-                    );
-                    final shimmer = Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _shimmerBox(double.infinity, 18.h, branding),
-                          SizedBox(height: 8.h),
-                          _shimmerBox(120.w, 13.h, branding),
-                        ],
-                      ),
-                    );
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: avatarFirstInRow
-                          ? [avatar, SizedBox(width: 14.w), shimmer]
-                          : [shimmer, SizedBox(width: 14.w), avatar],
+                  if (state is UserinfoLoadingState) {
+                    return Column(
+                      children: [
+                        _shimmerBox(160.w, 18.h, branding),
+                        SizedBox(height: 8.h),
+                        _shimmerBox(120.w, 13.h, branding),
+                      ],
                     );
                   }
                   if (state is UserinfoSuccessState) {
                     final user = state.user;
-                    final displayName = _buildDisplayName(user);
-                    final isNameArabic = _containsArabicScript(displayName);
-                    // Under RTL, first Row child is on the right — put info first so
-                    // name sits on the right and avatar on the left in Arabic.
-                    final avatarFirstInRow = !isArabic;
-
-                    final avatar = _buildAvatarSection(
-                      branding,
-                      cameraOnStartSide: avatarFirstInRow,
-                    );
-                    final info = _buildProfileInfoSection(
-                      context,
-                      branding,
-                      user,
-                      displayName,
-                      isNameArabic,
-                    );
-
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: avatarFirstInRow
-                          ? [
-                              avatar,
-                              SizedBox(width: 14.w),
-                              Expanded(child: info),
-                            ]
-                          : [
-                              Expanded(child: info),
-                              SizedBox(width: 14.w),
-                              avatar,
-                            ],
-                    );
-                  }
-                  if (state is UserinfoFailureState) {
-                    final avatarFirstInRow = !isArabic;
-                    final avatar = _buildAvatarSection(
-                      branding,
-                      cameraOnStartSide: avatarFirstInRow,
-                    );
-                    final failureContent = Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            AppTranslations.getTextStatic(
-                              context,
-                              'session_start_failed',
-                            ),
-                            style: GoogleFonts.cairo(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.w700,
-                              color: branding.buttonText,
-                            ),
+                    return Column(
+                      children: [
+                        Text(
+                          '${user.nickname} ${user.name}',
+                          style: GoogleFonts.cairo(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w800,
+                            color: branding.buttonText,
                           ),
-                          SizedBox(height: 6.h),
-                          GestureDetector(
-                            onTap: () =>
-                                context.read<Userinfogcubit>().fetchUserInfo(),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: 12.w,
-                                vertical: 6.h,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        SizedBox(height: 4.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.phone_iphone_rounded,
+                              size: 13,
+                              color: branding.buttonText.withValues(
+                                alpha: 0.75,
                               ),
-                              decoration: BoxDecoration(
-                                color: branding.buttonText.withValues(alpha: 0.14),
-                                borderRadius: BorderRadius.circular(20),
-                              ),
-                              child: Text(
-                                AppTranslations.getTextStatic(context, 'retry'),
-                                style: GoogleFonts.cairo(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w700,
-                                  color: branding.buttonText,
+                            ),
+                            SizedBox(width: 5.w),
+                            Text(
+                              user.mobilePhone,
+                              textDirection: TextDirection.ltr,
+                              style: GoogleFonts.cairo(
+                                fontSize: 13.sp,
+                                color: branding.buttonText.withValues(
+                                  alpha: 0.75,
                                 ),
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    );
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: avatarFirstInRow
-                          ? [avatar, SizedBox(width: 14.w), failureContent]
-                          : [failureContent, SizedBox(width: 14.w), avatar],
+                          ],
+                        ),
+                        SizedBox(height: 14.h),
+                        // Info pills row
+                        _buildInfoPillsRow(context, branding, isArabic, user),
+                      ],
                     );
                   }
-                  return const SizedBox.shrink();
+                  return const SizedBox();
                 },
               ),
             ],
@@ -377,208 +390,50 @@ class _ProfailState extends State<Profail> {
     );
   }
 
-  Widget _buildAvatarSection(
-    dynamic branding, {
-    required bool cameraOnStartSide,
-  }) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        BlocBuilder<Userinfogcubit, UserinfoState>(
-          builder: (context, userState) =>
-              BlocBuilder<ChangeImageCubit, ChangeImageState>(
-                builder: (context, imgState) {
-                  String? localImage;
-                  if (imgState is ChangeImageSuccess) {
-                    localImage = imgState.imagePath;
-                  }
-                  String? apiImage;
-                  if (userState is UserinfoSuccessState) {
-                    apiImage = userState.user.imagePath;
-                  }
-
-                  ImageProvider? imageProvider;
-                  if (localImage != null &&
-                      localImage.isNotEmpty &&
-                      File(localImage).existsSync()) {
-                    imageProvider = FileImage(File(localImage));
-                  } else if (apiImage != null && apiImage.isNotEmpty) {
-                    final finalUrl = apiImage.startsWith('http')
-                        ? apiImage
-                        : buildImageUrlFromApiPath(apiImage);
-                    imageProvider = NetworkImage(finalUrl);
-                  }
-
-                  return Container(
-                    width: 84.r,
-                    height: 84.r,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: branding.buttonText.withValues(alpha: 0.2),
-                      border: Border.all(
-                        color: branding.buttonText.withValues(alpha: 0.6),
-                        width: 2.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.18),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: imageProvider != null
-                          ? Image(
-                              image: imageProvider,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) =>
-                                  _AvatarFallback(branding: branding),
-                            )
-                          : _AvatarFallback(branding: branding),
-                    ),
-                  );
-                },
-              ),
-        ),
-        Positioned(
-          bottom: 0,
-          right: cameraOnStartSide ? null : 0,
-          left: cameraOnStartSide ? 0 : null,
-          child: GestureDetector(
-            onTap: _pickAndUploadImage,
-            child: Container(
-              width: 28.r,
-              height: 28.r,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: branding.screenBg,
-                border: Border.all(
-                  color: branding.badge.withValues(alpha: 0.4),
-                  width: 1.5,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.1),
-                    blurRadius: 6,
-                  ),
-                ],
-              ),
-              child: Icon(
-                Icons.camera_alt_rounded,
-                size: 13,
-                color: branding.iconPrimary,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProfileInfoSection(
-    BuildContext context,
-    dynamic branding,
-    StudentInfo user,
-    String displayName,
-    bool isNameArabic,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          displayName,
-          textAlign: TextAlign.start,
-          textDirection:
-              isNameArabic ? TextDirection.rtl : TextDirection.ltr,
-          style: (isNameArabic ? GoogleFonts.cairo : GoogleFonts.inter)(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w800,
-            color: branding.buttonText,
-          ),
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-        ),
-        SizedBox(height: 4.h),
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.phone_iphone_rounded,
-              size: 13,
-              color: branding.buttonText.withValues(alpha: 0.75),
-            ),
-            SizedBox(width: 5.w),
-            Flexible(
-              child: Text(
-                user.mobilePhone,
-                textDirection: TextDirection.ltr,
-                textAlign: TextAlign.start,
-                overflow: TextOverflow.ellipsis,
-                style: GoogleFonts.cairo(
-                  fontSize: 13.sp,
-                  color: branding.buttonText.withValues(alpha: 0.75),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        SizedBox(height: 10.h),
-        _buildInfoPillsRow(
-          context,
-          branding,
-          user: user,
-        ),
-      ],
-    );
-  }
-
   // ─────────────────────────────────────────────────────────────────────────
   // Info pills (email + account number)
   // ─────────────────────────────────────────────────────────────────────────
   Widget _buildInfoPillsRow(
     BuildContext context,
-    dynamic branding, {
-    required StudentInfo user,
-  }) {
-    return Wrap(
-      alignment: WrapAlignment.start,
-      spacing: 8.w,
-      runSpacing: 8.h,
+    dynamic branding,
+    bool isArabic,
+    dynamic user,
+  ) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Email pill
-        if (kEmailFeaturesEnabled)
-          Container(
-            constraints: BoxConstraints(maxWidth: 160.w),
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: branding.buttonText.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.mail_rounded,
-                  size: 12,
-                  color: branding.buttonText.withValues(alpha: 0.8),
-                ),
-                SizedBox(width: 5.w),
-                Flexible(
-                  child: Text(
-                    user.email,
-                    overflow: TextOverflow.ellipsis,
-                    style: GoogleFonts.cairo(
-                      fontSize: 11.sp,
-                      color: branding.buttonText.withValues(alpha: 0.85),
-                      fontWeight: FontWeight.w500,
-                    ),
+        Container(
+          constraints: BoxConstraints(maxWidth: 160.w),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+          decoration: BoxDecoration(
+            color: branding.buttonText.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Icons.mail_rounded,
+                size: 12,
+                color: branding.buttonText.withValues(alpha: 0.8),
+              ),
+              SizedBox(width: 5.w),
+              Flexible(
+                child: Text(
+                  user.email,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.cairo(
+                    fontSize: 11.sp,
+                    color: branding.buttonText.withValues(alpha: 0.85),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
+        ),
+        SizedBox(width: 8.w),
         // Account number pill with copy
         GestureDetector(
           onTap: () async {
@@ -788,18 +643,14 @@ class _ProfailState extends State<Profail> {
           MaterialPageRoute(builder: (_) => Restpassword()),
         ),
       ),
-      // Two-factor authentication is not offered from the app any more: the
-      // email channel was retired and SMS cannot reach every market, so
-      // enabling it only locked users out.
-      if (kEmailFeaturesEnabled)
-        _SettingItem(
-          icon: Icons.security_rounded,
-          label: AppTranslations.getText(context, 'enable_two_factor'),
-          onTap: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => ActivationScreen()),
-          ),
+      _SettingItem(
+        icon: Icons.security_rounded,
+        label: AppTranslations.getText(context, 'enable_two_factor'),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => ActivationScreen()),
         ),
+      ),
       _SettingItem(
         icon: Icons.headset_mic_rounded,
         label: AppTranslations.getText(context, 'technical_support'),
@@ -807,16 +658,6 @@ class _ProfailState extends State<Profail> {
           context,
           MaterialPageRoute(builder: (_) => TechniclSupport()),
         ),
-      ),
-      _SettingItem(
-        icon: Icons.gavel_rounded,
-        label: 'Legal & Privacy',
-        onTap: () => _showLegalPrivacyDialog(context, branding, isArabic),
-      ),
-      _SettingItem(
-        icon: Icons.delete_forever_rounded,
-        label: isArabic ? 'حذف الحساب' : 'Delete account',
-        onTap: () => _showDeleteAccountDialog(context, branding, isArabic),
       ),
       _SettingItem(
         icon: Icons.language_rounded,
@@ -945,328 +786,6 @@ class _ProfailState extends State<Profail> {
   // ─────────────────────────────────────────────────────────────────────────
   // Logout Dialog
   // ─────────────────────────────────────────────────────────────────────────
-  Future<void> _openDeleteAccountPage(BuildContext context) async {
-    final uri = Uri.parse('https://hawwelapp.com/delete-account');
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!opened && context.mounted) {
-      _showErrorSnackBar(
-        context,
-        Localizations.localeOf(context).languageCode == 'ar'
-            ? 'تعذر فتح صفحة حذف الحساب'
-            : 'Unable to open delete account page',
-      );
-    }
-  }
-
-  Future<void> _openLegalUrl(BuildContext context, String url) async {
-    final uri = Uri.parse(url);
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!opened && context.mounted) {
-      _showErrorSnackBar(
-        context,
-        Localizations.localeOf(context).languageCode == 'ar'
-            ? 'تعذر فتح الرابط'
-            : 'Unable to open link',
-      );
-    }
-  }
-
-  void _showLegalPrivacyDialog(
-    BuildContext context,
-    dynamic branding,
-    bool isArabic,
-  ) {
-    final links = [
-      (
-        isArabic ? 'سياسة الخصوصية' : 'Privacy Policy',
-        'https://hawwelapp.com/privacy',
-      ),
-      (
-        isArabic ? 'الشروط والأحكام' : 'Terms',
-        'https://hawwelapp.com/terms',
-      ),
-      (
-        isArabic ? 'سياسة AML/KYC' : 'AML/KYC',
-        'https://hawwelapp.com/aml-kyc',
-      ),
-      (isArabic ? 'الدعم' : 'Support', 'https://hawwelapp.com/support'),
-      (isArabic ? 'تواصل معنا' : 'Contact', 'https://hawwelapp.com/contact'),
-      (
-        isArabic ? 'حذف الحساب' : 'Delete Account',
-        'https://hawwelapp.com/delete-account',
-      ),
-    ];
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        backgroundColor: branding.screenBg,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
-        title: Text(
-          'Legal & Privacy',
-          style: GoogleFonts.cairo(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.w700,
-            color: branding.primaryText,
-          ),
-        ),
-        content: SizedBox(
-          width: 320.w,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: links
-                .map(
-                  (item) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    title: Text(
-                      item.$1,
-                      style: GoogleFonts.cairo(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w600,
-                        color: branding.primaryText,
-                      ),
-                    ),
-                    trailing: Icon(
-                      isArabic
-                          ? Icons.arrow_back_ios_new_rounded
-                          : Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: branding.hintText,
-                    ),
-                    onTap: () {
-                      Navigator.pop(dialogContext);
-                      _openLegalUrl(context, item.$2);
-                    },
-                  ),
-                )
-                .toList(),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(
-              AppTranslations.getText(context, 'cancel'),
-              style: GoogleFonts.cairo(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w700,
-                color: branding.accent,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _submitDeleteAccountRequest() async {
-    try {
-      final api = ApiService(dio: Dio());
-      final response = await api.postdata(
-        endpoint: _deleteAccountRequestEndpoint,
-        data: const <String, dynamic>{},
-        needtoken: true,
-      );
-      final payload = response.data;
-      if (payload is! Map<String, dynamic> || payload['error'] == true) {
-        return false;
-      }
-      final data = payload['data'];
-      final alreadyPending =
-          data is Map && data['alreadyPending'] == true;
-      if (!mounted) return true;
-      _showSuccessSnackBar(
-        context,
-        AppTranslations.getTextStatic(
-          context,
-          alreadyPending
-              ? 'delete_account_request_already_pending'
-              : 'delete_account_request_received',
-        ),
-      );
-      return true;
-    } catch (_) {
-      return false;
-    }
-  }
-
-  void _showDeleteAccountDialog(
-    BuildContext context,
-    dynamic branding,
-    bool isArabic,
-  ) {
-    var isSubmitting = false;
-
-    showDialog(
-      context: context,
-      barrierColor: Colors.black.withValues(alpha: 0.45),
-      builder: (dialogContext) => StatefulBuilder(
-        builder: (context, setDialogState) => AlertDialog(
-          backgroundColor: branding.screenBg,
-          elevation: 0,
-          insetPadding: EdgeInsets.symmetric(horizontal: 28.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24.r),
-          ),
-          contentPadding: EdgeInsets.fromLTRB(22.w, 24.h, 22.w, 18.h),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 62.r,
-                height: 62.r,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: branding.error.withValues(alpha: 0.1),
-                  border: Border.all(
-                    color: branding.error.withValues(alpha: 0.3),
-                  ),
-                ),
-                child: Icon(
-                  Icons.delete_forever_rounded,
-                  color: branding.error,
-                  size: 28.sp,
-                ),
-              ),
-              SizedBox(height: 18.h),
-              Text(
-                isArabic ? 'حذف الحساب' : 'Delete account',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.cairo(
-                  fontSize: 20.sp,
-                  fontWeight: FontWeight.w800,
-                  color: branding.primaryText,
-                ),
-              ),
-              SizedBox(height: 8.h),
-              Text(
-                isArabic
-                    ? 'يمكنك طلب حذف حسابك وبياناتك الشخصية. قد نحتفظ ببعض السجلات لأسباب قانونية أو امتثالية أو أمنية أو لمنع الاحتيال أو النزاعات. حذف التطبيق من الهاتف لا يعني حذف الحساب.'
-                    : 'You can request deletion of your account and personal data. Some records may be retained for legal, compliance, security, fraud-prevention, or dispute reasons. Deleting the app does not delete your account.',
-                textAlign: TextAlign.center,
-                style: GoogleFonts.cairo(
-                  fontSize: 13.sp,
-                  fontWeight: FontWeight.w500,
-                  color: branding.secondaryText,
-                ),
-              ),
-              SizedBox(height: 24.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: isSubmitting
-                          ? null
-                          : () => Navigator.pop(dialogContext),
-                      child: Container(
-                        height: 46.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14.r),
-                          border: Border.all(
-                            color: branding.hintText.withValues(alpha: 0.4),
-                          ),
-                          color: branding.inputBorder.withValues(alpha: 0.5),
-                        ),
-                        child: Center(
-                          child: Text(
-                            AppTranslations.getText(context, "cancel"),
-                            style: GoogleFonts.cairo(
-                              fontSize: 14.sp,
-                              fontWeight: FontWeight.w700,
-                              color: branding.hintText,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: isSubmitting
-                          ? null
-                          : () async {
-                              setDialogState(() => isSubmitting = true);
-                              final submitted = await _submitDeleteAccountRequest();
-                              if (!dialogContext.mounted) return;
-                              if (submitted) {
-                                Navigator.pop(dialogContext);
-                                return;
-                              }
-                              setDialogState(() => isSubmitting = false);
-                              if (!mounted) return;
-                              _showErrorSnackBar(
-                                context,
-                                AppTranslations.getTextStatic(
-                                  context,
-                                  'delete_account_request_failed',
-                                ),
-                              );
-                            },
-                      child: Container(
-                        height: 46.h,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(14.r),
-                          color: branding.error.withValues(
-                            alpha: isSubmitting ? 0.7 : 1,
-                          ),
-                        ),
-                        child: Center(
-                          child: isSubmitting
-                              ? SizedBox(
-                                  width: 20.r,
-                                  height: 20.r,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : Text(
-                                  AppTranslations.getTextStatic(
-                                    context,
-                                    'delete_account_submit_request',
-                                  ),
-                                  textAlign: TextAlign.center,
-                                  style: GoogleFonts.cairo(
-                                    fontSize: 13.sp,
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 12.h),
-              TextButton(
-                onPressed: isSubmitting
-                    ? null
-                    : () {
-                        Navigator.pop(dialogContext);
-                        _openDeleteAccountPage(this.context);
-                      },
-                child: Text(
-                  AppTranslations.getTextStatic(
-                    context,
-                    'delete_account_web_fallback',
-                  ),
-                  style: GoogleFonts.cairo(
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.w600,
-                    color: branding.accent,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   void _showLogoutDialog(
     BuildContext context,
     dynamic branding,
@@ -1408,16 +927,11 @@ class _ProfailState extends State<Profail> {
     }
 
     if (status == 'rejected' || status == 'blocked') {
-      final reason = (kyc.decisionReason ?? '').trim();
+      final reason = kyc.blockingReason ?? 'لم يتم إرسال سبب';
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => KycStatusPage(
-            status: status,
-            reason: reason.isEmpty
-                ? AppTranslations.getTextStatic(context, 'kyc_no_reason')
-                : reason,
-          ),
+          builder: (_) => KycStatusPage(status: status, reason: reason),
         ),
       );
       return;
@@ -1435,15 +949,10 @@ class _ProfailState extends State<Profail> {
     }
 
     if (status == 'verified') {
-      _showSuccessSnackBar(
+      _showErrorSnackBar(
         context,
         AppTranslations.getTextStatic(context, 'kyc_verified_message'),
       );
-      return;
-    }
-
-    if (status == 'cancel-blocked' || status == 'remove-verified') {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => idintyview()));
       return;
     }
   }
@@ -1451,23 +960,6 @@ class _ProfailState extends State<Profail> {
   // ─────────────────────────────────────────────────────────────────────────
   // Helpers
   // ─────────────────────────────────────────────────────────────────────────
-  static final RegExp _arabicScriptPattern = RegExp(
-    r'[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]',
-  );
-
-  bool _containsArabicScript(String text) {
-    return _arabicScriptPattern.hasMatch(text);
-  }
-
-  String _buildDisplayName(StudentInfo user) {
-    final first = user.name.trim();
-    final last = user.nickname.trim();
-    if (first.isEmpty && last.isEmpty) return '';
-    if (first.isEmpty) return last;
-    if (last.isEmpty) return first;
-    return '$first $last';
-  }
-
   String _kycLabel(BuildContext context, String status) {
     switch (status) {
       case 'verified':
@@ -1478,12 +970,8 @@ class _ProfailState extends State<Profail> {
         return AppTranslations.getText(context, 'rejected');
       case 'blocked':
         return AppTranslations.getText(context, 'blocked');
-      case 'cancel-blocked':
-        return AppTranslations.getText(context, 'cancel-blocked');
-      case 'remove-verified':
-        return AppTranslations.getText(context, 'remove-verified');
       default:
-        return AppTranslations.getText(context, 'kyc_not_verified');
+        return AppTranslations.getText(context, 'undefined');
     }
   }
 
@@ -1492,9 +980,6 @@ class _ProfailState extends State<Profail> {
       case 'verified':
         return branding.success;
       case 'under-review':
-        return const Color(0xFFFFA726);
-      case 'cancel-blocked':
-      case 'remove-verified':
         return const Color(0xFFFFA726);
       case 'rejected':
       case 'blocked':
@@ -1579,7 +1064,7 @@ class _AvatarFallback extends StatelessWidget {
       color: branding.buttonText.withValues(alpha: 0.15),
       child: Icon(
         Icons.person_rounded,
-        size: 44,
+        size: 52,
         color: branding.buttonText.withValues(alpha: 0.8),
       ),
     );

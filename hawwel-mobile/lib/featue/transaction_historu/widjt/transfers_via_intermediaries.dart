@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/app_branding.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class TransactionViaItem extends StatelessWidget {
   final String amount;

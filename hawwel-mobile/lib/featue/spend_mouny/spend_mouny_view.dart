@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
-import 'package:hawwel/featue/spend_mouny/widjt/spenf_text_fild.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/spend_mouny/widjt/spenf_text_fild.dart';
 
 class Spendmouny extends StatefulWidget {
   const Spendmouny({super.key});
@@ -24,15 +23,6 @@ class _SpendmounyState extends State<Spendmouny> {
   Widget build(BuildContext context) {
     final branding = appBrandingNotifier.value;
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    final selectedDisplayCurrency = SendCurrencyHelper.displayLabelForSymbol(
-      selectedCurrency,
-      isArabic: isArabic,
-    );
-    final alternateCurrency = selectedCurrency == 'USDT' ? 'USDC' : 'USDT';
-    final alternateDisplayCurrency = SendCurrencyHelper.displayLabelForSymbol(
-      alternateCurrency,
-      isArabic: isArabic,
-    );
 
     return Directionality(
       textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
@@ -43,9 +33,6 @@ class _SpendmounyState extends State<Spendmouny> {
         body: Stack(
           children: [
             Container(
-              height: double.infinity,
-              width: double.infinity,
-              color: branding.badge,
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: 100.0.w,
@@ -66,6 +53,9 @@ class _SpendmounyState extends State<Spendmouny> {
                   ],
                 ),
               ),
+              height: double.infinity,
+              width: double.infinity,
+              color: branding.badge,
             ),
 
             /// 🔹 المحتوى القابل للسكرول
@@ -121,8 +111,8 @@ class _SpendmounyState extends State<Spendmouny> {
                       child: Row(
                         children: [
                           SizedBox(width: 15.w),
-                          SendCurrencyHelper.buildCoinIcon(
-                            symbol: selectedCurrency,
+                          Image.asset(
+                            AppImages.usdt,
                             height: 40.h,
                             width: 40.w,
                           ),
@@ -132,7 +122,7 @@ class _SpendmounyState extends State<Spendmouny> {
                             children: [
                               SizedBox(height: 20.h),
                               Text(
-                                selectedDisplayCurrency,
+                                selectedCurrency,
                                 style: GoogleFonts.cairo(
                                   fontSize: 18.sp,
                                   fontWeight: FontWeight.w600,
@@ -140,7 +130,7 @@ class _SpendmounyState extends State<Spendmouny> {
                                 ),
                               ),
                               Text(
-                                alternateDisplayCurrency,
+                                selectedCurrency == 'USDT' ? 'USDC' : 'USDT',
                                 style: GoogleFonts.cairo(
                                   fontSize: 13.sp,
                                   fontWeight: FontWeight.w600,
@@ -179,7 +169,7 @@ class _SpendmounyState extends State<Spendmouny> {
                           borderRadius: BorderRadius.circular(10),
                           boxShadow: [
                             BoxShadow(
-                              color: branding.accent.withValues(alpha: 0.6),
+                              color: branding.accent.withOpacity(0.6),
                               blurRadius: 10,
                               offset: const Offset(0, 4),
                             ),
@@ -188,11 +178,6 @@ class _SpendmounyState extends State<Spendmouny> {
                         child: Column(
                           // crossAxisAlignment: CrossAxisAlignment.end,
                           children: currencies.map((currency) {
-                            final displayLabel =
-                                SendCurrencyHelper.displayLabelForSymbol(
-                              currency,
-                              isArabic: isArabic,
-                            );
                             return InkWell(
                               onTap: () {
                                 setState(() {
@@ -203,7 +188,7 @@ class _SpendmounyState extends State<Spendmouny> {
                               child: Padding(
                                 padding: EdgeInsets.symmetric(vertical: 8.h),
                                 child: Text(
-                                  displayLabel,
+                                  currency,
                                   style: GoogleFonts.cairo(
                                     fontSize: 16.sp,
                                     fontWeight: FontWeight.w700,
@@ -299,7 +284,7 @@ class _SpendmounyState extends State<Spendmouny> {
                         children: [
                           //  SizedBox(width: 270.w),
                           Text(
-                            AppTranslations.getText(context, 'payment_instructions'),
+                            AppTranslations.getText(context, 'wallet'),
                             style: GoogleFonts.cairo(
                               fontSize: 18.sp,
                               fontWeight: FontWeight.w700,

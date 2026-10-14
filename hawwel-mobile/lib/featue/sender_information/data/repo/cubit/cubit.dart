@@ -1,6 +1,6 @@
 // import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:hawwel/featue/sender_information/data/repo/cubit/cubit_state.dart';
-// import 'package:hawwel/featue/sender_information/data/repo/repo.dart';
+// import 'package:usdt/featue/sender_information/data/repo/cubit/cubit_state.dart';
+// import 'package:usdt/featue/sender_information/data/repo/repo.dart';
 
 // class ReceiversDisplayCubit extends Cubit<ReceiversDisplayState> {
 
@@ -27,9 +27,9 @@
 // lib/featue/sender_information/data/repo/cubit/receivers_display_cubit.dart
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/sender_information/data/model.dart';
-import 'package:hawwel/featue/sender_information/data/repo/cubit/cubit_state.dart';
-import 'package:hawwel/featue/sender_information/data/repo/repo.dart';
+import 'package:usdt/featue/sender_information/data/model.dart';
+import 'package:usdt/featue/sender_information/data/repo/cubit/cubit_state.dart';
+import 'package:usdt/featue/sender_information/data/repo/repo.dart';
 
 // class ReceiversDisplayCubit extends Cubit<ReceiversDisplayState> {
 //   final ReceiversDisplayRepo repo;
@@ -69,12 +69,7 @@ class ReceiversDisplayCubit extends Cubit<ReceiversDisplayState> {
     final result = await repo.getAllReceiversDisplay();
 
     result.fold(
-      (failure) => emit(
-        ReceiversDisplayFailure(
-          failure.errMassage,
-          statusCode: failure.statusCode,
-        ),
-      ),
+      (failure) => emit(ReceiversDisplayFailure(failure.errMassage)),
       (receivers) {
         _allReceivers = receivers; // نخزن النسخة الكاملة هنا
         emit(
@@ -96,7 +91,8 @@ class ReceiversDisplayCubit extends Cubit<ReceiversDisplayState> {
   } else {
     // الفلترة مع التأكد من أن الكائن والاسم ليسا null
     final filteredList = _allReceivers.where((receiver) {
-      final name = receiver.fullName.toLowerCase();
+      // نستخدم ?. للوصول الآمن و ?? لتعيين قيمة افتراضية فارغة في حال كان الاسم null
+      final name = receiver.fullName?.toLowerCase() ?? '';
       final search = query.toLowerCase();
       
       return name.contains(search);

@@ -1,7 +1,7 @@
 // mark_all_read_cubit.dart
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/notifation/data/cubit/cubit_marke_stat.dart';
-import 'package:hawwel/featue/notifation/data/repo/repo.dart';
+import 'package:usdt/featue/notifation/data/cubit/cubit_marke_stat.dart';
+import 'package:usdt/featue/notifation/data/repo/repo.dart';
  
 class MarkAllReadCubit extends Cubit<MarkAllReadState> {
   final NotificationsRepo repo;

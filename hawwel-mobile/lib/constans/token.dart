@@ -1,6 +1,5 @@
-// ignore_for_file: non_constant_identifier_names
+import 'dart:developer';
 
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Functions {
@@ -10,34 +9,21 @@ class Functions {
   factory Functions() {
     return instance ??= Functions._();
   }
-
-  // Reactive mirror of isLogin - the floating chat button (and anything
-  // else that needs to react to login/logout without an app restart)
-  // listens to this instead of polling the plain bool below.
-  static final ValueNotifier<bool> loginStateNotifier = ValueNotifier<bool>(
-    false,
-  );
-
   bool isLogin = false;
-  set _loggedIn(bool value) {
-    isLogin = value;
-    loginStateNotifier.value = value;
-  }
-
   Future<void> testToken() async {
     preferences = await SharedPreferences.getInstance();
     String? token = await getToken();
-    if (token == null || token.trim().isEmpty) {
-      _loggedIn = false;
+
+    log(token ?? "no");
+    if (token == null) {
+      isLogin = false;
     } else {
-      _loggedIn = true;
+      isLogin = true;
     }
   }
  Future<void> saveToken(String token) async {
     final prefs = await SharedPreferences.getInstance();
-    final normalized = token.trim();
-    await prefs.setString("token", normalized);
-    _loggedIn = normalized.isNotEmpty;
+    await prefs.setString("token", token);
   }
   Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
@@ -51,7 +37,10 @@ class Functions {
     await prefs.remove('showonetime2');
     await prefs.remove('showonetime3');
 
-    _loggedIn = false;
+    isLogin = false;
+    String? token = await getToken();
+    log(token!);
+    log('User logged out successfully');
   }
 
   Future<void> setLanguage(String lang) async {
@@ -70,8 +59,10 @@ class Functions {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('token');
-      _loggedIn = false;
-    } catch (_) {}
+      log('Token deleted successfully');
+    } catch (e) {
+      log('Error deleting token: $e');
+    }
   }
 
   Future<void> delettot() async {
@@ -80,7 +71,11 @@ class Functions {
       await prefs.remove('showonetime1');
       await prefs.remove('showonetime2');
       await prefs.remove('showonetime3');
-    } catch (_) {}
+
+      log('showtutoriela deleted successfully');
+    } catch (e) {
+      log('Error deleting token: $e');
+    }
   }
 
   // Future<void> setToken(String tooken) async {
@@ -88,9 +83,8 @@ class Functions {
   // }
  Future<void> setToken(String token) async {
   preferences = await SharedPreferences.getInstance();
-  final normalized = token.trim();
-  await preferences.setString('token', normalized);
-  _loggedIn = normalized.isNotEmpty;
+  await preferences.setString('token', token);
+  log("💾 Token saved successfully");
 }
 
 
@@ -100,10 +94,7 @@ class Functions {
   // }
   Future<String?> getToken() async {
   preferences = await SharedPreferences.getInstance();
-  final token = preferences.getString('token');
-  if (token == null) return null;
-  final normalized = token.trim();
-  return normalized.isEmpty ? null : normalized;
+  return preferences.getString('token');
 }
 
 
@@ -128,9 +119,9 @@ class Functions {
   Future<bool> test_tot(int numoftot) async {
     preferences = await SharedPreferences.getInstance();
     // bool? first_time_inapp = await preferences.getBool('showtutoriela');
-    bool? show_tot_1 = preferences.getBool('showonetime1');
-    bool? show_tot_2 = preferences.getBool('showonetime2');
-    bool? show_tot_3 = preferences.getBool('showonetime3');
+    bool? show_tot_1 = await preferences.getBool('showonetime1');
+    bool? show_tot_2 = await preferences.getBool('showonetime2');
+    bool? show_tot_3 = await preferences.getBool('showonetime3');
     if (numoftot == 1) {
       if (show_tot_1 == null) {
         preferences.setBool('showonetime1', true);

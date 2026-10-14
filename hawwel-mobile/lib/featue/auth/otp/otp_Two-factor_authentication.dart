@@ -1,24 +1,20 @@
-// ignore_for_file: file_names
-
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/digit_utils.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubut.dart';
-import 'package:hawwel/featue/bootom_navigator.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubut.dart';
+import 'package:usdt/featue/bootom_navigator.dart';
 
 class OtpTwofactorauthentication extends StatefulWidget {
   final String email;
-  final String session;
+  String session;
 
-  const OtpTwofactorauthentication({
+  OtpTwofactorauthentication({
     super.key,
     required this.email,
     required this.session,
@@ -110,7 +106,25 @@ class _OtpscreenState extends State<OtpTwofactorauthentication> {
                           // Back row
                           Row(
                             children: [
-                              AppBackButton(),
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                  width: 38.r,
+                                  height: 38.r,
+                                  decoration: BoxDecoration(
+                                    color: branding.buttonText
+                                        .withValues(alpha: 0.18),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  child: Icon(
+                                    isArabic
+                                        ? Icons.arrow_forward_ios_rounded
+                                        : Icons.arrow_back_ios_new_rounded,
+                                    color: branding.buttonText,
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
                               Expanded(
                                 child: Text(
                                   AppTranslations.getText(
@@ -166,7 +180,7 @@ class _OtpscreenState extends State<OtpTwofactorauthentication> {
 
                           SizedBox(height: 6.h),
 
-                          // Identifier pill (phone number the code went to)
+                          // Email pill
                           Container(
                             padding: EdgeInsets.symmetric(
                                 horizontal: 16.w, vertical: 6.h),
@@ -178,7 +192,7 @@ class _OtpscreenState extends State<OtpTwofactorauthentication> {
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
-                                Icon(Icons.sms_outlined,
+                                Icon(Icons.email_outlined,
                                     color: branding.buttonText
                                         .withValues(alpha: 0.8),
                                     size: 14),
@@ -204,9 +218,7 @@ class _OtpscreenState extends State<OtpTwofactorauthentication> {
                 // ── Body ────────────────────────────────────────────────
                 Expanded(
                   child: SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    physics: const BouncingScrollPhysics(),
                     padding: EdgeInsets.symmetric(
                         horizontal: 24.w, vertical: 32.h),
                     child: Column(
@@ -245,17 +257,7 @@ class _OtpscreenState extends State<OtpTwofactorauthentication> {
                               const Duration(milliseconds: 200),
                           backgroundColor: Colors.transparent,
                           enableActiveFill: true,
-                          onChanged: (value) {
-                            final normalized = normalizeAuthDigits(value);
-                            if (normalized != value) {
-                              otpfactor.value = TextEditingValue(
-                                text: normalized,
-                                selection: TextSelection.collapsed(
-                                  offset: normalized.length,
-                                ),
-                              );
-                            }
-                          },
+                          onChanged: (_) {},
                           onCompleted: (_) {},
                         ),
 
@@ -319,19 +321,10 @@ class _OtpscreenState extends State<OtpTwofactorauthentication> {
                           onTap: state is RegisterOTPLoading
                               ? null
                               : () {
-                                  final normalizedOtp = normalizeAuthDigits(
-                                    otpfactor.text,
-                                  ).trim();
-                                  otpfactor.value = TextEditingValue(
-                                    text: normalizedOtp,
-                                    selection: TextSelection.collapsed(
-                                      offset: normalizedOtp.length,
-                                    ),
-                                  );
                                   context
                                       .read<RegisterCubit>()
                                       .verifyOtpAndGetSession2(
-                                        otp: normalizedOtp,
+                                        otp: otpfactor.text,
                                         session: widget.session,
                                       );
                                 },

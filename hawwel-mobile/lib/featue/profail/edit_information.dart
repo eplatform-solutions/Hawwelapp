@@ -7,21 +7,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:loader_overlay/loader_overlay.dart';
-import 'package:hawwel/constans/country_defaults_helper.dart';
-import 'package:hawwel/constans/feature_flags.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/style.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-import 'package:hawwel/featue/profail/data/cubit/cubit.dart';
-import 'package:hawwel/featue/profail/data/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/profail/data/cubit_put/cubit.dart';
-import 'package:hawwel/featue/profail/data/cubit_put/cubit_stat.dart';
-import 'package:hawwel/featue/profail/edit_profile_otp_page.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/profail/data/cubit/cubit.dart';
+import 'package:usdt/featue/profail/data/cubit_put/cubit.dart';
+import 'package:usdt/featue/profail/data/cubit_put/cubit_stat.dart';
+import 'package:usdt/featue/profail/edit_profile_otp_page.dart';
 
 class Editinformation extends StatefulWidget {
   const Editinformation({super.key});
@@ -103,29 +99,6 @@ class _RegsterviewState extends State<Editinformation> {
     context.read<UpdateInfoCubit>().emailOtpController.clear();
     context.read<UpdateInfoCubit>().phoneController.clear();
     context.read<UpdateInfoCubit>().phoneOtpController.clear();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _loadSenderCountry());
-  }
-
-  Future<void> _loadSenderCountry() async {
-    final userCubit = context.read<Userinfogcubit>();
-    if (userCubit.state is! UserinfoSuccessState) {
-      await userCubit.fetchUserInfo();
-    }
-    if (!mounted) return;
-    final state = userCubit.state;
-    if (state is UserinfoSuccessState) {
-      _applyCountryCode(state.user.country);
-    }
-  }
-
-  void _applyCountryCode(String code) {
-    if (code.trim().isEmpty) return;
-    final upper = code.trim().toUpperCase();
-    final match = CountryService().getAll().where(
-      (c) => c.countryCode.toUpperCase() == upper,
-    );
-    if (match.isEmpty) return;
-    setState(() => selectedCountry = match.first);
   }
 
   @override
@@ -141,7 +114,7 @@ class _RegsterviewState extends State<Editinformation> {
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Directionality(
-      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      textDirection: isArabic ? TextDirection.ltr : TextDirection.rtl,
       child: LoaderOverlay(
         child: Scaffold(
           backgroundColor: branding.screenBg,
@@ -154,10 +127,7 @@ class _RegsterviewState extends State<Editinformation> {
             if (state is RegisterchangOTPSent) {
               context.loaderOverlay.hide();
               final cubit = context.read<UpdateInfoCubit>();
-              // With email features off the email field is never shown, so
-              // this OTP page can only ever be the phone variant.
-              final bool isEmailOtp = kEmailFeaturesEnabled &&
-                  cubit.emailController.text.isNotEmpty &&
+              final bool isEmailOtp = cubit.emailController.text.isNotEmpty &&
                   cubit.phoneController.text.isEmpty;
               final String sentTo = isEmailOtp
                   ? cubit.emailController.text
@@ -200,44 +170,6 @@ class _RegsterviewState extends State<Editinformation> {
                 isEmailResendClicked = false;
                 isPhoneResendClicked = false;
               });
-            }
-
-            if (state is UpdateInfoSuccess) {
-              context.loaderOverlay.hide();
-              context.read<Userinfogcubit>().fetchUserInfo();
-              final media = MediaQuery.of(context).size;
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  backgroundColor: Colors.green.shade600,
-                  elevation: 6,
-                  duration: const Duration(seconds: 2),
-                  behavior: SnackBarBehavior.floating,
-                  margin: EdgeInsets.only(
-                    left: 24.w,
-                    right: 24.w,
-                    bottom: media.height * 0.42,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14.r),
-                  ),
-                  content: Row(
-                    children: [
-                      const Icon(Icons.check_circle_rounded, color: Colors.white),
-                      SizedBox(width: 8.w),
-                      Expanded(
-                        child: Text(
-                          state.message,
-                          style: GoogleFonts.cairo(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w700,
-                            fontSize: 13.sp,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
             }
 
             if (state is UpdateInfoFailure) {
@@ -294,7 +226,22 @@ class _RegsterviewState extends State<Editinformation> {
                 padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
                 child: Row(
                   children: [
-                    AppBackButton(),
+                    GestureDetector(
+                      onTap: () => Navigator.pop(context),
+                      child: Container(
+                        width: 38.w,
+                        height: 38.h,
+                        decoration: BoxDecoration(
+                          color: branding.buttonText.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(10.r),
+                        ),
+                        child: Icon(
+                          isArabic ? Icons.arrow_forward_ios_rounded : Icons.arrow_back_ios_rounded,
+                          color: branding.buttonText,
+                          size: 18,
+                        ),
+                      ),
+                    ),
                     Expanded(
                       child: Text(
                         AppTranslations.getText(context, 'edit information'),
@@ -307,7 +254,7 @@ class _RegsterviewState extends State<Editinformation> {
                       ),
                     ),
                     // Balance spacer
-                    SizedBox(width: 38.w, height: 38.h),
+                    Container(width: 38.w, height: 38.h),
                   ],
                 ),
               ),
@@ -346,170 +293,60 @@ class _RegsterviewState extends State<Editinformation> {
                       ],
                     ),
                   ),
-                  SizedBox(height: 16.h),
+                  SizedBox(height: 20.h),
+
+                  // ── Email Section ──────────────────────────────────────
                   _sectionCard(
                     branding: branding,
-                    icon: Icons.public_rounded,
-                    title: isArabic ? 'بلد المرسل' : 'Sender country',
+                    icon: Icons.email_outlined,
+                    title: AppTranslations.getText(context, 'email_hint'),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        GestureDetector(
-                          onTap: () => _showCustomPicker(context),
-                          child: Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 12.w,
-                              vertical: 12.h,
-                            ),
-                            decoration: BoxDecoration(
-                              border: Border.all(color: branding.inputBorder),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Row(
-                              children: [
-                                if (isArabic) ...[
-                                  CountryDefaultsHelper.countryFlag(
-                                    selectedCountry.countryCode,
-                                    size: 22,
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  Expanded(
-                                    child: Text(
-                                      CountryDefaultsHelper.localizedCountryName(
-                                        context,
-                                        selectedCountry.countryCode,
-                                        fallback: selectedCountry.name,
-                                      ),
-                                      textAlign: TextAlign.right,
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: branding.hintText,
-                                  ),
-                                ] else ...[
-                                  Icon(
-                                    Icons.keyboard_arrow_down_rounded,
-                                    color: branding.hintText,
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  Expanded(
-                                    child: Text(
-                                      CountryDefaultsHelper.localizedCountryName(
-                                        context,
-                                        selectedCountry.countryCode,
-                                        fallback: selectedCountry.name,
-                                      ),
-                                      textAlign: TextAlign.left,
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 14.sp,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(width: 10.w),
-                                  CountryDefaultsHelper.countryFlag(
-                                    selectedCountry.countryCode,
-                                    size: 22,
-                                  ),
-                                ],
-                              ],
+                        // Email field
+                        TextFieldCustom(
+                          validator: (value) => emailError,
+                          controller: cubit.emailController,
+                          hintText: AppTranslations.getText(context, 'email_hint'),
+                          type: TextInputType.emailAddress,
+                          prefixIcon: GestureDetector(
+                            onTap: isEmailResendClicked
+                                ? null
+                                : () async {
+                                    startEmailTimer();
+                                    await cubit.sendOtpchange();
+                                  },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 15.h),
+                              child: isEmailResendClicked
+                                      ? Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(Icons.access_time, size: 15, color: branding.iconPrimary),
+                                            SizedBox(width: 3.w),
+                                            Text(
+                                              isArabic
+                                                  ? '${AppTranslations.getText(context, 'Resend after')}$emailSecondsRemaining${AppTranslations.getText(context, 'seconds')}  '
+                                                  : '${AppTranslations.getText(context, 'Resend after')}${AppTranslations.getText(context, 'seconds')} $emailSecondsRemaining  ',
+                                              style: GoogleFonts.cairo(fontSize: 11.sp, fontWeight: FontWeight.w600, color: branding.secondaryText),
+                                            ),
+                                          ],
+                                        )
+                                      : Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                          child: Text(
+                                            AppTranslations.getText(context, 'otp'),
+                                            style: GoogleFonts.cairo(fontSize: 13.sp, fontWeight: FontWeight.w600, color: branding.iconPrimary),
+                                          ),
+                                        ),
                             ),
                           ),
-                        ),
-                        SizedBox(height: 12.h),
-                        GestureDetector(
-                          onTap: state is UpdateInfoLoading
-                              ? null
-                              : () {
-                                  context
-                                      .read<UpdateInfoCubit>()
-                                      .updateSenderCountry(
-                                        selectedCountry.countryCode,
-                                      );
-                                },
-                          child: Container(
-                            height: 44.h,
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              gradient: branding.buildHeaderGradient(),
-                              borderRadius: BorderRadius.circular(12.r),
-                            ),
-                            child: Text(
-                              isArabic ? 'حفظ بلد المرسل' : 'Save sender country',
-                              style: GoogleFonts.cairo(
-                                fontSize: 14.sp,
-                                fontWeight: FontWeight.w700,
-                                color: branding.buttonText,
-                              ),
-                            ),
-                          ),
+                          hintStyle: AppStyle.meduim16grey,
                         ),
                       ],
                     ),
                   ),
                   SizedBox(height: 16.h),
-                  SizedBox(height: 20.h),
-
-                  // ── Email Section ──────────────────────────────────────
-                  if (kEmailFeaturesEnabled) ...[
-                    _sectionCard(
-                      branding: branding,
-                      icon: Icons.email_outlined,
-                      title: AppTranslations.getText(context, 'email_hint'),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          // Email field
-                          TextFieldCustom(
-                            validator: (value) => emailError,
-                            controller: cubit.emailController,
-                            hintText: AppTranslations.getText(context, 'email_hint'),
-                            type: TextInputType.emailAddress,
-                            suffix: GestureDetector(
-                              onTap: isEmailResendClicked
-                                  ? null
-                                  : () async {
-                                      startEmailTimer();
-                                      await cubit.sendOtpchange();
-                                    },
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 15.h),
-                                child: isEmailResendClicked
-                                        ? Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(Icons.access_time, size: 15, color: branding.iconPrimary),
-                                              SizedBox(width: 3.w),
-                                              Text(
-                                                isArabic
-                                                    ? '${AppTranslations.getText(context, 'Resend after')}$emailSecondsRemaining${AppTranslations.getText(context, 'seconds')}  '
-                                                    : '${AppTranslations.getText(context, 'Resend after')}${AppTranslations.getText(context, 'seconds')} $emailSecondsRemaining  ',
-                                                style: GoogleFonts.cairo(fontSize: 11.sp, fontWeight: FontWeight.w600, color: branding.secondaryText),
-                                              ),
-                                            ],
-                                          )
-                                        : Padding(
-                                            padding: EdgeInsets.symmetric(horizontal: 10.w),
-                                            child: Text(
-                                              AppTranslations.getText(context, 'otp'),
-                                              style: GoogleFonts.cairo(fontSize: 13.sp, fontWeight: FontWeight.w600, color: branding.iconPrimary),
-                                            ),
-                                          ),
-                              ),
-                            ),
-                            hintStyle: AppStyle.meduim16grey,
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(height: 16.h),
-                  ],
 
                   // ── Phone Section ──────────────────────────────────────
                   _sectionCard(
@@ -519,20 +356,113 @@ class _RegsterviewState extends State<Editinformation> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Phone field + country code (RTL: country on the right)
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: isArabic
-                              ? [
-                                  _buildPhoneCountryPicker(branding),
-                                  SizedBox(width: 8.w),
-                                  Expanded(child: _buildPhoneField(context, branding, cubit)),
-                                ]
-                              : [
-                                  Expanded(child: _buildPhoneField(context, branding, cubit)),
-                                  SizedBox(width: 8.w),
-                                  _buildPhoneCountryPicker(branding),
-                                ],
+                        // Phone field + country code
+                        IntrinsicHeight(
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Expanded(
+                                child: TextFieldCustom(
+                                  validator: (value) => phoneError,
+                                  controller: cubit.phoneController,
+                                  hintText: AppTranslations.getText(context, 'phone_number1'),
+                                  type: TextInputType.phone,
+                                  prefixIcon: GestureDetector(
+                                    onTap: isPhoneResendClicked
+                                        ? null
+                                        : () async {
+                                            final cubit = context.read<UpdateInfoCubit>();
+                                            setState(() { phoneError = null; });
+                                            String phoneInput = cubit.phoneController.text.trim();
+                                            if (phoneInput.isEmpty) {
+                                              setState(() {
+                                                phoneError = AppTranslations.getTextStatic(context, 'enter_phone_number');
+                                              });
+                                              _formKey.currentState?.validate();
+                                              return;
+                                            }
+                                            final fullPhoneNumber = buildPhoneNumberWithCountryCode(
+                                              phone: phoneInput,
+                                              phoneCode: selectedCountry.phoneCode,
+                                            );
+                                            final isPhoneValid = await validatePhoneWithCountry(
+                                              phone: fullPhoneNumber,
+                                              countryCode: selectedCountry.countryCode,
+                                            );
+                                            if (!isPhoneValid) {
+                                              setState(() {
+                                                phoneError = AppTranslations.getTextStatic(context, 'mobile_number_invalid');
+                                              });
+                                              _formKey.currentState?.validate();
+                                              return;
+                                            }
+                                            final oldPhoneText = cubit.phoneController.text;
+                                            cubit.submittedPhone = fullPhoneNumber;
+                                            startphoneTimer();
+                                            await cubit.sendOtpchangephone();
+                                            cubit.phoneController.text = oldPhoneText;
+                                          },
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 15.h),
+                                      child: isPhoneResendClicked
+                                              ? Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Icon(Icons.access_time, size: 15, color: branding.iconPrimary),
+                                                    SizedBox(width: 3.w),
+                                                    Text(
+                                                      isArabic
+                                                          ? '${AppTranslations.getText(context, 'Resend after')}$phoneSecondsRemaining${AppTranslations.getText(context, 'seconds')}  '
+                                                          : '${AppTranslations.getText(context, 'Resend after')}${AppTranslations.getText(context, 'seconds')} $phoneSecondsRemaining  ',
+                                                      style: GoogleFonts.cairo(fontSize: 11.sp, fontWeight: FontWeight.w600, color: branding.secondaryText),
+                                                    ),
+                                                  ],
+                                                )
+                                              : Padding(
+                                                  padding: EdgeInsets.symmetric(horizontal: 10.w),
+                                                  child: Text(
+                                                    AppTranslations.getText(context, 'otp'),
+                                                    style: GoogleFonts.cairo(fontSize: 13.sp, fontWeight: FontWeight.w600, color: branding.iconPrimary),
+                                                  ),
+                                                ),
+                                    ),
+                                  ),
+                                  hintStyle: AppStyle.meduim16grey,
+                                ),
+                              ),
+                              SizedBox(width: 8.w),
+                              // Country code picker button
+                              GestureDetector(
+                                onTap: () => _showCustomPicker(context),
+                                child: Container(
+                                  width: 70.w,
+                                  decoration: BoxDecoration(
+                                    color: branding.cardBg,
+                                    border: Border.all(color: branding.iconPrimary.withValues(alpha: 0.5)),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      selectedCountry.countryCode == "SY"
+                                          ? Image.asset(AppImages.syria, width: 22.w, height: 16.h)
+                                          : Text(selectedCountry.flagEmoji, style: const TextStyle(fontSize: 20)),
+                                      SizedBox(height: 2.h),
+                                      Text(
+                                        '+${selectedCountry.phoneCode}',
+                                        textDirection: TextDirection.ltr,
+                                        style: GoogleFonts.cairo(
+                                          fontSize: 11.sp,
+                                          fontWeight: FontWeight.w600,
+                                          color: branding.primaryText,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -602,137 +532,12 @@ class _RegsterviewState extends State<Editinformation> {
     );
   }
 
-  Widget _buildPhoneCountryPicker(AppBrandingConfig branding) {
-    return GestureDetector(
-      onTap: () => _showCustomPicker(context),
-      child: Container(
-        width: 84.w,
-        height: 50.h,
-        decoration: BoxDecoration(
-          color: branding.cardBg,
-          border: Border.all(color: branding.iconPrimary.withValues(alpha: 0.5)),
-          borderRadius: BorderRadius.circular(15.r),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CountryDefaultsHelper.countryFlag(
-              selectedCountry.countryCode,
-              size: 20,
-            ),
-            SizedBox(width: 4.w),
-            Text(
-              '+${selectedCountry.phoneCode}',
-              textDirection: TextDirection.ltr,
-              style: GoogleFonts.cairo(
-                fontSize: 13.sp,
-                fontWeight: FontWeight.w600,
-                color: branding.primaryText,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPhoneField(
-    BuildContext context,
-    AppBrandingConfig branding,
-    UpdateInfoCubit cubit,
-  ) {
-    return TextFieldCustom(
-      validator: (value) => phoneError,
-      controller: cubit.phoneController,
-      hintText: AppTranslations.getText(context, 'phone_number1'),
-      type: TextInputType.phone,
-      suffix: GestureDetector(
-        onTap: isPhoneResendClicked
-            ? null
-            : () async {
-                setState(() => phoneError = null);
-                final phoneInput = cubit.phoneController.text.trim();
-                if (phoneInput.isEmpty) {
-                  setState(() {
-                    phoneError = AppTranslations.getTextStatic(
-                      context,
-                      'enter_phone_number',
-                    );
-                  });
-                  _formKey.currentState?.validate();
-                  return;
-                }
-                final fullPhoneNumber = buildPhoneNumberWithCountryCode(
-                  phone: phoneInput,
-                  phoneCode: selectedCountry.phoneCode,
-                );
-                final isPhoneValid = await validatePhoneWithCountry(
-                  phone: fullPhoneNumber,
-                  countryCode: selectedCountry.countryCode,
-                );
-                if (!isPhoneValid) {
-                  setState(() {
-                    phoneError = AppTranslations.getTextStatic(
-                      context,
-                      'mobile_number_invalid',
-                    );
-                  });
-                  _formKey.currentState?.validate();
-                  return;
-                }
-                final oldPhoneText = cubit.phoneController.text;
-                cubit.submittedPhone = fullPhoneNumber;
-                startphoneTimer();
-                await cubit.sendOtpchangephone();
-                cubit.phoneController.text = oldPhoneText;
-              },
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 15.h),
-          child: isPhoneResendClicked
-              ? Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.access_time, size: 15, color: branding.iconPrimary),
-                    SizedBox(width: 3.w),
-                    Flexible(
-                      child: Text(
-                        Localizations.localeOf(context).languageCode == 'ar'
-                            ? '${AppTranslations.getText(context, 'Resend after')}$phoneSecondsRemaining${AppTranslations.getText(context, 'seconds')}  '
-                            : '${AppTranslations.getText(context, 'Resend after')}${AppTranslations.getText(context, 'seconds')} $phoneSecondsRemaining  ',
-                        style: GoogleFonts.cairo(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w600,
-                          color: branding.secondaryText,
-                        ),
-                      ),
-                    ),
-                  ],
-                )
-              : Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 10.w),
-                  child: Text(
-                    AppTranslations.getText(context, 'otp'),
-                    style: GoogleFonts.cairo(
-                      fontSize: 13.sp,
-                      fontWeight: FontWeight.w600,
-                      color: branding.iconPrimary,
-                    ),
-                  ),
-                ),
-        ),
-      ),
-      hintStyle: AppStyle.meduim16grey,
-    );
-  }
-
   Widget _sectionCard({
     required AppBrandingConfig branding,
     required IconData icon,
     required String title,
     required Widget child,
   }) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Container(
       padding: EdgeInsets.fromLTRB(16.w, 14.h, 16.w, 16.h),
       decoration: BoxDecoration(
@@ -742,58 +547,25 @@ class _RegsterviewState extends State<Editinformation> {
         boxShadow: [BoxShadow(color: branding.iconPrimary.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 3))],
       ),
       child: Column(
-        crossAxisAlignment:
-            isArabic ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Align(
-            alignment:
-                isArabic ? Alignment.centerRight : Alignment.centerLeft,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: isArabic
-                  ? [
-                      Container(
-                        width: 32.w,
-                        height: 32.h,
-                        decoration: BoxDecoration(
-                          color: branding.iconPrimary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Icon(icon, color: branding.iconPrimary, size: 17),
-                      ),
-                      SizedBox(width: 10.w),
-                      Text(
-                        title,
-                        textAlign: TextAlign.right,
-                        style: GoogleFonts.cairo(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: branding.primaryText,
-                        ),
-                      ),
-                    ]
-                  : [
-                      Container(
-                        width: 32.w,
-                        height: 32.h,
-                        decoration: BoxDecoration(
-                          color: branding.iconPrimary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Icon(icon, color: branding.iconPrimary, size: 17),
-                      ),
-                      SizedBox(width: 10.w),
-                      Text(
-                        title,
-                        textAlign: TextAlign.left,
-                        style: GoogleFonts.cairo(
-                          fontSize: 14.sp,
-                          fontWeight: FontWeight.w700,
-                          color: branding.primaryText,
-                        ),
-                      ),
-                    ],
-            ),
+          Row(
+            children: [
+              Container(
+                width: 32.w,
+                height: 32.h,
+                decoration: BoxDecoration(
+                  color: branding.iconPrimary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8.r),
+                ),
+                child: Icon(icon, color: branding.iconPrimary, size: 17),
+              ),
+              SizedBox(width: 10.w),
+              Text(
+                title,
+                style: GoogleFonts.cairo(fontSize: 14.sp, fontWeight: FontWeight.w700, color: branding.primaryText),
+              ),
+            ],
           ),
           SizedBox(height: 14.h),
           child,
@@ -843,11 +615,7 @@ class _RegsterviewState extends State<Editinformation> {
                       setInternalState(() {
                         filteredCountries = allCountries.where((country) {
                           final String localizedName =
-                              CountryDefaultsHelper.localizedCountryName(
-                                context,
-                                country.countryCode,
-                                fallback: country.name,
-                              );
+                              CountryLocalizations.of(context)?.countryName(countryCode: country.countryCode) ?? country.name;
                           final searchLower = val.toLowerCase();
                           return localizedName.toLowerCase().contains(searchLower) ||
                               country.name.toLowerCase().contains(searchLower) ||
@@ -863,16 +631,11 @@ class _RegsterviewState extends State<Editinformation> {
                       itemBuilder: (context, index) {
                         final country = filteredCountries[index];
                         final String displayCountryName =
-                            CountryDefaultsHelper.localizedCountryName(
-                              context,
-                              country.countryCode,
-                              fallback: country.name,
-                            );
+                            CountryLocalizations.of(context)?.countryName(countryCode: country.countryCode) ?? country.name;
                         return ListTile(
-                          leading: CountryDefaultsHelper.countryFlag(
-                            country.countryCode,
-                            size: 24,
-                          ),
+                          leading: country.countryCode == "SY"
+                              ? Image.asset('asset/syrianewsyria.png', width: 30.w, height: 20.h)
+                              : Text(country.flagEmoji, style: const TextStyle(fontSize: 24)),
                           title: Text(displayCountryName, style: GoogleFonts.cairo(fontSize: 14.sp, fontWeight: FontWeight.w600)),
                           trailing: Text(
                             '+${country.phoneCode}',

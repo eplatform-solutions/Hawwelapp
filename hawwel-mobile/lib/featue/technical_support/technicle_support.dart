@@ -1,18 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/constans/feature_flags.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/featue/technical_support/data/cubite/cubite.dart';
-import 'package:hawwel/featue/technical_support/data/cubite/cubite_state.dart';
-import 'package:hawwel/featue/technical_support/data/model.dart';
-import 'package:hawwel/featue/support_chat/support_chat_view.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/technical_support/data/cubite/cubite.dart';
+import 'package:usdt/featue/technical_support/data/cubite/cubite_state.dart';
+import 'package:usdt/featue/technical_support/data/model.dart';
 
 class TechniclSupport extends StatefulWidget {
   const TechniclSupport({super.key});
@@ -22,8 +19,6 @@ class TechniclSupport extends StatefulWidget {
 }
 
 class _TechniclSupportState extends State<TechniclSupport> {
-  static const String _officialContactUrl = 'https://hawwelapp.com/contact';
-
   final Set<int> _expandedFaqs = {};
 
   @override
@@ -78,26 +73,15 @@ class _TechniclSupportState extends State<TechniclSupport> {
                     bottom: false,
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 20.h),
-                      child: Row(
-                        children: [
-                          const AppBackButton(),
-                          Expanded(
-                            child: Text(
-                              AppTranslations.getText(
-                                context,
-                                'technical_support',
-                              ),
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.cairo(
-                                fontSize: 18.sp,
-                                fontWeight: FontWeight.w700,
-                                color: branding.buttonText,
-                              ),
-                            ),
+                      child: Center(
+                        child: Text(
+                          AppTranslations.getText(context, 'technical_support'),
+                          style: GoogleFonts.cairo(
+                            fontSize: 18.sp,
+                            fontWeight: FontWeight.w700,
+                            color: branding.buttonText,
                           ),
-                          // Keeps the title centred against the back button.
-                          SizedBox(width: 38.w),
-                        ],
+                        ),
                       ),
                     ),
                   ),
@@ -126,7 +110,7 @@ class _TechniclSupportState extends State<TechniclSupport> {
     if (contact?.mobilePhones != null && contact!.mobilePhones.isNotEmpty) {
       return contact.mobilePhones;
     }
-    return const [];
+    return const ['+963 994 000 981'];
   }
 
   Widget _buildMainContent(
@@ -193,8 +177,6 @@ class _TechniclSupportState extends State<TechniclSupport> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            _chatWithSupportCard(context, branding),
-            SizedBox(height: 20.h),
             if (faqs.isNotEmpty) ...[
               _sectionHeader(
                 context,
@@ -498,69 +480,6 @@ class _TechniclSupportState extends State<TechniclSupport> {
     );
   }
 
-  Widget _chatWithSupportCard(BuildContext context, AppBrandingConfig branding) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            settings: const RouteSettings(name: SupportChatView.routeName),
-            builder: (_) => const SupportChatView(),
-          ),
-        );
-      },
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-        decoration: BoxDecoration(
-          gradient: branding.buildHeaderGradient(),
-          borderRadius: BorderRadius.circular(16.r),
-          boxShadow: [
-            BoxShadow(
-              color: branding.accent.withValues(alpha: 0.3),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 40.w,
-              height: 40.w,
-              decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.18),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.chat_bubble_rounded,
-                color: Colors.white,
-                size: 20.sp,
-              ),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Text(
-                AppTranslations.getText(context, 'chat_with_support'),
-                style: GoogleFonts.cairo(
-                  fontSize: 14.5.sp,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-            Icon(
-              Localizations.localeOf(context).languageCode == 'ar'
-                  ? Icons.arrow_back_ios_rounded
-                  : Icons.arrow_forward_ios_rounded,
-              color: Colors.white,
-              size: 15.sp,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _stepsCard(BuildContext context, AppBrandingConfig branding) {
     final steps = [
       AppTranslations.getText(context, 'step_1_select_recipient'),
@@ -721,8 +640,7 @@ class _TechniclSupportState extends State<TechniclSupport> {
             ),
             SizedBox(height: 14.h),
 
-            // Email support channel is retired (kEmailFeaturesEnabled).
-            if (kEmailFeaturesEnabled && email != null && email.isNotEmpty)
+            if (email != null && email.isNotEmpty)
               _contactTile(
                 context: context,
                 branding: branding,
@@ -760,20 +678,6 @@ class _TechniclSupportState extends State<TechniclSupport> {
                   copyValue: telegramDisplay,
                   ltrValue: true,
                   onTap: () => _openTelegram(telegramDisplay),
-                ),
-              ),
-            if (!showChannels)
-              Padding(
-                padding: EdgeInsets.only(top: 10.h),
-                child: _contactTile(
-                  context: context,
-                  branding: branding,
-                  icon: const Icon(Icons.language_rounded),
-                  label: AppTranslations.getText(context, 'contact_us'),
-                  value: _officialContactUrl,
-                  copyValue: _officialContactUrl,
-                  ltrValue: true,
-                  onTap: _openContactPage,
                 ),
               ),
             if (showChannels) ...[
@@ -820,13 +724,6 @@ class _TechniclSupportState extends State<TechniclSupport> {
     final trimmed = address.trim();
     if (trimmed.isEmpty) return;
     final uri = Uri(scheme: 'mailto', path: trimmed);
-    try {
-      await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {}
-  }
-
-  Future<void> _openContactPage() async {
-    final uri = Uri.parse(_officialContactUrl);
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {}

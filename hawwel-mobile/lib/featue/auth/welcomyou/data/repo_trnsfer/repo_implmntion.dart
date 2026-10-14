@@ -1,12 +1,11 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/model_ressponse_transfer.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/model_transfer.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/repo_trnsfer/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_ressponse_transfer.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_transfer.dart';
+import 'package:usdt/featue/auth/welcomyou/data/repo_trnsfer/repo.dart';
 
 class TransferRepoImpl implements TransferRepo {
   final ApiService _apiService;
@@ -94,52 +93,36 @@ class TransferRepoImpl implements TransferRepo {
     return 'حدث خطأ غير متوقع';
   }
 
-  @override
   Future<Either<Failur, TransferResponseModel>> sendTransfer(
     TransferRequestModel model,
   ) async {
-    debugPrint('--- ⚡ بدء إرسال عملية  طلب جديدة ---');
-    debugPrint(
-      '🌍 senderCountry(fromCountry): ${model.fromCountry} | destinationCountry(toCountry): ${model.toCountry} | receiverPhone: ${model.mobilePhone}',
-    );
-    if (model.fromCountry == model.toCountry) {
-      debugPrint(
-        'ℹ️ senderCountry equals destinationCountry (قد يكون صحيحاً إذا كان المرسل والوجهة من نفس البلد)',
-      );
-    }
-    debugPrint('📦 بيانات الإرسال (model.toJson()): ${model.toJson()}');
+    print('--- ⚡ بدء إرسال عملية  طلب جديدة ---');
+    print('📦 بيانات الإرسال (model.toJson()): ${model.toJson()}');
 
     try {
-      debugPrint('📤 إرسال طلب POST إلى /transfers/by-parameter...');
+      print('📤 إرسال طلب POST إلى /transfers/by-parameter...');
       final response = await _apiService.postdata(
         endpoint: '/transfers/by-parameter',
         data: model.toJson(),
         needtoken: true,
       );
 
-      debugPrint('✅ استجابة API وصلت');
-      debugPrint('الحالة: ${response.statusCode}');
-      debugPrint('البيانات: ${response.data}');
+      print('✅ استجابة API وصلت');
+      print('الحالة: ${response.statusCode}');
+      print('البيانات: ${response.data}');
 
       // 🌐 جلب لغة التطبيق
       final prefs = await SharedPreferences.getInstance();
       final lang = prefs.getString("app_language") ?? "ar";
-      debugPrint('🌐 لغة التطبيق: $lang');
+      print('🌐 لغة التطبيق: $lang');
 
       // ❌ في حال error = true
       if (response.data["error"] == true) {
         final errorMessage = resolveMessage(response.data["msg"], lang);
-        final errorCode = response.data["code"]?.toString();
 
-        debugPrint('❌ خطأ من السيرفر: $errorMessage');
+        print('❌ خطأ من السيرفر: $errorMessage');
 
-        return Left(
-          ServierFailur(
-            errorMessage,
-            response.statusCode ?? 400,
-            errorCode: errorCode,
-          ),
-        );
+        return Left(ServierFailur(errorMessage, response.statusCode ?? 400));
       }
 
       // ⚠️ التحقق من data
@@ -147,46 +130,44 @@ class TransferRepoImpl implements TransferRepo {
       if (responseData == null) {
         final errorMessage = resolveMessage(response.data["msg"], lang);
 
-        debugPrint('⚠️ data غير موجودة');
+        print('⚠️ data غير موجودة');
 
         return Left(ServierFailur(errorMessage, 500));
       }
 
        
-      debugPrint('🔄 طلب البيانات إلى TransferResponseModel...');
+      print('🔄 طلب البيانات إلى TransferResponseModel...');
       final transfer = TransferResponseModel.fromJson(responseData);
 
-      debugPrint('🎉 تم إنشاء الطلب بنجاح');
-      debugPrint('رقم الطلب: ${transfer.transferNumber}');
-      debugPrint('الكمية: ${transfer.amount} ${transfer.symbol}');
-      debugPrint('الحالة: ${transfer.status}');
+      print('🎉 تم إنشاء الطلب بنجاح');
+      print('رقم الطلب: ${transfer.transferNumber}');
+      print('الكمية: ${transfer.amount} ${transfer.symbol}');
+      print('الحالة: ${transfer.status}');
 
-      if (transfer.blockchainWallets.isNotEmpty == true) {
-        debugPrint('عناوين البلوك تشين:');
-        for (var wallet in transfer.blockchainWallets) {
-          debugPrint('• ${wallet.network}: ${wallet.address}');
+      if (transfer.blockchainWallets?.isNotEmpty == true) {
+        print('عناوين البلوك تشين:');
+        for (var wallet in transfer.blockchainWallets!) {
+          print('• ${wallet.network}: ${wallet.address}');
         }
       }
 
       return Right(transfer);
     } catch (e, stackTrace) {
-      debugPrint('💥 استثناء أثناء إرسال الطلب');
-      debugPrint('الخطأ: $e');
-      debugPrint('StackTrace:\n$stackTrace');
+      print('💥 استثناء أثناء إرسال الطلب');
+      print('الخطأ: $e');
+      print('StackTrace:\n$stackTrace');
 
       if (e is DioException) {
-        debugPrint('❌ DioException');
+        print('❌ DioException');
 
         // 🌐 جلب لغة التطبيق
         final prefs = await SharedPreferences.getInstance();
         final lang = prefs.getString("app_language") ?? "ar";
 
         String errorMessage = 'حدث خطأ غير متوقع';
-        String? errorCode;
 
         if (e.response?.data != null) {
           final msg = e.response?.data["msg"];
-          errorCode = e.response?.data["code"]?.toString();
 
           // 🧠 نفس المنطق الذكي
           if (msg is Map) {
@@ -196,15 +177,9 @@ class TransferRepoImpl implements TransferRepo {
           }
         }
 
-        debugPrint('📛 رسالة الخطأ المترجمة: $errorMessage');
+        print('📛 رسالة الخطأ المترجمة: $errorMessage');
 
-        return Left(
-          ServierFailur(
-            errorMessage,
-            e.response?.statusCode ?? 400,
-            errorCode: errorCode,
-          ),
-        );
+        return Left(ServierFailur(errorMessage, e.response?.statusCode ?? 400));
       }
 
       final failure = ServierFailur('Failed to send transfer', 500);

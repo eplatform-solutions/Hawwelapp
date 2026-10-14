@@ -2,8 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/profail/data/cubit_put/cubit_stat.dart';
-import 'package:hawwel/featue/profail/data/repo_put/repo.dart';
+import 'package:usdt/featue/profail/data/cubit_put/cubit_stat.dart';
+import 'package:usdt/featue/profail/data/repo_put/repo.dart';
 
 class UpdateInfoCubit extends Cubit<UpdateInfoState> {
   final UpdateInfoRepo repo;
@@ -57,7 +57,7 @@ class UpdateInfoCubit extends Cubit<UpdateInfoState> {
   }
 
   //0988960034
-  Future<void> updateUserInfo({String? mobilePhone, String? country}) async {
+  Future<void> updateUserInfo({String? mobilePhone}) async {
     emit(UpdateInfoLoading());
 
     final result = await repo.updateUserInfo(
@@ -67,21 +67,7 @@ class UpdateInfoCubit extends Cubit<UpdateInfoState> {
       emailSession: sessionForEmail ?? "",
       phoneCode: phoneOtpController.text,
       phoneSession: sessionForphone ?? "",
-      country: country,
     );
-
-    result.fold(
-      (l) => emit(
-        UpdateInfoFailure(error: l.errMassage, statusCode: l.statusCode),
-      ),
-      (r) => emit(UpdateInfoSuccess(r)),
-    );
-  }
-
-  Future<void> updateSenderCountry(String countryCode) async {
-    emit(UpdateInfoLoading());
-
-    final result = await repo.updateSenderCountry(country: countryCode);
 
     result.fold(
       (l) => emit(

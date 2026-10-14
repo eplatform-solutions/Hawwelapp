@@ -1,11 +1,11 @@
+import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/constans/localization/app_locale.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/auth/login/data/repo/repo_implmantion.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/constans/token.dart';
+import 'package:usdt/featue/auth/login/data/repo/repo_implmantion.dart';
 
 class ImplmentRepoLogin extends RepoLogin {
   final ApiService _apiService;
@@ -13,91 +13,112 @@ class ImplmentRepoLogin extends RepoLogin {
   ImplmentRepoLogin({required ApiService apiService})
     : _apiService = apiService;
 
-  @override
   Future<Either<Failur, dynamic>> login({
     required String email,
     required String password,
   }) async {
+    log('--- بدء عملية تسجيل الدخول ---');
+    log('📧 البريد الإلكتروني: $email');
+    // لا نطبع كلمة المرور لأسباب أمنية (حتى في debug)
+    log('🔑 تم إدخال كلمة المرور (مخفيّة لأسباب أمنية)');
+
     try {
-      final value = email.trim();
-      final isPhone = RegExp(r'^\+?[0-9]{7,15}$').hasMatch(value);
-      final Map<String, dynamic> requestData = {
-        if (isPhone) "mobilePhone": value else "email": value,
-        "password": password,
-      };
+      log('🚀 إرسال طلب POST إلى /auth/login...');
+final value = email.trim();
+
+final isPhone = RegExp(r'^\+?[0-9]{7,15}$').hasMatch(value);
+final Map<String, dynamic> requestData = {
+  if (isPhone) "mobilePhone": value else "email": value,
+  "password": password,
+};
 
       Response response = await _apiService.postdata(
         endpoint: "/auth/login",
         data: requestData,
         needtoken: false,
       );
-      if (kDebugMode) {
-        debugPrint('LOGIN request completed with status ${response.statusCode}');
-      }
 
-      final lang = await AppLocaleHelper.getLanguageCode();
+      log('✅ استجابة API وصلت:');
+      log('الحالة (status code): ${response.statusCode}');
+      log('البيانات الكاملة (response.data): ${response.data}');
+
+      final prefs = await SharedPreferences.getInstance();
+      final lang = prefs.getString("app_language") ?? "ar";
+      log('🌐 لغة التطبيق الحاليّة: $lang');
 
       // تحقق مما إذا كان هناك session (يعني 2FA مطلوبة)
       final hasError = response.data["error"] == true;
       final hasSession = response.data["data"]?["session"] != null;
 
+      log('🔍 تحليل الاستجابة:');
+      log('  error = ${response.data["error"]}');
+      log('  session موجود؟ $hasSession');
+
       if (hasError && hasSession) {
         final session = response.data["data"]["session"];
-        final message = AppLocaleHelper.messageFromResponse(
-              response.data["msg"],
-              lang,
-            ).isNotEmpty
-            ? AppLocaleHelper.messageFromResponse(response.data["msg"], lang)
-            : AppLocaleHelper.genericErrorFallback(lang);
+        final message = response.data["msg"]?[lang] ?? "رسالة غير متوفرة";
+        log('🔐 تم اكتشاف تفعيل التحقق بخطوتين (2FA)');
+        log('  session: $session');
+        log('  رسالة السيرفر: $message');
+
         final result = {
           "status": "2fa_required",
           "session": session,
           "message": message,
         };
+        log('📤 إرجاع نتيجة: 2FA مطلوبة');
         return right(result);
       }
 
       // حالة النجاح
       if (response.data["error"] == false) {
-        final token = (response.data["data"]?["token"] ?? "").toString().trim();
+        final token = response.data["data"]?["token"];
+        log('🎉 تسجيل الدخول ناجح!');
 
-        if (token.isNotEmpty) {
+        if (token != null) {
+          log('💾 حفظ التوكن في SharedPreference...');
           await Functions().setToken(token);
+          log('✅ التوكن حُفظ بنجاح');
         } else {
-          final missingTokenMessage = lang == 'ar'
-              ? 'فشل إنشاء جلسة الدخول. يرجى المحاولة مرة أخرى.'
-              : 'Failed to create login session. Please try again.';
-          return left(ServierFailur(missingTokenMessage, 500));
+          log('⚠️ تحذير: لم يتم استلام توكن من السيرفر!');
         }
 
         final successResult = {"status": "success", "message": "login_success"};
+        log('📤 إرجاع نتيجة: نجاح');
         return right(successResult);
       }
 
       // فشل عادي
-      final localizedMsg = AppLocaleHelper.messageFromResponse(
-        response.data["msg"],
-        lang,
-      );
-      String errorMessage = localizedMsg.isNotEmpty
-          ? localizedMsg
-          : AppLocaleHelper.loginErrorFallback(lang);
+      String errorMessage =
+          response.data["msg"]?[lang] ?? "خطأ أثناء تسجيل الدخول";
       int statusCode = response.statusCode ?? 500;
 
+      log('❌ فشل في تسجيل الدخول:');
+      log('  الرسالة: $errorMessage');
+      log('  كود الحالة: $statusCode');
+
       return left(ServierFailur(errorMessage, statusCode));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      log('💥 استثناء غير متوقع أثناء تسجيل الدخول:');
+      log('الخطأ: $e');
+      log('تتبع الخطأ:\n$stackTrace');
+
       if (e is DioException) {
-        if (kDebugMode) {
-          debugPrint(
-            'LOGIN DioException status=${e.response?.statusCode} endpoint=${e.requestOptions.path}',
-          );
+        log('نوع الخطأ: DioException');
+        if (e.response != null) {
+          log('كود الاستجابة: ${e.response?.statusCode}');
+          log('بيانات الخطأ: ${e.response?.data}');
         }
-        final lang = await AppLocaleHelper.getLanguageCode();
-        final failure = ServierFailur.fromDioError(e, lang: lang);
+        if (e.requestOptions != null) {
+          log('الـ URL: ${e.requestOptions.uri}');
+        }
+        final failure = ServierFailur.fromDioError(e);
+        log('📤 إرجاع فشل من نوع DioException: ${failure.errMassage}');
         return left(failure);
       }
 
       final failure = ServierFailur('Login failed: ${e.toString()}', 600);
+      log('📤 إرجاع فشل عام: ${failure.errMassage}');
       return left(failure);
     }
   }
@@ -106,10 +127,10 @@ class ImplmentRepoLogin extends RepoLogin {
 // import 'package:dartz/dartz.dart';
 // import 'package:dio/dio.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:hawwel/constans/api_servise.dart';
-// import 'package:hawwel/constans/failear.dart';
-// import 'package:hawwel/constans/token.dart';
-// import 'package:hawwel/featue/auth/login/data/repo/repo_implmantion.dart';
+// import 'package:usdt/constans/api_servise.dart';
+// import 'package:usdt/constans/failear.dart';
+// import 'package:usdt/constans/token.dart';
+// import 'package:usdt/featue/auth/login/data/repo/repo_implmantion.dart';
 
 // class ImplmentRepoLogin extends RepoLogin {
 //   final ApiService _apiService;

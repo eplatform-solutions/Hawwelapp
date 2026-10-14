@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/auth/forgeat_password/data/cubit/cubit_forget_stat.dart';
-import 'package:hawwel/featue/auth/forgeat_password/data/repo/forget_repo_implmantion.dart';
+import 'package:usdt/featue/auth/forgeat_password/data/cubit/cubit_forget_stat.dart';
+import 'package:usdt/featue/auth/forgeat_password/data/repo/forget_repo_implmantion.dart';
 
 class ForgetCubit extends Cubit<ForgetState> {
   ForgetCubit(this.implmentRepoforgetpassword) : super(ForgetpasswordInitial());

@@ -4,16 +4,15 @@ import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/profail/data/repo_put/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/profail/data/repo_put/repo.dart';
 
 class UpdateInfoRepoImpl implements UpdateInfoRepo {
   final ApiService _apiService;
 
   UpdateInfoRepoImpl({required ApiService apiService})
     : _apiService = apiService;
-  @override
   Future<Either<Failur, Map<String, dynamic>>> sendotpchang({
     required String email,
   }) async {
@@ -126,10 +125,9 @@ class UpdateInfoRepoImpl implements UpdateInfoRepo {
     required String emailSession,
     required String phoneCode,
     required String phoneSession,
-    String? country,
   }) async {
     try {
-      final Map<String, dynamic> data;
+      final data;
       if (mobilePhone.isNotEmpty &&
           phoneCode.isNotEmpty &&
           phoneSession.isNotEmpty) {
@@ -155,9 +153,6 @@ class UpdateInfoRepoImpl implements UpdateInfoRepo {
           "mobilePhoneCode": phoneCode,
           "sessionForMobilePhone": phoneSession,
         };
-      }
-      if (country != null && country.trim().isNotEmpty) {
-        data["country"] = country.trim();
       }
 
       log("📤 PUT → /users/update");
@@ -219,42 +214,6 @@ class UpdateInfoRepoImpl implements UpdateInfoRepo {
       // ************** UNKNOWN ERROR ****************
       log("❌ UNKNOWN ERROR → $e");
 
-      return Left(ServierFailur(e.toString(), 500));
-    }
-  }
-
-  @override
-  Future<Either<Failur, String>> updateSenderCountry({
-    required String country,
-  }) async {
-    try {
-      log('📤 PUT → /users/update (country only)');
-      log('📦 country → $country');
-
-      final response = await _apiService.put(
-        endpoint: '/users/update',
-        data: {'country': country.trim()},
-      );
-      log('📥 [/users/update country] status=${response.statusCode}');
-      log('📥 [/users/update country] body=${response.data}');
-
-      final prefs = await SharedPreferences.getInstance();
-      final lang = prefs.getString('app_language') ?? 'ar';
-      final msgMap = response.data['msg'] as Map<String, dynamic>?;
-      final message =
-          msgMap?[lang] ??
-          msgMap?['en'] ??
-          msgMap?['ar'] ??
-          'تم تحديث بلد المرسل بنجاح';
-
-      if (response.data['error'] == true) {
-        return Left(ServierFailur(message, response.statusCode ?? 400));
-      }
-
-      return Right(message);
-    } on DioException catch (e) {
-      return Left(ServierFailur.fromDioError(e));
-    } catch (e) {
       return Left(ServierFailur(e.toString(), 500));
     }
   }

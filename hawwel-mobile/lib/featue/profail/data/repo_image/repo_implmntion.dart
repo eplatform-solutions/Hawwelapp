@@ -1,9 +1,8 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/profail/data/repo_image/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/profail/data/repo_image/repo.dart';
 
  
 class ImplementChangeImageRepo implements RepoChangeImage {
@@ -27,8 +26,8 @@ class ImplementChangeImageRepo implements RepoChangeImage {
         isFormData: true,
       );
 
-      debugPrint("STATUS: ${response.statusCode}");
-      debugPrint("DATA: ${response.data}");
+      print("STATUS: ${response.statusCode}");
+      print("DATA: ${response.data}");
 
       return const Right("Image Updated");
     } catch (e) {

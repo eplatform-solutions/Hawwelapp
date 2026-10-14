@@ -1,7 +1,8 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:hawwel/constans/app_branding.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class DashedBorderContainer extends StatelessWidget {
   final Widget child;
@@ -16,7 +17,7 @@ class DashedBorderContainer extends StatelessWidget {
   final Color backgroundColor;
 
   const DashedBorderContainer({
-    super.key,
+    Key? key,
     required this.child,
     this.strokeWidth = 2.0,
     this.color,
@@ -27,7 +28,7 @@ class DashedBorderContainer extends StatelessWidget {
     this.height = 120,
     this.width = 300,
     this.backgroundColor = Colors.white,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -1,13 +1,11 @@
-// ignore_for_file: camel_case_types
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/idintity_veryfation/widgt/stepper.dart';
-import 'package:hawwel/featue/lode_file/lode_file.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/idintity_veryfation/widgt/stepper.dart';
+import 'package:usdt/featue/lode_file/lode_file.dart';
 
 class idintyview extends StatefulWidget {
   const idintyview({super.key});
@@ -37,7 +35,7 @@ class _idintyviewState extends State<idintyview> {
                 color: branding.badge,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3), // لون الظل
+                    color: Colors.black.withOpacity(0.3), // لون الظل
                     spreadRadius: 2, // مدى الانتشار
                     blurRadius: 10, // درجة التمويه
                     offset: const Offset(0, 4), // موقع الظل (x,y)
@@ -96,7 +94,7 @@ class _idintyviewState extends State<idintyview> {
                         child: Text(
                           AppTranslations.getText(
                             context,
-                            'Steps to complete orders',
+                            'Steps to complete money transfers',
                           ),
                           style: GoogleFonts.cairo(
                             fontSize: 13.sp,

@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/style.dart';
-import 'package:hawwel/featue/paymant/review_transaction.dart';
-import 'package:hawwel/featue/paymant/widgt/text_fild_payment.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/paymant/review_transaction.dart';
+import 'package:usdt/featue/paymant/widgt/text_fild_payment.dart';
 
 class Improvepament extends StatefulWidget {
   const Improvepament({super.key});
@@ -63,7 +64,7 @@ class _ImprovepamentState extends State<Improvepament> {
                     controller: username,
                     hintText: AppTranslations.getText(
                       context,
-                      'phone_or_name_hint',
+                      'email_phone_hint',
                     ),
                     type: TextInputType.name,
                     // maxLength: 10,
@@ -115,6 +116,7 @@ class _ImprovepamentState extends State<Improvepament> {
                         builder: (context) => Reviewtranzation(),
                       ),
                     );
+                    // TODO: تنفيذ التسجيل
                   },
                   child: Container(
                     height: 58.h,

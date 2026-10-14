@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/transfer_execution/data/cubit/cubit_stat.dart';
-  import 'package:hawwel/featue/transfer_execution/data/cubit/repo/repo.dart';
+import 'package:usdt/featue/transfer_execution/data/cubit/cubit_stat.dart';
+  import 'package:usdt/featue/transfer_execution/data/cubit/repo/repo.dart';
 
 class DepositExternalCubit extends Cubit<DepositExternalState> {
   DepositExternalCubit(this.repo) : super(DepositExternalInitial());

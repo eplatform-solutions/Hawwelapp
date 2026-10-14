@@ -1,5 +1,4 @@
-// ignore_for_file: camel_case_types
-
+import 'dart:developer';
 import 'dart:io';
 import 'dart:math' as math;
 
@@ -9,26 +8,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' as path_provider;
-import 'package:permission_handler/permission_handler.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/bootom_navigator.dart';
-import 'package:hawwel/featue/lode_file/data/cubit/cubit.dart';
-import 'package:hawwel/featue/lode_file/data/cubit/cubit_state.dart';
-import 'package:hawwel/featue/lode_file/widjt/id_camera_capture_screen.dart';
-import 'package:hawwel/featue/profail/data/cubit/cubit.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/bootom_navigator.dart';
+import 'package:usdt/featue/lode_file/data/cubit/cubit.dart';
+import 'package:usdt/featue/lode_file/data/cubit/cubit_state.dart';
 import 'package:file_picker/file_picker.dart';
-
-// Server-side limit for a KYC document; enforced here too so a user is not
-// sent through a long upload only to get a rejection.
-const int _kMaxKycFileBytes = 5 * 1024 * 1024;
 
 class lodedfile extends StatefulWidget {
   const lodedfile({super.key});
@@ -39,11 +28,8 @@ class lodedfile extends StatefulWidget {
 
 class _lodedfileState extends State<lodedfile>
     with TickerProviderStateMixin {
-  String? _firstFilePath;
-  String? _firstPickedFileName;
-  String? _secondFilePath;
-  String? _secondPickedFileName;
-  bool _kycConsent = false;
+  String? _filePath;
+  String? _pickedFileName;
 
   late final AnimationController _headerCtrl;
   late final Animation<double> _headerFade;
@@ -64,14 +50,6 @@ class _lodedfileState extends State<lodedfile>
   @override
   void initState() {
     super.initState();
-
-    // The cubit is app-scoped, so a previous submission's Success state
-    // would otherwise still be showing when the screen is reopened (e.g.
-    // after a rejection) and swallow the new upload as "already done".
-    final uploadCubit = context.read<UploadKycCubit>();
-    if (uploadCubit.state is! UploadKycLoading) {
-      uploadCubit.reset();
-    }
 
     _headerCtrl = AnimationController(
       vsync: this,
@@ -130,218 +108,10 @@ class _lodedfileState extends State<lodedfile>
     super.dispose();
   }
 
-  Future<void> _showSourcePicker({required bool isSecond}) async {
-    final branding = appBrandingNotifier.value;
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-
-    await showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (sheetContext) {
-        return Container(
-          decoration: BoxDecoration(
-            color: branding.cardBg,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-          ),
-          padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 28.h),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
-                width: 40.w,
-                height: 4.h,
-                decoration: BoxDecoration(
-                  color: branding.divider,
-                  borderRadius: BorderRadius.circular(4.r),
-                ),
-              ),
-              SizedBox(height: 18.h),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  isArabic ? 'اختر مصدر الصورة' : 'Choose image source',
-                  style: GoogleFonts.cairo(
-                    fontSize: 15.sp,
-                    fontWeight: FontWeight.w800,
-                    color: branding.primaryText,
-                  ),
-                ),
-              ),
-              SizedBox(height: 16.h),
-              _SourceOptionTile(
-                branding: branding,
-                icon: Icons.camera_alt_rounded,
-                label: isArabic ? 'التقاط صورة بالكاميرا' : 'Take a photo',
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  _runPicker(() => _pickFromCamera(isSecond: isSecond));
-                },
-              ),
-              SizedBox(height: 10.h),
-              _SourceOptionTile(
-                branding: branding,
-                icon: Icons.photo_library_rounded,
-                label: isArabic ? 'اختيار من المعرض' : 'Choose from gallery',
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  _runPicker(() => _pickFromGallery(isSecond: isSecond));
-                },
-              ),
-              SizedBox(height: 10.h),
-              _SourceOptionTile(
-                branding: branding,
-                icon: Icons.attach_file_rounded,
-                label: isArabic ? 'اختيار ملف (PDF)' : 'Choose a file (PDF)',
-                onTap: () {
-                  Navigator.pop(sheetContext);
-                  _runPicker(() => _pickFromFiles(isSecond: isSecond));
-                },
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  // Picker plugins throw PlatformException for denied permissions, a killed
-  // picker activity, or an unreadable file - each of those used to bring the
-  // whole app down instead of showing a message.
-  Future<void> _runPicker(Future<void> Function() picker) async {
-    try {
-      await picker();
-    } catch (_) {
-      if (!mounted) return;
-      _showUploadCardError(
-        isArabic: Localizations.localeOf(context).languageCode == 'ar',
-      );
-    }
-  }
-
-  Future<void> _pickFromCamera({required bool isSecond}) async {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-
-    PermissionStatus status = await Permission.camera.status;
-    if (!status.isGranted) {
-      status = await Permission.camera.request();
-    }
-    if (!mounted) return;
-
-    if (status.isPermanentlyDenied) {
-      _showCameraPermissionDialog(isArabic: isArabic);
-      return;
-    }
-    if (!status.isGranted) {
-      _showSnack(
-        isArabic
-            ? 'لم يتم منح إذن الكاميرا. يمكنك اختيار الصورة من المعرض بدلاً من ذلك.'
-            : 'Camera permission was not granted. You can pick the photo from the gallery instead.',
-      );
-      return;
-    }
-
-    final File? shot = await Navigator.push<File?>(
-      context,
-      MaterialPageRoute(
-        builder: (_) => IdCameraCaptureScreen(
-          guideTitle: isSecond
-              ? (isArabic ? 'الوجه الخلفي للمستند' : 'Document back side')
-              : (isArabic ? 'الوجه الأمامي للمستند' : 'Document front side'),
-        ),
-        fullscreenDialog: true,
-      ),
-    );
-    if (shot == null || !mounted) return;
-    await _handlePickedImage(shot, isSecond: isSecond);
-  }
-
-  void _showCameraPermissionDialog({required bool isArabic}) {
-    showDialog<void>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: Text(isArabic ? 'إذن الكاميرا مطلوب' : 'Camera permission needed'),
-        content: Text(
-          isArabic
-              ? 'يرجى تفعيل إذن الكاميرا من إعدادات الجهاز لتتمكن من تصوير مستنداتك.'
-              : 'Please enable camera access from device settings to photograph your documents.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: Text(isArabic ? 'إلغاء' : 'Cancel'),
-          ),
-          TextButton(
-            onPressed: () {
-              Navigator.pop(dialogContext);
-              openAppSettings();
-            },
-            child: Text(isArabic ? 'فتح الإعدادات' : 'Open Settings'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<void> _pickFromGallery({required bool isSecond}) async {
-    final XFile? picked = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-      imageQuality: 90,
-    );
-    if (picked == null) return;
-    await _handlePickedImage(File(picked.path), isSecond: isSecond);
-  }
-
-  Future<void> _handlePickedImage(File file, {required bool isSecond}) async {
-    final compressedFile = await _compressImage(file);
-    if (compressedFile == null) {
-      if (!mounted) return;
-      _showUploadCardError(
-        isArabic: Localizations.localeOf(context).languageCode == 'ar',
-      );
-      return;
-    }
-    _setStoredFile(
-      compressedFile.path,
-      p.basename(compressedFile.path),
-      isSecond: isSecond,
-    );
-  }
-
-  // يستبدل مسار الملف المخزَّن لهذه الخانة، ويحذف الملف المؤقت السابق (إن وُجد)
-  // بعد الاستبدال حتى لا تتراكم نسخ سابقة من مستندات هوية حساسة على الجهاز.
-  void _setStoredFile(String path, String name, {required bool isSecond}) {
-    if (!mounted) return;
-    final previousPath = isSecond ? _secondFilePath : _firstFilePath;
-    setState(() {
-      if (isSecond) {
-        _secondFilePath = path;
-        _secondPickedFileName = name;
-      } else {
-        _firstFilePath = path;
-        _firstPickedFileName = name;
-      }
-    });
-    if (previousPath != null && previousPath != path) {
-      _deleteFileQuietly(previousPath);
-    }
-  }
-
-  Future<void> _deleteFileQuietly(String path) async {
-    try {
-      final file = File(path);
-      if (await file.exists()) {
-        await file.delete();
-      }
-    } catch (_) {
-      // تجاهل أي فشل في حذف الملف المؤقت — ليس حرجًا لتجربة المستخدم.
-    }
-  }
-
-  Future<void> _pickFromFiles({required bool isSecond}) async {
+  Future<void> _pickFile() async {
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
-      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png', 'heic', 'heif'],
+      allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
     );
 
     if (result != null && result.files.isNotEmpty) {
@@ -350,121 +120,50 @@ class _lodedfileState extends State<lodedfile>
 
       if (path != null) {
         File file = File(path);
+        int originalSize = file.lengthSync();
         String extension = p.extension(path).toLowerCase();
 
-        // Normalize every non-PDF document to a real JPEG, regardless of the
-        // source extension (camera captures on many phones default to
-        // HEIC/HEIF, which the backend does not accept).
-        if (extension != '.pdf') {
+        if (['.jpg', '.jpeg', '.png'].contains(extension)) {
           final compressedFile = await _compressImage(file);
-          if (compressedFile == null) {
-            if (!mounted) return;
-            _showUploadCardError(
-              isArabic: Localizations.localeOf(context).languageCode == 'ar',
-            );
-            return;
+          if (compressedFile != null) {
+            path = compressedFile.path;
+            int compressedSize = compressedFile.lengthSync();
+            log("✅ تم الضغط بنجاح:");
+            log("📏 الحجم الأصلي: ${(originalSize / 1024).toStringAsFixed(2)} KB");
+            log("📉 الحجم الجديد: ${(compressedSize / 1024).toStringAsFixed(2)} KB");
+            log("♻️ نسبة التوفير: ${((1 - compressedSize / originalSize) * 100).toStringAsFixed(1)}%");
           }
-          path = compressedFile.path;
-          name = p.basename(compressedFile.path);
         } else {
-          // PDFs are sent as-is (no compression), so check the server's
-          // size limit before the upload instead of after it.
-          final size = await file.length();
-          if (!mounted) return;
-          if (size > _kMaxKycFileBytes) {
-            _showSnack(
-              Localizations.localeOf(context).languageCode == 'ar'
-                  ? 'حجم الملف أكبر من 5 ميغابايت. يرجى اختيار ملف أصغر.'
-                  : 'The file is larger than 5 MB. Please choose a smaller file.',
-            );
-            return;
-          }
+          log("ℹ️ ملف PDF: لا يتم ضغطه، الحجم: ${(originalSize / 1024).toStringAsFixed(2)} KB");
         }
       }
 
-      if (path != null) {
-        _setStoredFile(path, name, isSecond: isSecond);
-      }
+      setState(() {
+        _filePath = path;
+        _pickedFileName = name;
+      });
     }
-  }
-
-  void _showUploadCardError({required bool isArabic}) {
-    _showSnack(
-      isArabic
-          ? 'تعذّرت معالجة هذه الصورة. الرجاء اختيار صورة أخرى بصيغة JPG أو PNG.'
-          : 'Could not process this image. Please choose another JPG or PNG photo.',
-    );
-  }
-
-  void _showSnack(String message) {
-    if (!mounted) return;
-    final branding = appBrandingNotifier.value;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        behavior: SnackBarBehavior.floating,
-        margin: EdgeInsets.zero,
-        padding: EdgeInsets.zero,
-        content: CustomSnackBar(
-          backgroundColor: branding.error,
-          message: message,
-          imagePath: AppImages.eerorrimage,
-        ),
-      ),
-    );
   }
 
   Future<File?> _compressImage(File file) async {
-    try {
-      final dir = await path_provider.getTemporaryDirectory();
-      final baseName = p.basenameWithoutExtension(file.path);
-      final targetPath = p.join(dir.absolute.path, "temp_$baseName.jpg");
-      var result = await FlutterImageCompress.compressAndGetFile(
-        file.absolute.path,
-        targetPath,
-        quality: 70,
-        minWidth: 800,
-        minHeight: 800,
-        rotate: 0,
-        format: CompressFormat.jpeg,
-      );
-      return result != null ? File(result.path) : null;
-    } catch (_) {
-      return null;
-    }
+    final dir = await path_provider.getTemporaryDirectory();
+    final targetPath = p.join(dir.absolute.path, "temp_${p.basename(file.path)}");
+    var result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: 70,
+      minWidth: 800,
+      minHeight: 800,
+      rotate: 0,
+    );
+    return result != null ? File(result.path) : null;
   }
 
-  // Replace the whole stack: pushing Home on top left the KYC wizard
-  // screens underneath, reachable again with the system back button.
   void _goToHome() {
-    Navigator.pushAndRemoveUntil(
+    Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => HomeScreen()),
-      (route) => false,
     );
-  }
-
-  Future<void> _openExternalUrl(String url) async {
-    final uri = Uri.parse(url);
-    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!opened && mounted) {
-      final branding = appBrandingNotifier.value;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.zero,
-          content: CustomSnackBar(
-            backgroundColor: branding.error,
-            message: 'Unable to open link',
-            imagePath: AppImages.eerorrimage,
-          ),
-        ),
-      );
-    }
   }
 
   void _onSubmit() {
@@ -472,7 +171,7 @@ class _lodedfileState extends State<lodedfile>
     final state = cubit.state;
     final branding = appBrandingNotifier.value;
 
-    if (_firstFilePath == null || _secondFilePath == null) {
+    if (_filePath == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.transparent,
@@ -482,31 +181,7 @@ class _lodedfileState extends State<lodedfile>
           padding: EdgeInsets.zero,
           content: CustomSnackBar(
             backgroundColor: branding.iconPrimary,
-            message: AppTranslations.getTextStatic(
-              context,
-              _firstFilePath == null
-                  ? "select_first_kyc_image"
-                  : "select_second_kyc_image",
-            ),
-            imagePath: AppImages.eerorrimage,
-          ),
-        ),
-      );
-      return;
-    }
-    if (!_kycConsent) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.zero,
-          content: CustomSnackBar(
-            backgroundColor: branding.error,
-            message: Localizations.localeOf(context).languageCode == 'ar'
-                ? 'يرجى الموافقة على إفصاح KYC قبل رفع المستند.'
-                : 'Please accept the KYC disclosure before uploading.',
+            message: AppTranslations.getTextStatic(context, "select_file_first"),
             imagePath: AppImages.eerorrimage,
           ),
         ),
@@ -515,7 +190,7 @@ class _lodedfileState extends State<lodedfile>
     }
 
     if (state is UploadKycInitial || state is UploadKycFailure) {
-      cubit.uploadKyc(_firstFilePath!, _secondFilePath!);
+      cubit.uploadKyc(_filePath!);
       return;
     }
 
@@ -533,31 +208,6 @@ class _lodedfileState extends State<lodedfile>
       listener: (context, state) {
         if (state is UploadKycSuccess) {
           _successCtrl.forward();
-          // المستندات رُفعت بنجاح؛ لا حاجة للاحتفاظ بنسخها المؤقتة الحساسة على الجهاز.
-          final first = _firstFilePath;
-          final second = _secondFilePath;
-          if (first != null) _deleteFileQuietly(first);
-          if (second != null) _deleteFileQuietly(second);
-          // Profile / home gates read the cached user; refresh it so the
-          // badge flips to "under review" without a manual pull-to-refresh.
-          context.read<Userinfogcubit>().fetchUserInfo();
-        } else if (state is UploadKycFailure) {
-          final branding = appBrandingNotifier.value;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.zero,
-              padding: EdgeInsets.zero,
-              duration: const Duration(seconds: 5),
-              content: CustomSnackBar(
-                backgroundColor: branding.error,
-                message: state.error,
-                imagePath: AppImages.eerorrimage,
-              ),
-            ),
-          );
         }
       },
       child: Directionality(
@@ -608,71 +258,15 @@ class _lodedfileState extends State<lodedfile>
                                   context: context,
                                 )
                               else ...[
-                                Text(
-                                  AppTranslations.getTextStatic(
-                                    context,
-                                    'kyc_first_image_label',
-                                  ),
-                                  style: GoogleFonts.cairo(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: branding.primaryText,
-                                  ),
-                                ),
-                                SizedBox(height: 10.h),
                                 _UploadCard(
                                   branding: branding,
-                                  filePath: _firstFilePath,
-                                  fileName: _firstPickedFileName,
-                                  onTap: () => _showSourcePicker(isSecond: false),
-                                  context: context,
-                                ),
-                                SizedBox(height: 18.h),
-                                Text(
-                                  AppTranslations.getTextStatic(
-                                    context,
-                                    'kyc_second_image_label',
-                                  ),
-                                  style: GoogleFonts.cairo(
-                                    fontSize: 14.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: branding.primaryText,
-                                  ),
-                                ),
-                                SizedBox(height: 10.h),
-                                _UploadCard(
-                                  branding: branding,
-                                  filePath: _secondFilePath,
-                                  fileName: _secondPickedFileName,
-                                  onTap: () => _showSourcePicker(isSecond: true),
+                                  filePath: _filePath,
+                                  fileName: _pickedFileName,
+                                  onTap: _pickFile,
                                   context: context,
                                 ),
                                 SizedBox(height: 16.h),
                                 _TipsCard(branding: branding, context: context),
-                                SizedBox(height: 16.h),
-                                _KycDisclosureCard(
-                                  branding: branding,
-                                  context: context,
-                                  consent: _kycConsent,
-                                  onConsentChanged: (value) {
-                                    setState(() {
-                                      _kycConsent = value ?? false;
-                                    });
-                                  },
-                                  onOpenPrivacy: () => _openExternalUrl(
-                                    'https://hawwelapp.com/privacy',
-                                  ),
-                                  onOpenAmlKyc: () => _openExternalUrl(
-                                    'https://hawwelapp.com/aml-kyc',
-                                  ),
-                                ),
-                                if (state is UploadKycFailure) ...[
-                                  SizedBox(height: 16.h),
-                                  _FailureBanner(
-                                    branding: branding,
-                                    message: state.error,
-                                  ),
-                                ],
                               ],
 
                               SizedBox(height: 36.h),
@@ -708,79 +302,86 @@ class _lodedfileState extends State<lodedfile>
       decoration: BoxDecoration(
         gradient: branding.buildHeaderGradient(),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28.r),
-          bottomRight: Radius.circular(28.r),
+          bottomLeft: Radius.circular(32.r),
+          bottomRight: Radius.circular(32.r),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 14.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 28.h),
+          child: Column(
             children: [
-              AppBackButton(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      AppTranslations.getText(context, 'Upload Documents'),
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.cairo(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
+              Align(
+                alignment:
+                    isArabic ? Alignment.centerRight : Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: 38.w,
+                    height: 38.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
                     ),
-                    SizedBox(height: 4.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 3.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        AppTranslations.getText(
-                          context,
-                          'Step 2 of 3',
-                        ),
-                        style: GoogleFonts.cairo(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                      ),
+                    child: Icon(
+                      isArabic
+                          ? Icons.arrow_forward_ios_rounded
+                          : Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white,
+                      size: 16.sp,
                     ),
-                  ],
+                  ),
                 ),
               ),
-              SizedBox(width: 10.w),
+              SizedBox(height: 18.h),
               Container(
-                width: 38.w,
-                height: 38.w,
+                width: 66.w,
+                height: 66.w,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.35),
-                    width: 1.5,
+                    width: 2,
                   ),
                 ),
-                padding: EdgeInsets.all(8.r),
+                padding: EdgeInsets.all(14.r),
                 child: Icon(
                   Icons.upload_file_rounded,
                   color: Colors.white,
-                  size: 18.sp,
+                  size: 26.sp,
+                ),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                AppTranslations.getText(context, 'Upload Documents'),
+                style: GoogleFonts.cairo(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 6.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Text(
+                  AppTranslations.getText(
+                    context,
+                    'Step 2 of 3',
+                  ),
+                  style: GoogleFonts.cairo(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
                 ),
               ),
             ],
@@ -942,7 +543,7 @@ class _UploadCard extends StatelessWidget {
             ),
           ],
         ),
-        padding: EdgeInsets.symmetric(horizontal: 16.r, vertical: 14.r),
+        padding: EdgeInsets.all(24.r),
         child: filePath == null
             ? _EmptyState(branding: branding, context: context)
             : _FilledState(
@@ -957,64 +558,6 @@ class _UploadCard extends StatelessWidget {
   }
 }
 
-// ── Source option tile (used inside the camera/gallery/file picker sheet) ─────
-class _SourceOptionTile extends StatelessWidget {
-  final AppBrandingConfig branding;
-  final IconData icon;
-  final String label;
-  final VoidCallback onTap;
-  const _SourceOptionTile({
-    required this.branding,
-    required this.icon,
-    required this.label,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-        decoration: BoxDecoration(
-          color: branding.screenBg,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: branding.divider.withValues(alpha: 0.4)),
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 38.w,
-              height: 38.w,
-              decoration: BoxDecoration(
-                color: branding.accent.withValues(alpha: 0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: branding.accent, size: 19.sp),
-            ),
-            SizedBox(width: 12.w),
-            Expanded(
-              child: Text(
-                label,
-                style: GoogleFonts.cairo(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w700,
-                  color: branding.primaryText,
-                ),
-              ),
-            ),
-            Icon(
-              Icons.chevron_right_rounded,
-              color: branding.secondaryText,
-              size: 20.sp,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _EmptyState extends StatelessWidget {
   final AppBrandingConfig branding;
   final BuildContext context;
@@ -1022,11 +565,11 @@ class _EmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    return Row(
+    return Column(
       children: [
         Container(
-          width: 48.w,
-          height: 48.w,
+          width: 72.w,
+          height: 72.w,
           decoration: BoxDecoration(
             color: branding.accent.withValues(alpha: 0.08),
             shape: BoxShape.circle,
@@ -1034,44 +577,49 @@ class _EmptyState extends StatelessWidget {
           child: Icon(
             Icons.cloud_upload_outlined,
             color: branding.accent,
-            size: 22.sp,
+            size: 32.sp,
           ),
         ),
-        SizedBox(width: 14.w),
-        Expanded(
-          child: Column(
+        SizedBox(height: 16.h),
+        Text(
+          AppTranslations.getText(context, 'Tap to upload document'),
+          style: GoogleFonts.cairo(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w700,
+            color: branding.primaryText,
+          ),
+        ),
+        SizedBox(height: 6.h),
+        Text(
+          AppTranslations.getText(context, 'PDF, JPG, PNG supported'),
+          style: GoogleFonts.cairo(
+            fontSize: 12.sp,
+            fontWeight: FontWeight.w400,
+            color: branding.secondaryText,
+          ),
+        ),
+        SizedBox(height: 18.h),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+          decoration: BoxDecoration(
+            gradient: branding.buildHeaderGradient(),
+            borderRadius: BorderRadius.circular(12.r),
+          ),
+          child: Row(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              Icon(Icons.attach_file_rounded, color: Colors.white, size: 16.sp),
+              SizedBox(width: 6.w),
               Text(
-                AppTranslations.getText(context, 'Tap to upload document'),
+                AppTranslations.getText(context, 'Choose File'),
                 style: GoogleFonts.cairo(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w700,
-                  color: branding.primaryText,
-                ),
-              ),
-              SizedBox(height: 3.h),
-              Text(
-                AppTranslations.getText(context, 'PDF, JPG, PNG supported'),
-                style: GoogleFonts.cairo(
-                  fontSize: 11.sp,
-                  fontWeight: FontWeight.w400,
-                  color: branding.secondaryText,
+                  color: Colors.white,
                 ),
               ),
             ],
           ),
-        ),
-        SizedBox(width: 8.w),
-        Container(
-          width: 34.w,
-          height: 34.w,
-          decoration: BoxDecoration(
-            gradient: branding.buildHeaderGradient(),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(Icons.add_rounded, color: Colors.white, size: 20.sp),
         ),
       ],
     );
@@ -1094,22 +642,22 @@ class _FilledState extends StatelessWidget {
 
   @override
   Widget build(BuildContext ctx) {
-    return Row(
+    return Column(
       children: [
         if (isImage)
           ClipRRect(
             borderRadius: BorderRadius.circular(12.r),
             child: Image.file(
               File(filePath),
-              height: 52.w,
-              width: 52.w,
+              height: 160.h,
+              width: double.infinity,
               fit: BoxFit.cover,
             ),
           )
         else
           Container(
-            width: 52.w,
-            height: 52.w,
+            width: 72.w,
+            height: 72.w,
             decoration: BoxDecoration(
               color: branding.accent.withValues(alpha: 0.08),
               shape: BoxShape.circle,
@@ -1117,184 +665,42 @@ class _FilledState extends StatelessWidget {
             child: Icon(
               Icons.picture_as_pdf_rounded,
               color: branding.accent,
-              size: 24.sp,
+              size: 32.sp,
             ),
           ),
-        SizedBox(width: 14.w),
-        Expanded(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.check_circle_rounded,
-                    color: branding.accent,
-                    size: 16.sp,
-                  ),
-                  SizedBox(width: 6.w),
-                  Flexible(
-                    child: Text(
-                      fileName,
-                      style: GoogleFonts.cairo(
-                        fontSize: 13.sp,
-                        fontWeight: FontWeight.w600,
-                        color: branding.primaryText,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 4.h),
-              Text(
-                AppTranslations.getText(context, 'Tap to change file'),
+        SizedBox(height: 14.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.check_circle_rounded,
+              color: branding.accent,
+              size: 18.sp,
+            ),
+            SizedBox(width: 6.w),
+            Flexible(
+              child: Text(
+                fileName,
                 style: GoogleFonts.cairo(
-                  fontSize: 11.sp,
-                  color: branding.secondaryText,
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w600,
+                  color: branding.primaryText,
                 ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
+            ),
+          ],
+        ),
+        SizedBox(height: 12.h),
+        Text(
+          AppTranslations.getText(context, 'Tap to change file'),
+          style: GoogleFonts.cairo(
+            fontSize: 11.sp,
+            color: branding.secondaryText,
           ),
         ),
       ],
-    );
-  }
-}
-
-class _KycDisclosureCard extends StatelessWidget {
-  final AppBrandingConfig branding;
-  final BuildContext context;
-  final bool consent;
-  final ValueChanged<bool?> onConsentChanged;
-  final VoidCallback onOpenPrivacy;
-  final VoidCallback onOpenAmlKyc;
-
-  const _KycDisclosureCard({
-    required this.branding,
-    required this.context,
-    required this.consent,
-    required this.onConsentChanged,
-    required this.onOpenPrivacy,
-    required this.onOpenAmlKyc,
-  });
-
-  @override
-  Widget build(BuildContext ctx) {
-    final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: branding.cardBg,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(
-          color: consent
-              ? branding.accent.withValues(alpha: 0.45)
-              : branding.hintText.withValues(alpha: 0.3),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Transform.translate(
-                offset: const Offset(0, -2),
-                child: Checkbox(
-                  value: consent,
-                  onChanged: onConsentChanged,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  isArabic
-                      ? 'يجمع Hawwel App مستندي التحقق لمعالجة طلب KYC، منع الاحتيال، فحوصات الامتثال، وحماية الحساب. قد نحتفظ بسجلات التحقق حسب المتطلبات القانونية أو الامتثالية. يتطلب الرفع الحالي صورتين للمستند (الوجه الأمامي والخلفي)، وقد نطلب مستندات إضافية لاحقًا.'
-                      : 'Hawwel App collects verification documents to process KYC checks, prevent fraud, perform compliance reviews, and protect your account. Verification records may be retained where required for legal, compliance, security, or fraud-prevention purposes. The current upload requires two document images (front and back), and additional documents may be requested later.',
-                  style: GoogleFonts.cairo(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w500,
-                    color: branding.secondaryText,
-                    height: 1.45,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 6.h),
-          Wrap(
-            spacing: 12.w,
-            runSpacing: 6.h,
-            children: [
-              GestureDetector(
-                onTap: onOpenPrivacy,
-                child: Text(
-                  isArabic ? 'سياسة الخصوصية' : 'Privacy Policy',
-                  style: GoogleFonts.cairo(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                    color: branding.accent,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: onOpenAmlKyc,
-                child: Text(
-                  isArabic ? 'سياسة AML/KYC' : 'AML/KYC Policy',
-                  style: GoogleFonts.cairo(
-                    fontSize: 12.sp,
-                    fontWeight: FontWeight.w700,
-                    color: branding.accent,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ── Failure Banner ────────────────────────────────────────────────────────────
-class _FailureBanner extends StatelessWidget {
-  final AppBrandingConfig branding;
-  final String message;
-  const _FailureBanner({required this.branding, required this.message});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 12.h),
-      decoration: BoxDecoration(
-        color: branding.error.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(14.r),
-        border: Border.all(color: branding.error.withValues(alpha: 0.4)),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Icon(Icons.error_outline_rounded, color: branding.error, size: 18.sp),
-          SizedBox(width: 8.w),
-          Expanded(
-            child: Text(
-              message,
-              style: GoogleFonts.cairo(
-                fontSize: 12.sp,
-                fontWeight: FontWeight.w600,
-                color: branding.error,
-                height: 1.4,
-              ),
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

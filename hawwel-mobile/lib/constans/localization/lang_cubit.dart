@@ -28,12 +28,13 @@ class LanguageCubit extends Cubit<Language> {
     final prefs = await SharedPreferences.getInstance();
 
     if (!prefs.containsKey("app_language")) {
-      final deviceLang =
-          WidgetsBinding.instance.platformDispatcher.locale.languageCode;
-      final langCode = deviceLang == "ar" ? "ar" : "en";
+      final deviceLang = WidgetsBinding.instance.window.locale.languageCode;
 
-      await prefs.setString("app_language", langCode);
-      emit(langCode == "ar" ? Language.arabic : Language.english);
+      if (deviceLang == "ar") {
+        emit(Language.arabic);
+      } else {
+        emit(Language.english);
+      }
       return;
     }
 

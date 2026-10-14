@@ -3,8 +3,7 @@ import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/send_currency_helper.dart';
+import 'package:usdt/constans/api_servise.dart';
 
 class AppBrandingConfig {
   final String themeMode;
@@ -224,32 +223,32 @@ class AppBrandingConfig {
   LinearGradient buildHeaderGradient() {
     final a = gradientAlignments(headerGradientAngle);
     return LinearGradient(begin: a[0], end: a[1], colors: [
-      gradientStartColorValue.withValues(alpha: headerOpacity),
-      gradientEndColorValue.withValues(alpha: headerOpacity),
+      gradientStartColorValue.withOpacity(headerOpacity),
+      gradientEndColorValue.withOpacity(headerOpacity),
     ]);
   }
 
   LinearGradient buildButtonGradient() {
     final a = gradientAlignments(buttonGradientAngle);
     return LinearGradient(begin: a[0], end: a[1], colors: [
-      buttonGradientStart.withValues(alpha: buttonOpacity),
-      buttonGradientEnd.withValues(alpha: buttonOpacity),
+      buttonGradientStart.withOpacity(buttonOpacity),
+      buttonGradientEnd.withOpacity(buttonOpacity),
     ]);
   }
 
   LinearGradient buildCardGradient() {
     final a = gradientAlignments(cardGradientAngle);
     return LinearGradient(begin: a[0], end: a[1], colors: [
-      cardGradientStart.withValues(alpha: cardOpacity),
-      cardGradientEnd.withValues(alpha: cardOpacity),
+      cardGradientStart.withOpacity(cardOpacity),
+      cardGradientEnd.withOpacity(cardOpacity),
     ]);
   }
 
   LinearGradient buildNavBarGradient() {
     final a = gradientAlignments(navBarGradientAngle);
     return LinearGradient(begin: a[0], end: a[1], colors: [
-      gradientStartColorValue.withValues(alpha: navBarOpacity),
-      gradientEndColorValue.withValues(alpha: navBarOpacity),
+      gradientStartColorValue.withOpacity(navBarOpacity),
+      gradientEndColorValue.withOpacity(navBarOpacity),
     ]);
   }
 
@@ -261,7 +260,7 @@ class AppBrandingConfig {
       );
     }
     return BoxDecoration(
-      color: buttonBg.withValues(alpha: buttonOpacity),
+      color: buttonBg.withOpacity(buttonOpacity),
       borderRadius: BorderRadius.circular(radius),
     );
   }
@@ -275,7 +274,7 @@ class AppBrandingConfig {
       );
     }
     return BoxDecoration(
-      color: cardBg.withValues(alpha: cardOpacity),
+      color: cardBg.withOpacity(cardOpacity),
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(color: cardBorder, width: borderWidth),
     );
@@ -299,24 +298,14 @@ final ValueNotifier<AppBrandingConfig> appBrandingNotifier = ValueNotifier(
 class AppBrandingService {
   static Future<void> load() async {
     try {
-      final response = await Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 8),
-          receiveTimeout: const Duration(seconds: 8),
-        ),
-      ).get('${ApiService.baseURL}/app-visual-identity/public');
+      final response = await Dio().get(
+        '${ApiService.baseURL}/app-visual-identity/public',
+      );
       final data = response.data;
       if (data is Map && data['error'] == false && data['data'] is Map) {
-        final payload = Map<String, dynamic>.from(data['data']);
-        appBrandingNotifier.value = AppBrandingConfig.fromJson(payload);
-        // Same call carries which stablecoins may still fund a transfer, so a
-        // coin can be withdrawn server-side without an app-store release.
-        final allowed = payload['allowedSendCurrencies'];
-        if (allowed is List) {
-          SendCurrencyHelper.updateAllowedFromSymbols(
-            allowed.map((value) => value.toString()).toList(),
-          );
-        }
+        appBrandingNotifier.value = AppBrandingConfig.fromJson(
+          Map<String, dynamic>.from(data['data']),
+        );
       }
     } catch (e) {
       log('Branding load failed: $e');

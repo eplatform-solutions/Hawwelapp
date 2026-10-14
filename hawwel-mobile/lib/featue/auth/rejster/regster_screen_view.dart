@@ -3,23 +3,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:hawwel/constans/country_defaults_helper.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/digit_utils.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/localization/app_locale.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/style.dart';
-import 'package:hawwel/constans/widgets/password_requirements_hint.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-import 'package:hawwel/featue/auth/otp/widjt/top_screen.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
-import 'package:hawwel/featue/auth/rejster/data/cubit/regster_cubut.dart';
-import 'package:hawwel/featue/auth/rejster/register_phone_verify_view.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_city/cubit_city.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/ip_country_lookup.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/auth/otp/widjt/top_screen.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubi_statet.dart';
+import 'package:usdt/featue/auth/rejster/data/cubit/regster_cubut.dart';
+import 'package:usdt/featue/auth/rejster/register_phone_verify_view.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_city/cubit_city.dart';
 
 class Regsterview extends StatefulWidget {
   const Regsterview({super.key});
@@ -31,61 +27,34 @@ class Regsterview extends StatefulWidget {
 class _RegsterviewState extends State<Regsterview> {
   bool _viewpassword = true;
   bool _viewpassword1 = true;
-  bool _registerConsent = false;
   final _formKey = GlobalKey<FormState>();
 
+  /// إذا اختار المستخدم الدولة يدويًا قبل انتهاء طلب الـ IP لا نستبدل اختياره.
+  bool _countryPinnedByUser = false;
+
   Country selectedCountry = Country(
-    phoneCode: '49',
-    countryCode: 'DE',
+    phoneCode: '966',
+    countryCode: 'SA',
     e164Sc: 0,
     geographic: true,
     level: 1,
-    name: 'Germany',
-    example: '15123456789',
-    displayName: 'Germany',
-    displayNameNoCountryCode: 'Germany',
+    name: 'Saudi Arabia',
+    example: '512345678',
+    displayName: 'Saudi Arabia',
+    displayNameNoCountryCode: 'Saudi Arabia',
     e164Key: '',
   );
 
-  void _onRegisterPhoneChanged(String value) {
-    final cubit = context.read<RegisterCubit>();
-    final normalized = normalizePhoneLikeInput(value);
-    if (normalized != value) {
-      cubit.phonee.value = TextEditingValue(
-        text: normalized,
-        selection: TextSelection.collapsed(offset: normalized.length),
-      );
-    }
-  }
-
   /// يحدّث رمز الدولة في الطلب ومنتقي الهاتف (قائمة كاملة من country_picker، بلا قيد من لوحة التحكم).
-  void _applySignupCountry(Country c) {
+  void _applySignupCountry(Country c, {bool userSelected = true}) {
+    if (userSelected) {
+      _countryPinnedByUser = true;
+    }
     setState(() {
       selectedCountry = c;
     });
     context.read<RegisterCubit>().country.text = c.countryCode;
     context.read<CitiesCubit>().reset();
-  }
-
-  Future<void> _openExternalUrl(String url) async {
-    final uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          behavior: SnackBarBehavior.floating,
-          margin: EdgeInsets.zero,
-          padding: EdgeInsets.zero,
-          content: CustomSnackBar(
-            backgroundColor: appBrandingNotifier.value.error,
-            message: 'Unable to open link',
-            imagePath: AppImages.eerorrimage,
-          ),
-        ),
-      );
-    }
   }
 
   @override
@@ -104,9 +73,15 @@ class _RegsterviewState extends State<Regsterview> {
     context.read<RegisterCubit>().otpEmail.clear();
     context.read<RegisterCubit>().otpphone.clear();
     context.read<RegisterCubit>().phonee.clear();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
       context.read<RegisterCubit>().country.text = selectedCountry.countryCode;
+      final code = await IpCountryLookup.fetchCountryIso2();
+      if (!mounted || _countryPinnedByUser) return;
+      final parsed = code != null ? Country.tryParse(code) : null;
+      if (parsed != null) {
+        _applySignupCountry(parsed, userSelected: false);
+      }
     });
   }
 
@@ -116,7 +91,7 @@ class _RegsterviewState extends State<Regsterview> {
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Directionality(
-      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      textDirection: isArabic ? TextDirection.ltr : TextDirection.rtl,
       child: GestureDetector(
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
@@ -145,13 +120,6 @@ class _RegsterviewState extends State<Regsterview> {
               }
 
               if (state is RegisterOTPError) {
-                final message =
-                    AppLocaleHelper.isPhoneAlreadyRegisteredMessage(state.error)
-                    ? AppTranslations.getText(
-                        context,
-                        'phone_already_registered',
-                      )
-                    : state.error;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     backgroundColor: Colors.transparent,
@@ -162,7 +130,7 @@ class _RegsterviewState extends State<Regsterview> {
 
                     content: CustomSnackBar(
                       backgroundColor: branding.error,
-                      message: message,
+                      message: state.error,
                       imagePath: AppImages.eerorrimage,
                     ),
                   ),
@@ -170,13 +138,6 @@ class _RegsterviewState extends State<Regsterview> {
               }
 
               if (state is RegisterError) {
-                final message =
-                    AppLocaleHelper.isPhoneAlreadyRegisteredMessage(state.error)
-                    ? AppTranslations.getText(
-                        context,
-                        'phone_already_registered',
-                      )
-                    : state.error;
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
                     backgroundColor: Colors.transparent,
@@ -187,7 +148,7 @@ class _RegsterviewState extends State<Regsterview> {
 
                     content: CustomSnackBar(
                       backgroundColor: branding.error,
-                      message: message,
+                      message: state.error,
                       imagePath: AppImages.eerorrimage,
                     ),
                     // Text(state.message)
@@ -208,22 +169,18 @@ class _RegsterviewState extends State<Regsterview> {
 
   Widget buildRegisterUI(BuildContext context, RegisterState state) {
     final branding = appBrandingNotifier.value;
-    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
     return Form(
       key: _formKey,
       child: Column(
         children: [
           GradientHeader2(
             title: AppTranslations.getText(context, 'create_account'),
-            v: 78,
-            headerHeight: 180,
-            useModernBackButton: true,
-            topLeftImage: AppImages.iconback,
+            v: 100,
           ),
 
           Expanded(
             child: SingleChildScrollView(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 25.h),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
@@ -233,14 +190,12 @@ class _RegsterviewState extends State<Regsterview> {
                         child: TextFieldCustom(
                           validator: (value) =>
                               validateFullName(value, context),
-                          controller: isArabic
-                              ? context.read<RegisterCubit>().firstName
-                              : context.read<RegisterCubit>().lastName,
+                          controller: context.read<RegisterCubit>().lastName,
                           hintText: AppTranslations.getText(
                             context,
-                            isArabic ? 'name_hint' : 'surname_hint',
+                            'surname_hint',
                           ),
-                          type: TextInputType.name,
+                          type: TextInputType.text,
                           hintStyle: AppStyle.meduim16grey,
                         ),
                       ),
@@ -249,18 +204,70 @@ class _RegsterviewState extends State<Regsterview> {
                         child: TextFieldCustom(
                           validator: (value) =>
                               validateFullName(value, context),
-                          controller: isArabic
-                              ? context.read<RegisterCubit>().lastName
-                              : context.read<RegisterCubit>().firstName,
+                          controller: context.read<RegisterCubit>().firstName,
                           hintText: AppTranslations.getText(
                             context,
-                            isArabic ? 'surname_hint' : 'name_hint',
+                            'name_hint',
                           ),
-                          type: TextInputType.text,
+                          type: TextInputType.name,
                           hintStyle: AppStyle.meduim16grey,
                         ),
                       ),
                     ],
+                  ),
+                  SizedBox(height: 15.h),
+
+                  TextFieldCustom(
+                    validator: (value) => contry(value, context),
+                    controller: context.read<RegisterCubit>().country,
+                    hintText: AppTranslations.getText(context, 'country_hint'),
+                    readOnly: true,
+                    type: TextInputType.text,
+                    onTap: () {
+                      FocusScope.of(context).unfocus();
+                      _showWorldCountryPicker(context);
+                    },
+                    prefixIcon: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () {
+                        FocusScope.of(context).unfocus();
+                        _showWorldCountryPicker(context);
+                      },
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 8.w),
+                        child: SizedBox(
+                          width: 150.w,
+                          child: Row(
+                            children: [
+                              Image.asset(
+                                AppImages.trkyicon,
+                                height: 22.h,
+                                width: 22.h,
+                                color: branding.secondaryText,
+                              ),
+                              SizedBox(width: 6.w),
+                              Expanded(
+                                child: Text(
+                                  CountryLocalizations.of(context)?.countryName(
+                                        countryCode:
+                                            selectedCountry.countryCode,
+                                      ) ??
+                                      selectedCountry.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: GoogleFonts.cairo(
+                                    fontSize: 12.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: branding.secondaryText,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    hintStyle: AppStyle.meduim16grey,
                   ),
                   SizedBox(height: 15.h),
 
@@ -392,10 +399,20 @@ class _RegsterviewState extends State<Regsterview> {
                   //         child: Row(
                   //           mainAxisAlignment: MainAxisAlignment.center,
                   //           children: [
-                  //             Text(
-                  //               selectedCountry.flagEmoji,
-                  //               style: const TextStyle(fontSize: 15),
-                  //             ),
+                  //             // Text(
+                  //             //   countryEmoji(selectedCountry.countryCode),
+                  //             //   style: const TextStyle(fontSize: 18),
+                  //             // ),
+                  //             selectedCountry.countryCode == "SY"
+                  //                 ? Image.asset(
+                  //                     "asset/syrianewsyria.png",
+                  //                     width: 15.w,
+                  //                     height: 15.h,
+                  //                   )
+                  //                 : Text(
+                  //                     selectedCountry.flagEmoji,
+                  //                     style: const TextStyle(fontSize: 15),
+                  //                   ),
                   //             const SizedBox(width: 4),
                   //             Text(
                   //               textDirection: TextDirection.ltr,
@@ -412,125 +429,59 @@ class _RegsterviewState extends State<Regsterview> {
                   IntrinsicHeight(
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: isArabic
-                          ? [
-                              GestureDetector(
-                                onTap: () => _showWorldCountryPicker(context),
-                                child: Container(
-                                  width: 85.w,
-                                  decoration: BoxDecoration(
-                                    color: branding.inputBorder,
-                                    border: Border.all(
-                                      color: branding.iconPrimary,
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
+                      children: [
+                        Expanded(
+                          child: TextFieldCustom(
+                            validator: (value) =>
+                                validatePhoneNumber(value, context),
+                            controller: context.read<RegisterCubit>().phonee,
+                            hintText: AppTranslations.getText(
+                              context,
+                              'enter phone',
+                            ),
+                            type: TextInputType.number,
+                            hintStyle: AppStyle.meduim16grey,
+                          ),
+                        ),
+                        SizedBox(width: 8.w),
+                        GestureDetector(
+                          onTap: () => _showWorldCountryPicker(context),
+                          child: Container(
+                            width: 85.w,
+                            // لاحظ حذفنا الـ height الثابت ليعمل الـ stretch
+                            decoration: BoxDecoration(
+                              color: branding.inputBorder,
+                              border: Border.all(color: branding.buttonBg),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                selectedCountry.countryCode == "SY"
+                                    ? Image.asset(
+                                        "asset/syrianewsyria.png",
+                                        width: 15.w,
+                                        height: 15.h,
+                                      )
+                                    : Text(
+                                        selectedCountry.flagEmoji,
+                                        style: const TextStyle(fontSize: 15),
+                                      ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '+${selectedCountry.phoneCode}',
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  child: Directionality(
-                                    textDirection: TextDirection.ltr,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        CountryDefaultsHelper.countryFlag(
-                                          selectedCountry.countryCode,
-                                          size: 15,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '+${selectedCountry.phoneCode}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textDirection: TextDirection.ltr,
-                                        ),
-                                        const Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  textDirection: TextDirection.ltr,
                                 ),
-                              ),
-                              SizedBox(width: 8.w),
-                              Expanded(
-                                child: TextFieldCustom(
-                                  validator: (value) =>
-                                      validatePhoneNumber(value, context),
-                                  controller: context
-                                      .read<RegisterCubit>()
-                                      .phonee,
-                                  hintText: AppTranslations.getText(
-                                    context,
-                                    'enter phone',
-                                  ),
-                                  type: TextInputType.number,
-                                  hintStyle: AppStyle.meduim16grey,
-                                  onChanged: _onRegisterPhoneChanged,
-                                ),
-                              ),
-                            ]
-                          : [
-                              Expanded(
-                                child: TextFieldCustom(
-                                  validator: (value) =>
-                                      validatePhoneNumber(value, context),
-                                  controller: context
-                                      .read<RegisterCubit>()
-                                      .phonee,
-                                  hintText: AppTranslations.getText(
-                                    context,
-                                    'enter phone',
-                                  ),
-                                  type: TextInputType.number,
-                                  hintStyle: AppStyle.meduim16grey,
-                                  onChanged: _onRegisterPhoneChanged,
-                                ),
-                              ),
-                              SizedBox(width: 8.w),
-                              GestureDetector(
-                                onTap: () => _showWorldCountryPicker(context),
-                                child: Container(
-                                  width: 85.w,
-                                  decoration: BoxDecoration(
-                                    color: branding.inputBorder,
-                                    border: Border.all(
-                                      color: branding.iconPrimary,
-                                      width: 2,
-                                    ),
-                                    borderRadius: BorderRadius.circular(15),
-                                  ),
-                                  child: Directionality(
-                                    textDirection: TextDirection.ltr,
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        CountryDefaultsHelper.countryFlag(
-                                          selectedCountry.countryCode,
-                                          size: 15,
-                                        ),
-                                        const SizedBox(width: 4),
-                                        Text(
-                                          '+${selectedCountry.phoneCode}',
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                          textDirection: TextDirection.ltr,
-                                        ),
-                                        const Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 20,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
+                                const Icon(Icons.arrow_drop_down, size: 20),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 15.h),
@@ -554,7 +505,6 @@ class _RegsterviewState extends State<Regsterview> {
                     hintStyle: AppStyle.meduim16grey,
                     obscureText: _viewpassword,
                   ),
-                  const PasswordRequirementsHint(),
                   SizedBox(height: 15.h),
 
                   TextFieldCustom(
@@ -580,91 +530,6 @@ class _RegsterviewState extends State<Regsterview> {
                       },
                     ),
                     obscureText: _viewpassword1,
-                  ),
-                  SizedBox(height: 14.h),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 12.w,
-                      vertical: 10.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: branding.cardBg,
-                      borderRadius: BorderRadius.circular(14.r),
-                      border: Border.all(
-                        color: _registerConsent
-                            ? branding.accent.withValues(alpha: 0.45)
-                            : branding.hintText.withValues(alpha: 0.25),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Transform.translate(
-                          offset: const Offset(0, -2),
-                          child: Checkbox(
-                            value: _registerConsent,
-                            onChanged: (value) {
-                              setState(() => _registerConsent = value ?? false);
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                isArabic
-                                    ? 'أوافق على الشروط والأحكام وسياسة الخصوصية، وأفهم أن بياناتي ستُستخدم لإنشاء الحساب والتحقق وتقديم خدمات طلبات التحويل الرقمية.'
-                                    : 'I agree to the Terms and Privacy Policy and understand that my data will be used to create my account, verify my identity, and provide digital transfer request services.',
-                                style: GoogleFonts.cairo(
-                                  fontSize: 12.sp,
-                                  fontWeight: FontWeight.w500,
-                                  color: branding.secondaryText,
-                                  height: 1.45,
-                                ),
-                              ),
-                              SizedBox(height: 8.h),
-                              Wrap(
-                                spacing: 12.w,
-                                runSpacing: 6.h,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => _openExternalUrl(
-                                      'https://hawwelapp.com/terms',
-                                    ),
-                                    child: Text(
-                                      isArabic ? 'الشروط والأحكام' : 'Terms',
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w700,
-                                        color: branding.accent,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
-                                  GestureDetector(
-                                    onTap: () => _openExternalUrl(
-                                      'https://hawwelapp.com/privacy',
-                                    ),
-                                    child: Text(
-                                      isArabic
-                                          ? 'سياسة الخصوصية'
-                                          : 'Privacy Policy',
-                                      style: GoogleFonts.cairo(
-                                        fontSize: 12.sp,
-                                        fontWeight: FontWeight.w700,
-                                        color: branding.accent,
-                                        decoration: TextDecoration.underline,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
                   ),
                   SizedBox(height: 30.h),
 
@@ -698,34 +563,8 @@ class _RegsterviewState extends State<Regsterview> {
                         });
                         return;
                       }
-                      if (!_registerConsent) {
-                        if (!context.mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            backgroundColor: Colors.transparent,
-                            elevation: 0,
-                            behavior: SnackBarBehavior.floating,
-                            margin: EdgeInsets.zero,
-                            padding: EdgeInsets.zero,
-                            content: CustomSnackBar(
-                              backgroundColor: branding.error,
-                              message: isArabic
-                                  ? 'يرجى الموافقة على الشروط والخصوصية للمتابعة.'
-                                  : 'Please agree to Terms and Privacy Policy to continue.',
-                              imagePath: AppImages.eerorrimage,
-                            ),
-                          ),
-                        );
-                        return;
-                      }
 
-                      final raw = normalizePhoneLikeInput(
-                        cubit.phonee.text,
-                      ).trim();
-                      cubit.phonee.value = TextEditingValue(
-                        text: raw,
-                        selection: TextSelection.collapsed(offset: raw.length),
-                      );
+                      final raw = cubit.phonee.text.trim();
                       final isValid = await validatePhoneWithCountry(
                         phone: raw,
                         countryCode: selectedCountry.countryCode,
@@ -803,27 +642,23 @@ class _RegsterviewState extends State<Regsterview> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text(
-                        AppTranslations.getText(
-                          context,
-                          'already_have_account',
-                        ),
-                        style: GoogleFonts.cairo(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w600,
-                          color: branding.hintText,
-                        ),
-                      ),
-                      SizedBox(width: 6.w),
                       GestureDetector(
                         onTap: () => Navigator.pop(context),
                         child: Text(
-                          AppTranslations.getText(context, 'login_now'),
+                          AppTranslations.getText(context, 'login_title'),
                           style: GoogleFonts.cairo(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w600,
                             color: branding.buttonBg,
                           ),
+                        ),
+                      ),
+                      Text(
+                        AppTranslations.getText(context, 'dont_have_account'),
+                        style: GoogleFonts.cairo(
+                          fontSize: 15.sp,
+                          fontWeight: FontWeight.w600,
+                          color: branding.hintText,
                         ),
                       ),
                     ],
@@ -891,11 +726,10 @@ class _RegsterviewState extends State<Regsterview> {
                         filteredCountries = allCountries.where((country) {
                           // جلب الاسم المترجم للبحث فيه
                           final String localizedName =
-                              CountryDefaultsHelper.localizedCountryName(
-                                context,
-                                country.countryCode,
-                                fallback: country.name,
-                              );
+                              CountryLocalizations.of(context)?.countryName(
+                                countryCode: country.countryCode,
+                              ) ??
+                              country.name;
 
                           final searchLower = val.toLowerCase();
                           return localizedName.toLowerCase().contains(
@@ -917,18 +751,25 @@ class _RegsterviewState extends State<Regsterview> {
                       itemBuilder: (context, index) {
                         final country = filteredCountries[index];
 
+                        // ✅ الحل الآمن لجلب الاسم المترجم:
+                        // نستخدم CountryLocalizations.of(context) للحصول على الاسم بناءً على لغة التطبيق الحالية
                         final String displayCountryName =
-                            CountryDefaultsHelper.localizedCountryName(
+                            CountryLocalizations.of(
                               context,
-                              country.countryCode,
-                              fallback: country.name,
-                            );
+                            )?.countryName(countryCode: country.countryCode) ??
+                            country.name;
 
                         return ListTile(
-                          leading: CountryDefaultsHelper.countryFlag(
-                            country.countryCode,
-                            size: 24,
-                          ),
+                          leading: country.countryCode == "SY"
+                              ? Image.asset(
+                                  "asset/syrianewsyria.png",
+                                  width: 30.w,
+                                  height: 20.h,
+                                )
+                              : Text(
+                                  country.flagEmoji,
+                                  style: const TextStyle(fontSize: 24),
+                                ),
                           title: Text(
                             displayCountryName,
                             style: GoogleFonts.cairo(

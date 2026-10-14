@@ -1,10 +1,11 @@
+import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/auth/rejster/data/repo/rejster_repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/constans/token.dart';
+import 'package:usdt/featue/auth/rejster/data/repo/rejster_repo.dart';
 
 class ImplmentReporejster extends Reporejster {
   final ApiService _apiService;
@@ -46,7 +47,12 @@ class ImplmentReporejster extends Reporejster {
   Future<Either<Failur, Map<String, dynamic>>> sendotphone({
     required String phonenumber,
   }) async {
+    log('--- 📲 بدء إرسال OTP عبر الهاتف ---');
+    log('📞 الرقم المرسل: $phonenumber');
+
     try {
+      log('🚀 إرسال طلب POST إلى /verification-codes/send...');
+
       Response res = await _apiService.postdata(
         endpoint: "/verification-codes/send",
         data: {
@@ -57,29 +63,62 @@ class ImplmentReporejster extends Reporejster {
         needtoken: false,
       );
 
+      log('✅ استجابة API وصلت');
+      log('📡 Status Code: ${res.statusCode}');
+      log('📦 Response Data: ${res.data}');
+
       final prefs = await SharedPreferences.getInstance();
       final lang = prefs.getString("app_language") ?? "ar";
+
+      log('🌐 لغة التطبيق الحالية: $lang');
 
       final hasError = res.data["error"] == true;
       final session = res.data["data"]?["session"];
 
+      log('🔍 تحليل الاستجابة:');
+      log('  error = ${res.data["error"]}');
+      log('  session = $session');
+
       if (!hasError) {
+        log('📨 OTP أُرسل بنجاح عبر SMS');
+
         return right({"msg": res.data["msg"][lang], "session": session});
       } else {
         final errorMsg = res.data["msg"]?[lang] ?? 'فشل إرسال رمز التحقق';
 
+        log('❌ فشل في إرسال OTP');
+        log('  الرسالة: $errorMsg');
+
         return left(ServierFailur(errorMsg, 400));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
+      log('💥 استثناء أثناء إرسال OTP عبر الهاتف');
+      log('الخطأ: $e');
+      log('تتبع الخطأ:\n$stackTrace');
+
       if (e is DioException) {
-        return left(ServierFailur.fromDioError(e));
+        log('⚠️ نوع الخطأ: DioException');
+
+        if (e.response != null) {
+          log('📡 Status Code: ${e.response?.statusCode}');
+          log('📦 Error Data: ${e.response?.data}');
+        }
+
+        log('🔗 URL: ${e.requestOptions.uri}');
+
+        final failure = ServierFailur.fromDioError(e);
+        log('📤 إرجاع فشل: ${failure.errMassage}');
+
+        return left(failure);
       }
 
-      return left(ServierFailur('Send OTP failed: ${e.toString()}', 500));
+      final failure = ServierFailur('Send OTP failed: ${e.toString()}', 500);
+
+      log('📤 إرجاع فشل عام: ${failure.errMassage}');
+      return left(failure);
     }
   }
 
-  @override
   Future<Either<Failur, Map<String, dynamic>>> sendotpchang({
     required String email,
   }) async {
@@ -113,15 +152,9 @@ class ImplmentReporejster extends Reporejster {
     required String email,
   }) async {
     try {
-      final value = email.trim();
-      final isPhone = RegExp(r'^\+?[0-9]{7,15}$').hasMatch(value);
-      final Map<String, dynamic> requestData = {
-        if (isPhone) "mobilePhone": value else "email": value,
-        "typeOfUse": "login",
-      };
       Response res = await _apiService.postdata(
         endpoint: "/verification-codes/send",
-        data: requestData,
+        data: {"email": email, "typeOfUse": "login"},
         needtoken: false,
       );
 
@@ -213,19 +246,15 @@ class ImplmentReporejster extends Reporejster {
   //     return left(ServierFailur(e.toString(), 500));
   //   }
   // }
-  @override
   Future<Either<Failur, Map<String, dynamic>>> verifyOtp({
     required String session,
     required String code,
-    CancelToken? cancelToken,
   }) async {
     try {
       final res = await _apiService.postdata(
         endpoint: "/verification-codes/verify",
         data: {"session": session, "code": code},
         needtoken: false,
-        cancelToken: cancelToken,
-        timeout: const Duration(seconds: 25),
       );
 
       final prefs = await SharedPreferences.getInstance();
@@ -263,7 +292,6 @@ class ImplmentReporejster extends Reporejster {
   }) async {
     try {
       final trimmedEmail = email.trim();
-      // country = ISO code (مثل SY/CH) لربط بلد المرسل في الحساب
       final Map<String, dynamic> payload = {
         "name": firstname,
         "nickname": lastname,
@@ -290,21 +318,23 @@ class ImplmentReporejster extends Reporejster {
       final prefs = await SharedPreferences.getInstance();
       final lang = prefs.getString("app_language") ?? "ar";
 
+      log("REGISTER RESPONSE: ${response.data}");
+
       // نجاح
       if (response.statusCode == 200 && response.data["error"] == false) {
         String msg =
             response.data["msg"]?[lang] ??
             response.data["msg"]?["ar"] ??
             "تم التسجيل بنجاح";
-        final token = (response.data["data"]?["token"] ?? "").toString().trim();
+        final token = response.data["data"]?["token"];
+        log('🎉 تسجيل الدخول ناجح!');
 
-        if (token.isNotEmpty) {
+        if (token != null) {
+          log('💾 حفظ التوكن في SharedPreference...');
           await Functions().setToken(token);
+          log('✅ التوكن حُفظ بنجاح');
         } else {
-          final missingTokenMessage = lang == 'ar'
-              ? 'فشل إنشاء جلسة الحساب. يرجى المحاولة مرة أخرى.'
-              : 'Failed to create account session. Please try again.';
-          return left(ServierFailur(missingTokenMessage, 500));
+          log('⚠️ تحذير: لم يتم استلام توكن من السيرفر!');
         }
         return right(msg);
       }
@@ -317,8 +347,16 @@ class ImplmentReporejster extends Reporejster {
 
       return left(ServierFailur(errorMessage, response.statusCode ?? 500));
     } on DioException catch (e) {
+      // لوج مفصل مثل login
+      log("📌 Dio ERROR (REGISTER) ----------------------------");
+      log("Status Code: ${e.response?.statusCode}");
+      log("Data: ${e.response?.data}");
+      log("Message: ${e.message}");
+      log("-----------------------------------------------------");
+
       return left(ServierFailur.fromDioError(e));
     } catch (e) {
+      log("📌 UNKNOWN ERROR (REGISTER): $e");
       return left(ServierFailur(e.toString(), 600));
     }
   }
@@ -328,9 +366,9 @@ class ImplmentReporejster extends Reporejster {
 // import 'package:dartz/dartz.dart';
 // import 'package:dio/dio.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:hawwel/constans/api_servise.dart';
-// import 'package:hawwel/constans/failear.dart';
-// import 'package:hawwel/featue/auth/rejster/data/repo/rejster_repo.dart';
+// import 'package:usdt/constans/api_servise.dart';
+// import 'package:usdt/constans/failear.dart';
+// import 'package:usdt/featue/auth/rejster/data/repo/rejster_repo.dart';
 
 // class ImplmentReporejster extends Reporejster {
 //   final ApiService _apiService;
@@ -476,9 +514,9 @@ class ImplmentReporejster extends Reporejster {
 // import 'package:dartz/dartz.dart';
 // import 'package:dio/dio.dart';
 // import 'package:shared_preferences/shared_preferences.dart';
-// import 'package:hawwel/constans/api_servise.dart';
-// import 'package:hawwel/constans/failear.dart';
-// import 'package:hawwel/featue/auth/rejster/data/repo/rejster_repo.dart';
+// import 'package:usdt/constans/api_servise.dart';
+// import 'package:usdt/constans/failear.dart';
+// import 'package:usdt/featue/auth/rejster/data/repo/rejster_repo.dart';
 
 // class ImplmentReporejster extends Reporejster {
 //   final ApiService _apiService;

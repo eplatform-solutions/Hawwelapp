@@ -1,4 +1,4 @@
-import 'package:hawwel/featue/auth/welcomyou/data/model_country.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_country.dart';
 
 abstract class CountriesState {}
 

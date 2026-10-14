@@ -1,10 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/model_rate.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/repo_rate/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_rate.dart';
+import 'package:usdt/featue/auth/welcomyou/data/repo_rate/repo.dart';
 
 class ExchangeRatesRepoImpl implements ExchangeRatesRepo {
   final ApiService _api;
@@ -30,39 +29,39 @@ class ExchangeRatesRepoImpl implements ExchangeRatesRepo {
   @override
   Future<Either<Failur, ExchangeRateModel>> getExchangeRates() async {
     try {
-      debugPrint("🚀 [API Request] Path: /exchange-rates/all");
+      print("🚀 [API Request] Path: /exchange-rates/all");
 
       final response = await _api.get(endpoint: "/exchange-rates/all");
 
       // طباعة كل ما يتعلق بالرد الناجح
-      debugPrint("✅ [API Response] Success Status Code: ${response.statusCode}");
-      debugPrint("📦 [API Data Body]: ${response.data}");
+      print("✅ [API Response] Success Status Code: ${response.statusCode}");
+      print("📦 [API Data Body]: ${response.data}");
 
       // محاولة تحويل البيانات إلى Model مع تتبع الأخطاء
       try {
         final model = ExchangeRateModel.fromJson(response.data);
-        debugPrint("🎯 [Model Parsing] Success: ExchangeRateModel mapped correctly");
+        print("🎯 [Model Parsing] Success: ExchangeRateModel mapped correctly");
         return Right(model);
       } catch (parseError) {
-        debugPrint(
+        print(
           "❌ [Model Parsing] Error: Failed to parse JSON to ExchangeRateModel",
         );
-        debugPrint("Detailed Parsing Error: $parseError");
+        print("Detailed Parsing Error: $parseError");
         return Left(ServierFailur("خطأ في معالجة البيانات: $parseError", 500));
       }
     } catch (e) {
-      debugPrint("⚠️ [API Catch] An error occurred in getExchangeRates");
+      print("⚠️ [API Catch] An error occurred in getExchangeRates");
 
       if (e is DioException) {
-        debugPrint("🚫 [Dio Error] Type: ${e.type}");
-        debugPrint("🚫 [Dio Error] Status Code: ${e.response?.statusCode}");
-        debugPrint("🚫 [Dio Error] Response Data: ${e.response?.data}");
+        print("🚫 [Dio Error] Type: ${e.type}");
+        print("🚫 [Dio Error] Status Code: ${e.response?.statusCode}");
+        print("🚫 [Dio Error] Response Data: ${e.response?.data}");
 
         if (e.response?.statusCode == 401) {
           // طباعة تفاصيل الحظر تحديداً
           String msg =
               e.response?.data['msg']['ar'] ?? "تم حظر حسابك، تواصل مع الدعم";
-          debugPrint("🔒 [Account Blocked] Message: $msg");
+          print("🔒 [Account Blocked] Message: $msg");
           return Left(ServierFailur(msg, 401));
         }
 
@@ -70,7 +69,7 @@ class ExchangeRatesRepoImpl implements ExchangeRatesRepo {
       }
 
       // خطأ غير متوقع (ليس من نوع Dio)
-      debugPrint("❗ [Unknown Error]: ${e.toString()}");
+      print("❗ [Unknown Error]: ${e.toString()}");
       return Left(ServierFailur(e.toString(), 500));
     }
   }

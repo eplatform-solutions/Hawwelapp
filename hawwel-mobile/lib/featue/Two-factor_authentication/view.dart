@@ -2,17 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/feature_flags.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/Two-factor_authentication/data/cubit/cubit.dart';
-import 'package:hawwel/featue/Two-factor_authentication/data/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bar2.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/profail/data/cubit/cubit.dart';
-import 'package:hawwel/featue/profail/data/cubit/cubit_stat.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/Two-factor_authentication/data/cubit/cubit.dart';
+import 'package:usdt/featue/Two-factor_authentication/data/cubit/cubit_stat.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bar2.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
 
 class ActivationScreen extends StatefulWidget {
   const ActivationScreen({super.key});
@@ -22,30 +18,26 @@ class ActivationScreen extends StatefulWidget {
 }
 
 class _ActivationScreenState extends State<ActivationScreen> {
-  int _selectedOption = 0;
+  static int _savedSelectedOption = 3;
+  late int _selectedOption;
 
   @override
   void initState() {
     super.initState();
-    _selectedOption = _initialSelection();
+    _selectedOption = _savedSelectedOption;
   }
 
-  // Mirror the account's real 2FA state instead of a remembered index. The
-  // old default landed on "Deactivate", so a user opening this screen to
-  // turn 2FA on and tapping Next actually switched it off - with a green
-  // success toast. Options are [phone, (email, both), deactivate].
-  int _initialSelection() {
-    final userState = context.read<Userinfogcubit>().state;
-    if (userState is! UserinfoSuccessState) return 0;
-    final user = userState.user;
-    if (!user.twoFAEnabled) return 0;
-    if (kEmailFeaturesEnabled) {
-      final hasPhone = user.twoFAMethods.contains('mobile-phone');
-      final hasEmail = user.twoFAMethods.contains('email');
-      if (hasPhone && hasEmail) return 2;
-      if (hasEmail) return 1;
+  List<String> _mapSelectionToMethods() {
+    switch (_selectedOption) {
+      case 0:
+        return ['mobile-phone'];
+      case 1:
+        return ['email'];
+      case 2:
+        return ['mobile-phone', 'email'];
+      default:
+        return [];
     }
-    return 0;
   }
 
   @override
@@ -60,33 +52,27 @@ class _ActivationScreenState extends State<ActivationScreen> {
         subtitle: isArabic
             ? 'استقبال رمز التحقق عبر رسالة نصية'
             : 'Receive OTP via SMS',
-        methods: const ['mobile-phone'],
       ),
-      if (kEmailFeaturesEnabled) ...[
-        _Option(
-          icon: Icons.email_outlined,
-          label: AppTranslations.getText(context, 'Email'),
-          subtitle: isArabic
-              ? 'استقبال رمز التحقق عبر البريد الإلكتروني'
-              : 'Receive OTP via email',
-          methods: const ['email'],
-        ),
-        _Option(
-          icon: Icons.devices_rounded,
-          label: AppTranslations.getText(context, 'Phone number or email'),
-          subtitle: isArabic
-              ? 'استخدام كلا الطريقتين معاً'
-              : 'Use both methods together',
-          methods: const ['mobile-phone', 'email'],
-        ),
-      ],
+      _Option(
+        icon: Icons.email_outlined,
+        label: AppTranslations.getText(context, 'Email'),
+        subtitle: isArabic
+            ? 'استقبال رمز التحقق عبر البريد الإلكتروني'
+            : 'Receive OTP via email',
+      ),
+      _Option(
+        icon: Icons.devices_rounded,
+        label: AppTranslations.getText(context, 'Phone number or email'),
+        subtitle: isArabic
+            ? 'استخدام كلا الطريقتين معاً'
+            : 'Use both methods together',
+      ),
       _Option(
         icon: Icons.lock_open_rounded,
         label: AppTranslations.getText(context, 'Deactivate'),
         subtitle: isArabic
             ? 'إيقاف المصادقة الثنائية'
             : 'Turn off two-factor authentication',
-        methods: const [],
         isDeactivate: true,
       ),
     ];
@@ -109,25 +95,11 @@ class _ActivationScreenState extends State<ActivationScreen> {
                     textDirection:
                         isArabic ? TextDirection.rtl : TextDirection.ltr,
                     backgroundColor: branding.success,
-                    // Say what actually changed - the server's generic
-                    // "updated" text left testers unsure anything happened.
-                    message: options[_selectedOption].isDeactivate
-                        ? AppTranslations.getTextStatic(
-                            context, 'two_factor_disabled_confirmation')
-                        : AppTranslations.getTextStatic(
-                            context, 'two_factor_enabled_phone_confirmation'),
+                    message: state.message,
                     imagePath: AppImages.doneimage,
                   ),
                 ),
               );
-              // The button reads "Next" - without this the screen just sits
-              // there with the same options re-rendered, which looks like
-              // the tap did nothing at all.
-              Future.delayed(const Duration(milliseconds: 700), () {
-                if (context.mounted && Navigator.canPop(context)) {
-                  Navigator.pop(context);
-                }
-              });
             } else if (state is Change2FAError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -168,7 +140,26 @@ class _ActivationScreenState extends State<ActivationScreen> {
                           // Back row
                           Row(
                             children: [
-                              AppBackButton(),
+                              GestureDetector(
+                                onTap: () => Navigator.pop(context),
+                                child: Container(
+                                  width: 38.r,
+                                  height: 38.r,
+                                  decoration: BoxDecoration(
+                                    color: branding.buttonText
+                                        .withValues(alpha: 0.18),
+                                    borderRadius:
+                                        BorderRadius.circular(12.r),
+                                  ),
+                                  child: Icon(
+                                    isArabic
+                                        ? Icons.arrow_forward_ios_rounded
+                                        : Icons.arrow_back_ios_new_rounded,
+                                    color: branding.buttonText,
+                                    size: 18,
+                                  ),
+                                ),
+                              ),
                               Expanded(
                                 child: Text(
                                   AppTranslations.getText(
@@ -213,9 +204,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
                           Text(
                             AppTranslations.getText(
                               context,
-                              kEmailFeaturesEnabled
-                                  ? 'Do you want to activate the service via phone number or email?'
-                                  : 'two_factor_intro_phone',
+                              'Do you want to activate the service via phone number or email?',
                             ),
                             textAlign: TextAlign.center,
                             style: GoogleFonts.cairo(
@@ -235,9 +224,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
                 // ── Options list ───────────────────────────────────────
                 Expanded(
                   child: SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    physics: const BouncingScrollPhysics(),
                     padding: EdgeInsets.fromLTRB(18.w, 22.h, 18.w, 24.h),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -254,6 +241,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
                           return GestureDetector(
                             onTap: () => setState(() {
                               _selectedOption = i;
+                              _savedSelectedOption = i;
                             }),
                             child: AnimatedContainer(
                               duration: const Duration(milliseconds: 220),
@@ -367,10 +355,11 @@ class _ActivationScreenState extends State<ActivationScreen> {
                           onTap: state is Change2FALoading
                               ? null
                               : () {
-                                  final selected = options[_selectedOption];
+                                  final enabled = _selectedOption != 3;
+                                  final methods = _mapSelectionToMethods();
                                   context.read<Change2FACubit>().change2FA(
-                                        enabled: !selected.isDeactivate,
-                                        methods: selected.methods,
+                                        enabled: enabled,
+                                        methods: methods,
                                       );
                                 },
                           child: Ink(
@@ -414,7 +403,7 @@ class _ActivationScreenState extends State<ActivationScreen> {
                                         SizedBox(width: 8.w),
                                         Text(
                                           AppTranslations.getText(
-                                              context, 'save'),
+                                              context, 'next'),
                                           style: GoogleFonts.cairo(
                                             fontSize: 15.sp,
                                             fontWeight: FontWeight.w700,
@@ -444,14 +433,12 @@ class _Option {
   final IconData icon;
   final String label;
   final String subtitle;
-  final List<String> methods;
   final bool isDeactivate;
 
   const _Option({
     required this.icon,
     required this.label,
     required this.subtitle,
-    required this.methods,
     this.isDeactivate = false,
   });
 }

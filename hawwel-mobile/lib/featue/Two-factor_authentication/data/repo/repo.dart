@@ -1,6 +1,6 @@
  import 'package:dartz/dartz.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/Two-factor_authentication/data/repo/modal.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/Two-factor_authentication/data/repo/modal.dart';
 
 abstract class Change2FARepository {
   Future<Either<Failur, Change2FAResponse>> change2FA({

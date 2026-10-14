@@ -1,4 +1,4 @@
-// import 'package:hawwel/featue/auth/welcomyou/data/model_transfer.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/model_transfer.dart';
 
 // abstract class TransferState {}
 
@@ -16,7 +16,7 @@
 //   final String error;
 //   TransferFailure(this.error);
 // }
-import 'package:hawwel/featue/auth/welcomyou/data/model_ressponse_transfer.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_ressponse_transfer.dart';
 
 abstract class TransferState {}
 
@@ -32,12 +32,5 @@ class TransferSuccess extends TransferState {
 
 class TransferFailure extends TransferState {
   final String error;
-  final int? statusCode;
-  final String? errorCode;
-
-  TransferFailure(
-    this.error, {
-    this.statusCode,
-    this.errorCode,
-  });
+  TransferFailure(this.error);
 }

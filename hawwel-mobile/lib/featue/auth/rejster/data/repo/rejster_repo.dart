@@ -1,6 +1,5 @@
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
-import 'package:hawwel/constans/failear.dart';
+import 'package:usdt/constans/failear.dart';
 
 abstract class Reporejster {
   Future<Either<Failur, Map<String, dynamic>>> sendotpemail({
@@ -21,7 +20,6 @@ abstract class Reporejster {
   Future<Either<Failur, Map<String, dynamic>>> verifyOtp({
     required String session,
     required String code,
-    CancelToken? cancelToken,
   });
 
   Future<Either<Failur, String>> rejster({
@@ -40,7 +38,7 @@ abstract class Reporejster {
 }
 
 // import 'package:dartz/dartz.dart';
-// import 'package:hawwel/constans/failear.dart';
+// import 'package:usdt/constans/failear.dart';
 
 // abstract class Reporejster {
 //   Future<Either<Failur, Map<String, dynamic>>> sendotp({

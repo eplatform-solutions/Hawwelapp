@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/digit_utils.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class Trsletastkbl3 extends StatelessWidget {
-  static const Color _kDarkText = Color(0xFF111827);
-
   final String text1;
   final String text2;
   final String text3;
@@ -28,33 +25,6 @@ class Trsletastkbl3 extends StatelessWidget {
   Widget build(BuildContext context) {
     final branding = appBrandingNotifier.value;
 
-    final labelStyle = GoogleFonts.cairo(
-      fontSize: 12.sp,
-      fontWeight: FontWeight.w700,
-      color: _kDarkText,
-      height: 1.2,
-    );
-
-    final amountStyle = GoogleFonts.cairo(
-      fontSize: 20.sp,
-      fontWeight: FontWeight.w700,
-      color: _kDarkText,
-      height: 1.1,
-    );
-
-    final hintStyle = GoogleFonts.cairo(
-      fontSize: 20.sp,
-      fontWeight: FontWeight.w400,
-      color: _kDarkText.withValues(alpha: 0.35),
-      height: 1.1,
-    );
-
-    final symbolStyle = GoogleFonts.cairo(
-      fontSize: 11.sp,
-      fontWeight: FontWeight.w700,
-      color: _kDarkText,
-    );
-
     return Container(
       width: 148.w,
       padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 14.h),
@@ -68,10 +38,7 @@ class Trsletastkbl3 extends StatelessWidget {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        border: Border.all(
-          color: branding.accent.withValues(alpha: 0.4),
-          width: 1.5,
-        ),
+        border: Border.all(color: branding.accent.withValues(alpha: 0.4), width: 1.5),
         boxShadow: [
           BoxShadow(
             color: branding.accent.withValues(alpha: 0.12),
@@ -81,60 +48,95 @@ class Trsletastkbl3 extends StatelessWidget {
         ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            text1,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: labelStyle,
-          ),
-          SizedBox(height: 10.h),
+          // Label row
           Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 6.w,
+                height: 6.h,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: branding.buildHeaderGradient(),
+                ),
+              ),
+              SizedBox(width: 6.w),
+              Expanded(
+                child: Text(
+                  text1,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.cairo(
+                    fontSize: 11.sp,
+                    fontWeight: FontWeight.w500,
+                    color: branding.accent,
+                  ),
+                ),
+              ),
+            ],
+          ),
+
+          SizedBox(height: 10.h),
+
+          // Amount + symbol
+          Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Flexible(
+              Expanded(
                 child: isEditable
                     ? TextField(
                         controller: controller,
                         onChanged: onChanged,
-                        inputFormatters: const [
-                          WesternDigitsTextInputFormatter(),
-                        ],
-                        keyboardType: const TextInputType.numberWithOptions(
-                          decimal: true,
-                        ),
-                        textAlign: TextAlign.center,
-                        style: amountStyle,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
                         decoration: InputDecoration(
                           hintText: '0.00',
-                          hintStyle: hintStyle,
+                          hintStyle: GoogleFonts.cairo(
+                            fontSize: 20.sp,
+                            fontWeight: FontWeight.w300,
+                            color: branding.accent.withValues(alpha: 0.4),
+                          ),
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: EdgeInsets.zero,
+                        ),
+                        style: GoogleFonts.cairo(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w800,
+                          color: branding.accent,
+                          height: 1.1,
                         ),
                       )
                     : Text(
                         text3.isEmpty ? '0.00' : text3,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        textAlign: TextAlign.center,
-                        style: amountStyle,
+                        style: GoogleFonts.cairo(
+                          fontSize: 20.sp,
+                          fontWeight: FontWeight.w800,
+                          color: branding.accent,
+                          height: 1.1,
+                        ),
                       ),
               ),
-              SizedBox(width: 6.w),
+              SizedBox(width: 4.w),
               Padding(
                 padding: EdgeInsets.only(bottom: 2.h),
                 child: Container(
-                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                  padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
                     borderRadius: BorderRadius.circular(6.r),
+                    gradient: branding.buildHeaderGradient(),
                   ),
-                  child: Text(text2, style: symbolStyle),
+                  child: Text(
+                    text2,
+                    style: GoogleFonts.cairo(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.w700,
+                      color: branding.buttonText,
+                    ),
+                  ),
                 ),
               ),
             ],

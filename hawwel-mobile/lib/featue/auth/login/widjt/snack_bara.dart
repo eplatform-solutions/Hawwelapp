@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:hawwel/constans/app_branding.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class CustomSnackBar extends StatelessWidget {
   final String message;
@@ -24,46 +24,83 @@ class CustomSnackBar extends StatelessWidget {
     return Directionality(
       textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
       child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 16.w),
+        padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 24.w),
         child: Container(
-          width: double.infinity,
-          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+          height: 45.h,
+          width: 320.w,
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(14.r),
+
             boxShadow: [
               BoxShadow(
-                color: branding.primaryText.withValues(alpha: 0.15),
+                color: branding.primaryText.withOpacity(0.15),
                 blurRadius: 8,
                 offset: const Offset(0, 4),
               ),
             ],
           ),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Image.asset(
-                imagePath,
-                height: 20.h,
-                width: 20.w,
-                fit: BoxFit.contain,
-              ),
-              SizedBox(width: 8.w),
-              Expanded(
-                child: Text(
-                  message,
-                  textDirection: textDirection,
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    fontWeight: FontWeight.w600,
-                    color: branding.primaryText,
+          child: isArabic
+              ? Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Image.asset(
+                        imagePath,
+                        height: 20.h,
+                        width: 20.w,
+                        fit: BoxFit.contain,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        textDirection: textDirection,
+                        message,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          fontWeight: FontWeight.w600,
+                          color: branding.primaryText,
+                        ),
+                      ),
+                      //SizedBox(width: 10.w),
+                      // Image.asset(
+                      //   imagePath,
+                      //   height: 20.h,
+                      //   width: 20.w,
+                      //   fit: BoxFit.contain,
+                      // ),
+                    ],
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      SizedBox(width: 10.w),
+                      Image.asset(
+                        imagePath,
+                        height: 20.h,
+                        width: 20.w,
+                        fit: BoxFit.contain,
+                      ),
+                      SizedBox(width: 5.w),
+                      Text(
+                        textDirection: textDirection,
+                        message,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 9.sp,
+                          fontWeight: FontWeight.w600,
+                          color: branding.primaryText,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ),
-            ],
-          ),
         ),
       ),
     );

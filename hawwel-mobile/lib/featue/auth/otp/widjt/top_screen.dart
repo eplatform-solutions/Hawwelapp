@@ -1,17 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class GradientHeader2 extends StatelessWidget {
   final String title; // النص الديناميكي
-  final String? topLeftImage; // مطلوبة لإظهار زر العودة؛ تُستخدم كصورة بديلة فقط عند useModernBackButton = false
+  final String? topLeftImage;
 
   final double v; // الصورة الاختيارية
-  final double headerHeight;
-  final bool useModernBackButton;
-  final VoidCallback? onLeadingTap;
 
   const GradientHeader2({
     super.key,
@@ -19,9 +15,6 @@ class GradientHeader2 extends StatelessWidget {
 
     required this.title,
     this.topLeftImage,
-    this.headerHeight = 260,
-    this.useModernBackButton = true,
-    this.onLeadingTap,
   });
 
   @override
@@ -55,29 +48,25 @@ class GradientHeader2 extends StatelessWidget {
         // Applies selected global identity mode (solid/gradient/image).
         Container(
           width: 380.w,
-          height: headerHeight.h,
+          height: 260.h,
           decoration: headerDecoration,
         ),
 
         if (topLeftImage != null)
           Positioned(
-            top: 44.h,
-            left: isArabic ? null : 8.w,
-            right: isArabic ? 8.w : null,
-            child: useModernBackButton
-                ? AppBackButton(
-                    onTap: onLeadingTap,
-                    color: branding.textColorValue,
-                  )
-                : GestureDetector(
-                    onTap: onLeadingTap ?? () => Navigator.maybePop(context),
-                    child: Image.asset(
-                      topLeftImage!,
-                      height: 28.h,
-                      width: 28.w,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+            top: 50.h,
+            left: 5.w,
+            child: GestureDetector(
+              onTap: () {
+                Navigator.pop(context);
+              },
+              child: Image.asset(
+                topLeftImage!,
+                height: 30.h,
+                width: 30.w,
+                fit: BoxFit.contain,
+              ),
+            ),
           ),
         Positioned(
           // top: 120.h,

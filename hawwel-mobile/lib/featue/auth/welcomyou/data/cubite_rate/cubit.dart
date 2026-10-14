@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubite_rate/cubit_state.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/repo_rate/repo.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubite_rate/cubit_state.dart';
+import 'package:usdt/featue/auth/welcomyou/data/repo_rate/repo.dart';
 
 class ExchangeRatesCubit extends Cubit<ExchangeRatesState> {
   final ExchangeRatesRepo repo;

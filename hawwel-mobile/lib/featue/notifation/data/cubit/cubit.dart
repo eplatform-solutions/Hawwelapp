@@ -1,9 +1,9 @@
 import 'dart:developer';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/notifation/data/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/notifation/data/model.dart';
-import 'package:hawwel/featue/notifation/data/repo/repo.dart';
+import 'package:usdt/featue/notifation/data/cubit/cubit_stat.dart';
+import 'package:usdt/featue/notifation/data/model.dart';
+import 'package:usdt/featue/notifation/data/repo/repo.dart';
 
 class NotificationsCubit extends Cubit<NotificationsState> {
   NotificationsCubit(this.repo) : super(NotificationsInitial());

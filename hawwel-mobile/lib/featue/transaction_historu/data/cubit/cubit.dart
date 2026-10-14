@@ -1,7 +1,7 @@
 // import 'package:flutter_bloc/flutter_bloc.dart';
-// import 'package:hawwel/featue/transaction_historu/data/cubit/cubit_state.dart';
-// import 'package:hawwel/featue/transaction_historu/data/model.dart';
-// import 'package:hawwel/featue/transaction_historu/data/repo/repo.dart';
+// import 'package:usdt/featue/transaction_historu/data/cubit/cubit_state.dart';
+// import 'package:usdt/featue/transaction_historu/data/model.dart';
+// import 'package:usdt/featue/transaction_historu/data/repo/repo.dart';
 
 // class TransfersCubit extends Cubit<TransfersState> {
 //   final TransfersRepo repo;
@@ -35,9 +35,9 @@
 //   }
 // }
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/transaction_historu/data/cubit/cubit_state.dart';
-import 'package:hawwel/featue/transaction_historu/data/model.dart';
-import 'package:hawwel/featue/transaction_historu/data/repo/repo.dart';
+import 'package:usdt/featue/transaction_historu/data/cubit/cubit_state.dart';
+import 'package:usdt/featue/transaction_historu/data/model.dart';
+import 'package:usdt/featue/transaction_historu/data/repo/repo.dart';
 
 class TransfersCubit extends Cubit<TransfersState> {
   final TransfersRepo repo;
@@ -74,12 +74,7 @@ class TransfersCubit extends Cubit<TransfersState> {
     result.fold(
       (failure) {
         _isLoading = false;
-        emit(
-          TransfersFailure(
-            failure.errMassage,
-            statusCode: failure.statusCode,
-          ),
-        );
+        emit(TransfersFailure(failure.errMassage));
       },
       (data) {
         if (data.length < _pageSize) {

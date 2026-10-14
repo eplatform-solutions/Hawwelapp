@@ -3,23 +3,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/localization/lang_cubit.dart';
-import 'package:hawwel/constans/localization/langhelper.dart';
-import 'package:hawwel/constans/transfer_status_theme.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
-import 'package:hawwel/featue/transaction_historu/data/cubit/cubit.dart';
-import 'package:hawwel/featue/transaction_historu/data/cubit/cubit_state.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/model_ressponse_transfer.dart'
-    as transfer_response;
-import 'package:hawwel/featue/transfer_execution/page_view.dart';
-import 'package:hawwel/featue/transaction_historu/widjt/detals_osta.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/localization/lang_cubit.dart';
+import 'package:usdt/constans/localization/langhelper.dart';
+import 'package:usdt/featue/transaction_historu/data/cubit/cubit.dart';
+import 'package:usdt/featue/transaction_historu/data/cubit/cubit_state.dart';
+import 'package:usdt/featue/transaction_historu/widjt/detals_osta.dart';
 import 'package:stylish_pull_to_refresh/stylish_pull_to_refresh.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/auth/login/login_screen_view.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class Transactionhistory extends StatefulWidget {
   const Transactionhistory({super.key});
@@ -30,7 +22,6 @@ class Transactionhistory extends StatefulWidget {
 
 class _TransactionhistoryState extends State<Transactionhistory> {
   final ScrollController _scrollController = ScrollController();
-  String _selectedBucket = 'awaiting-payment';
 
   @override
   void initState() {
@@ -58,180 +49,111 @@ class _TransactionhistoryState extends State<Transactionhistory> {
 
     return Directionality(
       textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-      child: BlocListener<TransfersCubit, TransfersState>(
-        listener: (context, state) async {
-          if (state is TransfersFailure && state.statusCode == 401) {
-            final expiredMessage = AppTranslations.getTextStatic(
-              context,
-              'session_expired_login_again',
-            );
-            await Functions().deleteToken();
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                behavior: SnackBarBehavior.floating,
-                margin: EdgeInsets.zero,
-                padding: EdgeInsets.zero,
-                content: CustomSnackBar(
-                  backgroundColor: branding.error,
-                  message: expiredMessage,
-                  imagePath: AppImages.eerorrimage,
-                ),
-              ),
-            );
-            await Future<void>.delayed(const Duration(milliseconds: 350));
-            if (!context.mounted) return;
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const Loginview()),
-              (_) => false,
-            );
-          }
-        },
-        child: Scaffold(
-          backgroundColor: branding.screenBg,
-          body: Column(
-            children: [
-              // â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-              _buildHeader(context, branding, isArabic),
+      child: Scaffold(
+        backgroundColor: branding.screenBg,
+        body: Column(
+          children: [
+            // â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            _buildHeader(context, branding, isArabic),
 
-              // â”€â”€ Body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-              Expanded(
-                child: BlocBuilder<TransfersCubit, TransfersState>(
-                  builder: (context, state) {
-                    // Loading shimmer
-                    if (state is TransfersLoading &&
-                        context.read<TransfersCubit>().allData.isEmpty) {
-                      return _buildShimmer(branding);
+            // â”€â”€ Body â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+            Expanded(
+              child: BlocBuilder<TransfersCubit, TransfersState>(
+                builder: (context, state) {
+                  // Loading shimmer
+                  if (state is TransfersLoading &&
+                      context.read<TransfersCubit>().allData.isEmpty) {
+                    return _buildShimmer(branding);
+                  }
+
+                  // Error
+                  if (state is TransfersFailure) {
+                    return _buildError(context, branding, state.error);
+                  }
+
+                  // Success
+                  if (state is TransfersSuccess) {
+                    final data = state.data;
+
+                    if (data.isEmpty) {
+                      return _buildEmpty(context, branding, isArabic);
                     }
 
-                    // Error
-                    if (state is TransfersFailure) {
-                      return _buildError(context, branding, state.error);
-                    }
-
-                    // Success
-                    if (state is TransfersSuccess) {
-                      final data = state.data;
-
-                      if (data.isEmpty) {
-                        return _buildEmpty(context, branding, isArabic);
-                      }
-
-                      final counts = _bucketCounts(data);
-                      final showTabs = _visibleBuckets(counts);
-                      final activeBucket = showTabs.contains(_selectedBucket)
-                          ? _selectedBucket
-                          : showTabs.first;
-
-                      if (activeBucket != _selectedBucket) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          if (!mounted) return;
-                          setState(() => _selectedBucket = activeBucket);
-                        });
-                      }
-
-                      final filteredData = _applyBucketFilter(
-                        data,
-                        activeBucket,
-                      );
-
-                      return StylishPullToRefresh(
-                        style: Style.paperPlane,
-                        color: branding.screenBg,
-                        size: 100,
-                        onRefresh: () async {
-                          await context.read<TransfersCubit>().fetchTransfers();
-                        },
-                        child: ListView(
-                          controller: _scrollController,
-                          physics: const AlwaysScrollableScrollPhysics(
-                            parent: BouncingScrollPhysics(),
-                          ),
-                          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 32.h),
-                          children: [
-                            _buildTopStatusTabs(
+                    return StylishPullToRefresh(
+                      style: Style.paperPlane,
+                      color: branding.screenBg,
+                      size: 100,
+                      onRefresh: () async {
+                        await context.read<TransfersCubit>().fetchTransfers();
+                      },
+                      child: ListView(
+                        controller: _scrollController,
+                        physics: const AlwaysScrollableScrollPhysics(
+                          parent: BouncingScrollPhysics(),
+                        ),
+                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 32.h),
+                        children: [
+                          ...data.map(
+                            (group) => _buildDateGroup(
                               context,
                               branding,
-                              counts,
-                              showTabs,
-                              activeBucket,
+                              isArabic,
+                              group,
                             ),
-                            SizedBox(height: 10.h),
-                            if (filteredData.isEmpty)
-                              _buildNoFilteredResults(
-                                context,
-                                branding,
-                                isArabic,
-                              )
-                            else
-                              ...filteredData.map(
-                                (group) => _buildDateGroup(
-                                  context,
-                                  branding,
-                                  isArabic,
-                                  group,
-                                ),
-                              ),
+                          ),
 
-                            // Pagination
-                            if (state.hasMore)
-                              _buildPaginationShimmer(branding)
-                            else
-                              Padding(
-                                padding: EdgeInsets.only(
-                                  top: 20.h,
-                                  bottom: 8.h,
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Container(
-                                      width: 40.w,
-                                      height: 1,
-                                      color: branding.hintText.withValues(
-                                        alpha: 0.3,
+                          // Pagination
+                          if (state.hasMore)
+                            _buildPaginationShimmer(branding)
+                          else
+                            Padding(
+                              padding: EdgeInsets.only(top: 20.h, bottom: 8.h),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Container(
+                                    width: 40.w,
+                                    height: 1,
+                                    color: branding.hintText.withValues(
+                                      alpha: 0.3,
+                                    ),
+                                  ),
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 10.w,
+                                    ),
+                                    child: Text(
+                                      AppTranslations.getText(
+                                        context,
+                                        'no_more_results',
+                                      ),
+                                      style: GoogleFonts.cairo(
+                                        fontSize: 13.sp,
+                                        color: branding.hintText,
+                                        fontWeight: FontWeight.w500,
                                       ),
                                     ),
-                                    Padding(
-                                      padding: EdgeInsets.symmetric(
-                                        horizontal: 10.w,
-                                      ),
-                                      child: Text(
-                                        AppTranslations.getText(
-                                          context,
-                                          'no_more_results',
-                                        ),
-                                        style: GoogleFonts.cairo(
-                                          fontSize: 13.sp,
-                                          color: branding.hintText,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
+                                  ),
+                                  Container(
+                                    width: 40.w,
+                                    height: 1,
+                                    color: branding.hintText.withValues(
+                                      alpha: 0.3,
                                     ),
-                                    Container(
-                                      width: 40.w,
-                                      height: 1,
-                                      color: branding.hintText.withValues(
-                                        alpha: 0.3,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
-                          ],
-                        ),
-                      );
-                    }
+                            ),
+                        ],
+                      ),
+                    );
+                  }
 
-                    return const SizedBox();
-                  },
-                ),
+                  return const SizedBox();
+                },
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -353,7 +275,10 @@ class _TransactionhistoryState extends State<Transactionhistory> {
         SizedBox(height: 10.h),
         // Cards
         ...group.transfers.map<Widget>((transfer) {
-          final currency = _resolveTransferCurrencySymbol(transfer);
+          final currency = transfer.symbol;
+          final imagePath = currency == 'USDC'
+              ? AppImages.usdt
+              : AppImages.usdc;
           final paymentMethodName = transfer.paymentMethod is String
               ? transfer.paymentMethod
               : LangHelper.isArabic(context)
@@ -365,22 +290,11 @@ class _TransactionhistoryState extends State<Transactionhistory> {
             child: _TransactionCard(
               transfer: transfer,
               currency: currency,
+              imagePath: imagePath,
               paymentMethodName: paymentMethodName,
               isArabic: isArabic,
               branding: branding,
               onTap: () {
-                final bucket = _statusBucketForRaw(transfer.status.toString());
-                if (bucket == 'awaiting-payment') {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ConfermScreen(
-                        transfer: _toTransferResponse(transfer),
-                      ),
-                    ),
-                  );
-                  return;
-                }
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -398,7 +312,6 @@ class _TransactionhistoryState extends State<Transactionhistory> {
                           : transfer.cityEn,
                       currency: currency,
                       amount: transfer.amount,
-                      paidAmount: transfer.paid,
                       isReceived: false,
                       senderName: transfer.receiver.fullName,
                       senderPhone: transfer.receiver.mobilePhone,
@@ -412,7 +325,6 @@ class _TransactionhistoryState extends State<Transactionhistory> {
                       transferNumber: transfer.transferNumber.toString(),
                       paymentProofNote: transfer.paymentProofNote,
                       paymentProofImagePath: transfer.paymentProofImagePath,
-                      receivingPlaceImagePath: transfer.receivingPlaceImagePath,
                     ),
                   ),
                 );
@@ -578,284 +490,6 @@ class _TransactionhistoryState extends State<Transactionhistory> {
       return iso;
     }
   }
-
-  String _resolveTransferCurrencySymbol(dynamic transfer) {
-    final currencyName = (transfer.currencyName ?? '')
-        .toString()
-        .trim()
-        .toUpperCase();
-    if (currencyName == 'USDT' || currencyName == 'USDC') {
-      return currencyName;
-    }
-    final symbol = (transfer.symbol ?? '').toString().trim().toUpperCase();
-    if (symbol == 'USDT' || symbol == 'USDC') {
-      return symbol;
-    }
-    return symbol.isNotEmpty ? symbol : currencyName;
-  }
-
-  String _statusBucketForRaw(String rawStatus) {
-    return transferStatusBucket(rawStatus);
-  }
-
-  String _statusBucketLabel(BuildContext context, String bucket) {
-    return transferStatusBucketLabel(context, bucket);
-  }
-
-  String _bucketRepresentativeStatus(String bucket) {
-    switch (bucket) {
-      case 'awaiting-payment':
-        return 'pending';
-      case 'paid':
-        return 'full-paid';
-      case 'processing':
-        return 'preparing-address';
-      case 'can-receive':
-        return 'can-receive';
-      case 'received':
-        return 'received';
-      case 'cancelled':
-        return 'cancelled';
-      case 'dispute':
-        return 'dispute';
-      default:
-        return 'pending';
-    }
-  }
-
-  List<String> _bucketOrder() {
-    const order = <String>[
-      'awaiting-payment',
-      'paid',
-      'processing',
-      'can-receive',
-      'received',
-      'cancelled',
-      'dispute',
-    ];
-    return order;
-  }
-
-  List<String> _visibleBuckets(Map<String, int> counts) {
-    final tabs = _bucketOrder()
-        .where((bucket) => (counts[bucket] ?? 0) > 0)
-        .toList();
-    return tabs.isNotEmpty ? tabs : _bucketOrder();
-  }
-
-  Map<String, int> _bucketCounts(List<dynamic> groups) {
-    final counts = <String, int>{for (final k in _bucketOrder()) k: 0};
-    for (final group in groups) {
-      for (final transfer in group.transfers) {
-        final bucket = _statusBucketForRaw(transfer.status.toString());
-        counts[bucket] = (counts[bucket] ?? 0) + 1;
-      }
-    }
-    return counts;
-  }
-
-  List<dynamic> _applyBucketFilter(
-    List<dynamic> groups,
-    String selectedBucket,
-  ) {
-    final filtered = <dynamic>[];
-    for (final group in groups) {
-      final transfers = group.transfers
-          .where(
-            (transfer) =>
-                _statusBucketForRaw(transfer.status.toString()) ==
-                selectedBucket,
-          )
-          .toList();
-      if (transfers.isNotEmpty) {
-        filtered.add(
-          _FilteredGroup(date: group.date.toString(), transfers: transfers),
-        );
-      }
-    }
-    return filtered;
-  }
-
-  Widget _buildTopStatusTabs(
-    BuildContext context,
-    dynamic branding,
-    Map<String, int> counts,
-    List<String> showTabs,
-    String activeBucket,
-  ) {
-    return SizedBox(
-      height: 42.h,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        itemCount: showTabs.length,
-        separatorBuilder: (_, __) => SizedBox(width: 8.w),
-        itemBuilder: (context, index) {
-          final bucket = showTabs[index];
-          final selected = bucket == activeBucket;
-          final count = counts[bucket] ?? 0;
-          final statusVisual = resolveTransferStatusVisual(
-            _bucketRepresentativeStatus(bucket),
-            branding,
-          );
-          final bucketColor = statusVisual.color;
-          return GestureDetector(
-            onTap: () => setState(() => _selectedBucket = bucket),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 180),
-              padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 7.h),
-              decoration: BoxDecoration(
-                color: selected
-                    ? bucketColor.withValues(alpha: 0.16)
-                    : branding.cardBg,
-                borderRadius: BorderRadius.circular(22.r),
-                border: Border.all(
-                  color: selected
-                      ? bucketColor
-                      : branding.cardBorder.withValues(alpha: 0.9),
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    _statusBucketLabel(context, bucket),
-                    style: GoogleFonts.cairo(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w700,
-                      color: selected ? bucketColor : branding.secondaryText,
-                    ),
-                  ),
-                  SizedBox(width: 6.w),
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 7.w,
-                      vertical: 1.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? bucketColor.withValues(alpha: 0.16)
-                          : branding.hintText.withValues(alpha: 0.16),
-                      borderRadius: BorderRadius.circular(10.r),
-                    ),
-                    child: Text(
-                      '$count',
-                      style: GoogleFonts.cairo(
-                        fontSize: 11.sp,
-                        fontWeight: FontWeight.w800,
-                        color: selected ? bucketColor : branding.secondaryText,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
-  transfer_response.TransferResponseModel _toTransferResponse(
-    dynamic transfer,
-  ) {
-    final wallets = (transfer.blockchainWallets as List<dynamic>? ?? [])
-        .map(
-          (wallet) => transfer_response.BlockchainWalletModel(
-            network: wallet.network.toString(),
-            address: wallet.address.toString(),
-            createdAt: wallet.createdAt,
-          ),
-        )
-        .toList();
-    final paymentMethodName = LangHelper.isArabic(context)
-        ? transfer.paymentMethod.nameAr
-        : transfer.paymentMethod.nameEn;
-    return transfer_response.TransferResponseModel(
-      id: transfer.id.toString(),
-      receiver: transfer_response.ReceiverModel(
-        fullName: transfer.receiver.fullName.toString(),
-        mobilePhone: transfer.receiver.mobilePhone.toString(),
-      ),
-      sender: transfer_response.SenderModel(
-        id: '',
-        name: '',
-        nickname: '',
-        fatherName: '',
-        mobilePhone: '',
-        email: '',
-      ),
-      fromCountry: '',
-      toCountry: '',
-      city: LangHelper.isArabic(context)
-          ? transfer.cityAr.toString()
-          : transfer.cityEn.toString(),
-      area: LangHelper.isArabic(context)
-          ? transfer.areaAr.toString()
-          : transfer.areaEn.toString(),
-      amount: transfer.amount,
-      total: transfer.total,
-      fee: transfer.fee,
-      rate: transfer.rate,
-      currencyName: transfer.currencyName.toString(),
-      symbol: _resolveTransferCurrencySymbol(transfer),
-      status: transfer.status.toString(),
-      expirationAt: transfer.expirationAt,
-      createdAt: transfer.createdAt,
-      transferNumber: transfer.transferNumber,
-      paymentMethod: transfer_response.PaymentMethodResponseModel(
-        id: transfer.paymentMethod.id.toString(),
-        name: paymentMethodName,
-        symbol: transfer.paymentMethod.symbol.toString(),
-        logoPath: transfer.paymentMethod.logoPath.toString(),
-      ),
-      blockchainWallets: wallets,
-    );
-  }
-
-  Widget _buildNoFilteredResults(
-    BuildContext context,
-    dynamic branding,
-    bool isArabic,
-  ) {
-    final text = isArabic
-        ? 'لا توجد نتائج لهذه الحالة'
-        : 'No results for this status';
-    return Padding(
-      padding: EdgeInsets.only(top: 42.h),
-      child: Center(
-        child: Text(
-          text,
-          style: GoogleFonts.cairo(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: branding.hintText,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _FilteredGroup {
-  final String date;
-  final List<dynamic> transfers;
-
-  _FilteredGroup({required this.date, required this.transfers});
-}
-
-// Once a transfer has actually been settled (paid, whether under, over, or
-// exactly on the requested amount), the customer needs to see what was
-// really received - not the originally requested amount - so this matches
-// what the final notification and the detail screen already show.
-dynamic _settledAmountFor(dynamic transfer) {
-  final normalized = normalizeTransferStatus(transfer.status.toString());
-  final isSettled = normalized == 'full-paid' ||
-      normalized == 'under-paid' ||
-      normalized == 'over-paid';
-  if (isSettled && transfer.paid > 0) {
-    return transfer.paid;
-  }
-  return transfer.amount;
 }
 
 // â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
@@ -864,6 +498,7 @@ dynamic _settledAmountFor(dynamic transfer) {
 class _TransactionCard extends StatelessWidget {
   final dynamic transfer;
   final String currency;
+  final String imagePath;
   final String paymentMethodName;
   final bool isArabic;
   final dynamic branding;
@@ -872,6 +507,7 @@ class _TransactionCard extends StatelessWidget {
   const _TransactionCard({
     required this.transfer,
     required this.currency,
+    required this.imagePath,
     required this.paymentMethodName,
     required this.isArabic,
     required this.branding,
@@ -880,18 +516,10 @@ class _TransactionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayCurrency = SendCurrencyHelper.displayLabelForSymbol(
-      currency,
-      isArabic: isArabic,
-    );
-    final statusVisual = resolveTransferStatusVisual(
-      transfer.status.toString(),
-      branding,
-    );
-    final statusColor = statusVisual.color;
-    final statusLabel = transferStatusLabel(
+    final statusColor = _statusColor(transfer.status, branding);
+    final statusLabel = AppTranslations.transferStatusLabel(
       context,
-      transfer.status.toString(),
+      transfer.status,
     );
     final netAmount = (transfer.amount - (transfer.amount * transfer.fee / 100))
         .toStringAsFixed(2);
@@ -956,11 +584,7 @@ class _TransactionCard extends StatelessWidget {
                               ),
                             ),
                             child: ClipOval(
-                              child: SendCurrencyHelper.buildCoinIcon(
-                                symbol: currency,
-                                height: 20.r,
-                                width: 20.r,
-                              ),
+                              child: Image.asset(imagePath, fit: BoxFit.cover),
                             ),
                           ),
                         ),
@@ -1012,7 +636,7 @@ class _TransactionCard extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
                         Text(
-                          '-${_settledAmountFor(transfer)} $displayCurrency',
+                          '-${transfer.amount} $currency',
                           style: GoogleFonts.cairo(
                             fontSize: 15.sp,
                             fontWeight: FontWeight.w800,
@@ -1021,7 +645,7 @@ class _TransactionCard extends StatelessWidget {
                         ),
                         SizedBox(height: 3.h),
                         Text(
-                          '$netAmount $displayCurrency',
+                          '\$$netAmount',
                           style: GoogleFonts.cairo(
                             fontSize: 12.sp,
                             color: branding.secondaryText,
@@ -1115,6 +739,35 @@ class _TransactionCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Color _statusColor(String status, dynamic branding) {
+    switch (status.trim().toLowerCase()) {
+      case 'full-paid':
+      case 'compleated':
+      case 'completed':
+      case 'received':
+      case 'is-received':
+      case 'is_received':
+        return branding.success;
+      case 'partial-paid':
+      case 'under-paid':
+        return const Color(0xFF2196F3);
+      case 'preparing-address':
+      case 'preparing_address':
+      case 'address-preparing':
+      case 'pending':
+      case 'can-receive':
+      case 'can_receive':
+      case 'ready-to-receive':
+      case 'ready_to_receive':
+        return const Color(0xFFFFA726);
+      case 'rejected':
+      case 'cancelled':
+        return branding.error;
+      default:
+        return branding.hintText;
+    }
   }
 }
 

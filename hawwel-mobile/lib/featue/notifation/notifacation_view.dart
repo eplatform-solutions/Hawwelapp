@@ -3,14 +3,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/transfer_status_theme.dart';
-import 'package:hawwel/featue/notifation/data/cubit/cubit.dart';
-import 'package:hawwel/featue/notifation/data/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/notifation/notification_navigation.dart';
-import 'package:hawwel/featue/notifation/widjt/notfaction_container.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/notifation/data/cubit/cubit.dart';
+import 'package:usdt/featue/notifation/data/cubit/cubit_stat.dart';
+import 'package:usdt/featue/notifation/widjt/notfaction_container.dart';
+import 'package:usdt/featue/transfer_execution/stat_paid_mor.dart';
+import 'package:usdt/featue/transfer_execution/state_sacssuse.dart';
+import 'package:usdt/featue/transfer_execution/state_view.dart';
 
 class Notifation extends StatefulWidget {
   const Notifation({super.key});
@@ -59,6 +59,20 @@ class _NotifationState extends State<Notifation>
     super.dispose();
   }
 
+  Color notificationColor(String? status) {
+    final branding = appBrandingNotifier.value;
+    switch (status) {
+      case 'full-paid':
+        return branding.gradientEndColorValue;
+      case 'under-paid':
+        return branding.divider;
+      case 'cancelled':
+        return branding.iconPrimary;
+      default:
+        return branding.divider;
+    }
+  }
+
   String _timeAgo(DateTime date) {
     final diff = DateTime.now().difference(date);
     if (diff.inMinutes < 60) {
@@ -71,79 +85,70 @@ class _NotifationState extends State<Notifation>
   }
 
   String _formatNotificationBody(dynamic notification) {
-    final rawBody = notification.body ?? "";
-    String body = AppTranslations.getText(context, rawBody);
+    String body = notification.body ?? "";
     final data = notification.data;
     if (data == null) return body;
     body = body.replaceAll('{{amount}}', data.amount?.toString() ?? "");
-    body = body.replaceAll('{{paid}}', data.paid?.toString() ?? "");
     body = body.replaceAll('{{currencyName}}', data.symbol ?? "");
     body = body.replaceAll('{{address}}', data.address ?? "");
     body = body.replaceAll('{{network}}', data.network ?? "");
     body = body.replaceAll('{{symbol}}', data.symbol ?? "");
-    if (body.contains('{{reasonClause}}')) {
-      final reason = (data.decisionReason ?? '').toString().trim();
-      final isArabic = Localizations.localeOf(context).languageCode == 'ar';
-      final reasonClause = reason.isEmpty
-          ? ''
-          : (isArabic ? ' السبب: $reason.' : ' Reason: $reason.');
-      body = body.replaceAll('{{reasonClause}}', reasonClause);
-    }
-    if (rawBody.contains("external_payment_deposit_notice") ||
-        rawBody.contains("Amount deposited")) {
-      return AppTranslations.getTextStatic(context, 'notification_deposit_message')
-          .replaceAll('{{amount}}', data.amount?.toString() ?? "")
-          .replaceAll('{{currencyName}}', data.symbol ?? "")
-          .replaceAll('{{address}}', data.address ?? "")
-          .replaceAll('{{network}}', data.network ?? "");
+    if (body.contains("Amount Deposit")) {
+      final bool isArabic =
+          Localizations.localeOf(context).languageCode == 'ar';
+      if (isArabic) {
+        return "تم إيداع ${data.amount}${data.symbol} على شبكة ${data.network} في المحفظة ${data.address}";
+      }
     }
     return body;
   }
 
-  void _showTransferNotFoundMessage(BuildContext context) {
-    final branding = appBrandingNotifier.value;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        backgroundColor: branding.iconPrimary,
-        content: Text(
-          AppTranslations.getText(context, 'notification_order_not_found'),
+  void _onNotificationTap(BuildContext context, dynamic notification) {
+    HapticFeedback.selectionClick();
+    final bool isArabic =
+        Localizations.localeOf(context).languageCode == 'ar';
+
+    final route = PageRouteBuilder(
+      transitionDuration: const Duration(milliseconds: 350),
+      pageBuilder: (_, a1, __) {
+        if (notification.data?.status == "full-paid") {
+          return paidsacssus(
+            paid: notification.data!.paid,
+            symbol: notification.data!.symbol,
+            country: isArabic
+                ? notification.data!.areaAr
+                : notification.data!.areaEn,
+            city: isArabic
+                ? notification.data!.cityAr
+                : notification.data!.cityEn,
+            name: notification.data!.fullName,
+          );
+        }
+        return statepademor(
+          symbol: notification.data!.symbol,
+          exstaamount: (int.parse(notification.data!.amount) -
+                  int.parse(notification.data!.paid))
+              .toString(),
+        );
+      },
+      transitionsBuilder: (_, a1, __, child) => FadeTransition(
+        opacity: a1,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.04),
+            end: Offset.zero,
+          ).animate(CurvedAnimation(parent: a1, curve: Curves.easeOut)),
+          child: child,
         ),
       ),
     );
-  }
-
-  Future<void> _onNotificationTap(
-    BuildContext context,
-    dynamic notification,
-  ) async {
-    HapticFeedback.selectionClick();
-    final payload = <String, dynamic>{
-      'title': notification.title,
-      'body': notification.body,
-      'data': {
-        'transferId': notification.data?.transferId,
-        'status': notification.data?.status,
-        // KYC decisions carry a kycId instead of a transferId; without it
-        // every KYC notification tap ended in "order not found".
-        'kycId': notification.data?.kycId,
-        'blockingReason': notification.data?.blockingReason,
-        'rejectionReason': notification.data?.rejectionReason,
-        'removeVerifyingReason': notification.data?.removeVerifyingReason,
-      },
-    };
-    final opened = await NotificationNavigation.openFromNotificationData(
-      context,
-      payload,
-    );
-    if (!opened && context.mounted) {
-      _showTransferNotFoundMessage(context);
-      return;
-    }
+    Navigator.push(context, route);
   }
 
   @override
   Widget build(BuildContext context) {
-    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
+    final bool isArabic =
+        Localizations.localeOf(context).languageCode == 'ar';
     final branding = appBrandingNotifier.value;
 
     return Directionality(
@@ -164,9 +169,22 @@ class _NotifationState extends State<Notifation>
                   expandedHeight: 110.h,
                   backgroundColor: Colors.transparent,
                   elevation: 0,
-                  leading: Padding(
-                    padding: EdgeInsets.all(10.r),
-                    child: AppBackButton(),
+                  leading: GestureDetector(
+                    onTap: () => Navigator.pop(context),
+                    child: Container(
+                      margin: EdgeInsets.all(10.r),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.18),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isArabic
+                            ? Icons.arrow_forward_ios_rounded
+                            : Icons.arrow_back_ios_new_rounded,
+                        size: 16.sp,
+                        color: branding.buttonText,
+                      ),
+                    ),
                   ),
                   flexibleSpace: Container(
                     decoration: BoxDecoration(
@@ -175,39 +193,35 @@ class _NotifationState extends State<Notifation>
                     child: SafeArea(
                       child: Align(
                         alignment: Alignment.bottomCenter,
-                          child: Padding(
-                          padding: EdgeInsets.only(bottom: 14.h),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  padding: EdgeInsets.all(8.r),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.15),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    Icons.notifications_rounded,
-                                    color: branding.buttonText,
-                                    size: 22.sp,
-                                  ),
+                        child: Padding(
+                          padding: EdgeInsets.only(bottom: 16.h),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Container(
+                                padding: EdgeInsets.all(10.r),
+                                decoration: BoxDecoration(
+                                  color:
+                                      Colors.white.withValues(alpha: 0.15),
+                                  shape: BoxShape.circle,
                                 ),
-                                SizedBox(height: 6.h),
-                                Text(
-                                  AppTranslations.getText(
-                                    context,
-                                    'notifications',
-                                  ),
-                                  style: GoogleFonts.cairo(
-                                    fontSize: 17.sp,
-                                    fontWeight: FontWeight.w800,
-                                    color: branding.buttonText,
-                                  ),
+                                child: Icon(
+                                  Icons.notifications_rounded,
+                                  color: branding.buttonText,
+                                  size: 24.sp,
                                 ),
-                              ],
-                            ),
+                              ),
+                              SizedBox(height: 8.h),
+                              Text(
+                                AppTranslations.getText(
+                                    context, 'notifications'),
+                                style: GoogleFonts.cairo(
+                                  fontSize: 18.sp,
+                                  fontWeight: FontWeight.w800,
+                                  color: branding.buttonText,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -222,8 +236,7 @@ class _NotifationState extends State<Notifation>
                       return SliverFillRemaining(
                         child: Center(
                           child: CircularProgressIndicator(
-                            color: branding.accent,
-                          ),
+                              color: branding.accent),
                         ),
                       );
                     }
@@ -239,16 +252,12 @@ class _NotifationState extends State<Notifation>
                     }
 
                     if (state is NotificationsSuccess) {
-                      final notifications = state.notifications;
-
-                      if (notifications.isEmpty) {
+                      if (state.notifications.isEmpty) {
                         return SliverFillRemaining(
                           child: _EmptyState(
                             icon: Icons.notifications_none_rounded,
                             message: AppTranslations.getText(
-                              context,
-                              'no_notifications',
-                            ),
+                                context, 'no_notifications'),
                             branding: branding,
                           ),
                         );
@@ -258,30 +267,22 @@ class _NotifationState extends State<Notifation>
                         delegate: SliverChildBuilderDelegate(
                           (context, index) {
                             // loader at end
-                            if (index >= notifications.length) {
+                            if (index >= state.notifications.length) {
                               return Padding(
                                 padding: EdgeInsets.symmetric(vertical: 20.h),
                                 child: Center(
                                   child: CircularProgressIndicator(
-                                    color: branding.accent,
-                                  ),
+                                      color: branding.accent),
                                 ),
                               );
                             }
 
-                            final n = notifications[index];
-                            final visual = resolveNotificationVisual(
-                              branding: branding,
-                              status: n.data?.status,
-                              title: n.title,
-                              body: n.body,
-                            );
+                            final n = state.notifications[index];
 
                             return TweenAnimationBuilder<double>(
                               tween: Tween(begin: 0, end: 1),
                               duration: Duration(
-                                milliseconds: 300 + (index * 40).clamp(0, 400),
-                              ),
+                                  milliseconds: 300 + (index * 40).clamp(0, 400)),
                               curve: Curves.easeOut,
                               builder: (_, value, child) => Opacity(
                                 opacity: value,
@@ -291,24 +292,20 @@ class _NotifationState extends State<Notifation>
                                 ),
                               ),
                               child: NotificationCard(
-                                onTap: () => _onNotificationTap(context, n),
+                                onTap: () =>
+                                    _onNotificationTap(context, n),
                                 title: AppTranslations.getText(
-                                  context,
-                                  n.title,
-                                ),
+                                    context, n.title),
                                 body: _formatNotificationBody(n),
                                 time: _timeAgo(n.createdAt),
-                                color: visual.accentColor,
-                                statusIcon: visual.icon,
-                                statusIconColor: visual.iconColor,
-                                statusIconBgColor: visual.iconBackground,
-                                isRead: n.isRead,
+                                color: notificationColor(
+                                    n.data?.status),
                               ),
                             );
                           },
                           childCount: state.hasMore
-                              ? notifications.length + 1
-                              : notifications.length,
+                              ? state.notifications.length + 1
+                              : state.notifications.length,
                         ),
                       );
                     }

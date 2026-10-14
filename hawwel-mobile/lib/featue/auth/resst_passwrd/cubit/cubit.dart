@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/auth/resst_passwrd/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/auth/resst_passwrd/repo/repo.dart';
+import 'package:usdt/featue/auth/resst_passwrd/cubit/cubit_stat.dart';
+import 'package:usdt/featue/auth/resst_passwrd/repo/repo.dart';
 
 class ChangePasswordCubit extends Cubit<ChangePasswordState> {
   final ChangePasswordRepo repo;
@@ -13,8 +13,8 @@ class ChangePasswordCubit extends Cubit<ChangePasswordState> {
     emit(ChangePasswordLoading());
 
     final result = await repo.changePassword(
-      password: oldpassword.text.trim(),
-      newPassword: newpassword.text.trim(),
+      password: oldpassword.text,
+      newPassword: newpassword.text,
     );
 
     result.fold(

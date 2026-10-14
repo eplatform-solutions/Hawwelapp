@@ -1,25 +1,22 @@
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/country_defaults_helper.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/colors.dart';
-import 'package:hawwel/constans/digit_utils.dart';
-import 'package:hawwel/constans/feature_flags.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/style.dart';
-import 'package:hawwel/featue/auth/forgeat_password/data/cubit/cubit_forget_stat.dart';
-import 'package:hawwel/featue/auth/forgeat_password/data/cubit/forget_cubit.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-import 'package:hawwel/featue/auth/otp/otp_view.dart';
-import 'package:hawwel/featue/auth/otp/widjt/top_screen.dart';
-import 'package:hawwel/featue/auth/rejster/regster_screen_view.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/colors.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/ip_country_lookup.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/featue/auth/forgeat_password/data/cubit/cubit_forget_stat.dart';
+import 'package:usdt/featue/auth/forgeat_password/data/cubit/forget_cubit.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/auth/otp/otp_view.dart';
+import 'package:usdt/featue/auth/otp/widjt/top_screen.dart';
+import 'package:usdt/featue/auth/rejster/regster_screen_view.dart';
 
 class Forgetpassword extends StatefulWidget {
   const Forgetpassword({super.key});
@@ -30,11 +27,22 @@ class Forgetpassword extends StatefulWidget {
 
 class _ForgetpasswordState extends State<Forgetpassword> {
   final _formKey = GlobalKey<FormState>();
+  bool _dialCountryPinnedByUser = false;
 
   @override
   void initState() {
     super.initState();
+    // fetch user info when opening profile
     context.read<ForgetCubit>().email.clear();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted || _dialCountryPinnedByUser) return;
+      final code = await IpCountryLookup.fetchCountryIso2();
+      if (!mounted || _dialCountryPinnedByUser) return;
+      final parsed = code != null ? Country.tryParse(code) : null;
+      if (parsed != null) {
+        setState(() => selectedCountry = parsed);
+      }
+    });
   }
 
   String countryEmoji(String countryCode) {
@@ -46,11 +54,6 @@ class _ForgetpasswordState extends State<Forgetpassword> {
 
   bool isPhone = true;
   void detectInputType(String value) {
-    if (!kEmailFeaturesEnabled) {
-      if (!isPhone) setState(() => isPhone = true);
-      return;
-    }
-
     final trimmed = value.trim();
     if (trimmed.isEmpty) {
       if (!isPhone) {
@@ -59,8 +62,7 @@ class _ForgetpasswordState extends State<Forgetpassword> {
       return;
     }
 
-    final normalized = normalizeToWesternDigits(trimmed);
-    final isDigit = RegExp(r'^[+0-9]').hasMatch(normalized[0]);
+    final isDigit = RegExp(r'^[+0-9]').hasMatch(trimmed[0]);
 
     if (isDigit != isPhone) {
       setState(() {
@@ -121,11 +123,10 @@ class _ForgetpasswordState extends State<Forgetpassword> {
                         filteredCountries = allCountries.where((country) {
                           // جلب الاسم المترجم للبحث فيه
                           final String localizedName =
-                              CountryDefaultsHelper.localizedCountryName(
-                                context,
-                                country.countryCode,
-                                fallback: country.name,
-                              );
+                              CountryLocalizations.of(context)?.countryName(
+                                countryCode: country.countryCode,
+                              ) ??
+                              country.name;
 
                           final searchLower = val.toLowerCase();
                           return localizedName.toLowerCase().contains(
@@ -147,18 +148,25 @@ class _ForgetpasswordState extends State<Forgetpassword> {
                       itemBuilder: (context, index) {
                         final country = filteredCountries[index];
 
+                        // ✅ الحل الآمن لجلب الاسم المترجم:
+                        // نستخدم CountryLocalizations.of(context) للحصول على الاسم بناءً على لغة التطبيق الحالية
                         final String displayCountryName =
-                            CountryDefaultsHelper.localizedCountryName(
+                            CountryLocalizations.of(
                               context,
-                              country.countryCode,
-                              fallback: country.name,
-                            );
+                            )?.countryName(countryCode: country.countryCode) ??
+                            country.name;
 
                         return ListTile(
-                          leading: CountryDefaultsHelper.countryFlag(
-                            country.countryCode,
-                            size: 24,
-                          ),
+                          leading: country.countryCode == "SY"
+                              ? Image.asset(
+                                  "asset/syrianewsyria.png",
+                                  width: 30.w,
+                                  height: 20.h,
+                                )
+                              : Text(
+                                  country.flagEmoji,
+                                  style: const TextStyle(fontSize: 24),
+                                ),
                           title: Text(
                             displayCountryName,
                             style: GoogleFonts.cairo(
@@ -173,7 +181,10 @@ class _ForgetpasswordState extends State<Forgetpassword> {
                             style: GoogleFonts.cairo(color: branding.hintText),
                           ),
                           onTap: () {
-                            setState(() => selectedCountry = country);
+                            setState(() {
+                              _dialCountryPinnedByUser = true;
+                              selectedCountry = country;
+                            });
                             Navigator.pop(context);
                           },
                         );
@@ -190,15 +201,15 @@ class _ForgetpasswordState extends State<Forgetpassword> {
   }
 
   Country selectedCountry = Country(
-    phoneCode: '49',
-    countryCode: 'DE',
+    phoneCode: '966',
+    countryCode: 'SA',
     e164Sc: 0,
     geographic: true,
     level: 1,
-    name: 'Germany',
-    example: '15123456789',
-    displayName: 'Germany',
-    displayNameNoCountryCode: 'Germany',
+    name: 'Saudi Arabia',
+    example: '512345678',
+    displayName: 'Saudi Arabia',
+    displayNameNoCountryCode: 'Saudi Arabia',
     e164Key: '',
   );
   //TextEditingController username = TextEditingController();
@@ -273,93 +284,100 @@ class _ForgetpasswordState extends State<Forgetpassword> {
                       horizontal: 48.w,
                       vertical: 30.h,
                     ),
-                    child: IntrinsicHeight(
-                      // Forced RTL so (with the field first) the dial-code
-                      // box always sits on the left, matching the login screen.
-                      child: Directionality(
-                        textDirection: TextDirection.rtl,
-                        child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          /// الحقل الرئيسي
-                          Expanded(
-                            child: TextFieldCustom(
-                              controller: BlocProvider.of<ForgetCubit>(
-                                context,
-                              ).email,
-                              hintText: isPhone
-                                  ? AppTranslations.getText(context, 'phone')
-                                  : AppTranslations.getText(context, 'email'),
-                              type: isPhone
-                                  ? TextInputType.number
-                                  : TextInputType.emailAddress,
-                              hintStyle: AppStyle.meduim16grey,
-                              obscureText: false,
-                              readOnly: false,
-                              inputFormatters: isPhone
-                                  ? [
-                                      const WesternDigitsTextInputFormatter(),
-                                      FilteringTextInputFormatter.allow(
-                                        RegExp(r'[0-9+\-\s()]'),
-                                      ),
-                                    ]
-                                  : null,
-                              validator: (value) {
-                                if (isPhone) {
-                                  return validatePhoneNumber(value, context);
-                                }
-                                return validateEmail(value, context);
-                              },
-                              onChanged: detectInputType,
-                            ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        /// زر الدولة
+                        if (isPhone) SizedBox(width: 8.w),
+
+                        /// الحقل الرئيسي
+                        Expanded(
+                          child: TextFieldCustom(
+                            controller: BlocProvider.of<ForgetCubit>(
+                              context,
+                            ).email,
+                            hintText: isPhone
+                                ? AppTranslations.getText(context, 'phone')
+                                : AppTranslations.getText(context, 'email'),
+                            type: isPhone
+                                ? TextInputType.phone
+                                : TextInputType.emailAddress,
+                            hintStyle: AppStyle.meduim16grey,
+                            obscureText: false,
+                            readOnly: false,
+                            validator: (value) {
+                              if (isPhone) {
+                                return validatePhoneNumber(value, context);
+                              }
+                              return validateEmail(value, context);
+                            },
+                            onChanged: detectInputType,
                           ),
-                          if (isPhone) SizedBox(width: 8.w),
-                          if (isPhone)
-                            GestureDetector(
+                        ),
+                        //  SizedBox(width: 10.w),
+                        if (isPhone)
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 5.w),
+                            child: GestureDetector(
                               onTap: () {
                                 _showCustomPicker(context);
+                                // showCountryPicker(
+                                //   context: context,
+                                //   showPhoneCode: true,
+                                //   onSelect: (Country country) {
+                                //     setState(() {
+                                //       selectedCountry = country;
+                                //     });
+                                //   },
+                                // );
                               },
                               child: Container(
-                                width: 85.w,
-                                height: 50.h,
+                                height: 55.h,
+                                width: 75.w,
+                                padding: EdgeInsets.symmetric(horizontal: 0.w),
                                 decoration: BoxDecoration(
                                   color: branding.inputBorder,
-                                  border: Border.all(
-                                    color: branding.iconPrimary,
-                                    width: 2,
-                                  ),
-                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(color: branding.buttonBg),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Directionality(
-                                  textDirection: TextDirection.ltr,
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      CountryDefaultsHelper.countryFlag(
-                                        selectedCountry.countryCode,
-                                        size: 15,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        '+${selectedCountry.phoneCode}',
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        textDirection: TextDirection.ltr,
-                                      ),
-                                      const Icon(
-                                        Icons.arrow_drop_down,
-                                        size: 20,
-                                      ),
-                                    ],
-                                  ),
+                                child: Row(
+                                  children: [
+                                    Icon(Icons.arrow_drop_down),
+
+                                    Text(
+                                      textAlign: TextAlign.right,
+                                      Localizations.localeOf(
+                                                context,
+                                              ).languageCode ==
+                                              'ar'
+                                          ? '${selectedCountry.phoneCode}+'
+                                          : '+${selectedCountry.phoneCode}',
+                                      style: TextStyle(fontSize: 10),
+                                    ),
+                                    SizedBox(width: 3.w),
+                                    selectedCountry.countryCode == "SY"
+                                        ? Image.asset(
+                                            "asset/syrianewsyria.png",
+                                            width: 15.w,
+                                            height: 15.h,
+                                          )
+                                        : Text(
+                                            selectedCountry.flagEmoji,
+                                            style: const TextStyle(
+                                              fontSize: 15,
+                                            ),
+                                          ),
+                                    // Text(
+                                    //   countryEmoji(selectedCountry.countryCode),
+                                    //   style: TextStyle(fontSize: 15),
+                                    // ),
+                                    //  SizedBox(width: 3.w),
+                                  ],
                                 ),
                               ),
                             ),
-                        ],
-                        ),
-                      ),
+                          ),
+                      ],
                     ),
                   ),
                   SizedBox(height: 120.h),
@@ -400,7 +418,7 @@ class _ForgetpasswordState extends State<Forgetpassword> {
                         ),
                         child: state is ForgetpasswordLoading
                             ? const Center(
-                                child: CircularProgressIndicator(
+                                child: const CircularProgressIndicator(
                                   color: AppColors.whiteColor,
                                 ),
                               )

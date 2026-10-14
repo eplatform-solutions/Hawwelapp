@@ -1,4 +1,4 @@
-// import 'package:hawwel/featue/transaction_historu/data/model.dart';
+// import 'package:usdt/featue/transaction_historu/data/model.dart';
 
 // sealed class TransfersState {}
 
@@ -21,7 +21,7 @@
 
 //   TransfersFailure(this.error);
 // }
-import 'package:hawwel/featue/transaction_historu/data/model.dart';
+import 'package:usdt/featue/transaction_historu/data/model.dart';
 
 abstract class TransfersState {}
 
@@ -31,8 +31,7 @@ class TransfersLoading extends TransfersState {}
 
 class TransfersFailure extends TransfersState {
   final String error;
-  final int? statusCode;
-  TransfersFailure(this.error, {this.statusCode});
+  TransfersFailure(this.error);
 }
 
 class TransfersSuccess extends TransfersState {

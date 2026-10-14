@@ -1,14 +1,11 @@
-// ignore_for_file: camel_case_types
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/lode_file/lode_file.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/lode_file/lode_file.dart';
 
 class idintyview extends StatefulWidget {
   const idintyview({super.key});
@@ -98,79 +95,84 @@ class _idintyviewState extends State<idintyview>
       decoration: BoxDecoration(
         gradient: branding.buildHeaderGradient(),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(28.r),
-          bottomRight: Radius.circular(28.r),
+          bottomLeft: Radius.circular(32.r),
+          bottomRight: Radius.circular(32.r),
         ),
       ),
       child: SafeArea(
         bottom: false,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(20.w, 10.h, 20.w, 14.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          padding: EdgeInsets.fromLTRB(20.w, 8.h, 20.w, 28.h),
+          child: Column(
             children: [
-              AppBackButton(
-                onTap: () {
-                  HapticFeedback.selectionClick();
-                  Navigator.pop(context);
-                },
-              ),
-              SizedBox(width: 10.w),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      AppTranslations.getText(
-                        context,
-                        'Identity verification',
-                      ),
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.cairo(
-                        fontSize: 16.sp,
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
+              Align(
+                alignment: isArabic
+                    ? Alignment.centerRight
+                    : Alignment.centerLeft,
+                child: GestureDetector(
+                  onTap: () {
+                    HapticFeedback.selectionClick();
+                    Navigator.pop(context);
+                  },
+                  child: Container(
+                    width: 38.w,
+                    height: 38.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.18),
+                      shape: BoxShape.circle,
                     ),
-                    SizedBox(height: 4.h),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 10.w,
-                        vertical: 3.h,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.white.withValues(alpha: 0.14),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        AppTranslations.getText(
-                          context,
-                          'Not yet verified, please complete',
-                        ),
-                        style: GoogleFonts.cairo(
-                          fontSize: 11.sp,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white.withValues(alpha: 0.9),
-                        ),
-                      ),
+                    child: Icon(
+                      isArabic
+                          ? Icons.arrow_forward_ios_rounded
+                          : Icons.arrow_back_ios_new_rounded,
+                      color: Colors.white,
+                      size: 16.sp,
                     ),
-                  ],
+                  ),
                 ),
               ),
-              SizedBox(width: 10.w),
+              SizedBox(height: 18.h),
               Container(
-                width: 38.w,
-                height: 38.w,
+                width: 66.w,
+                height: 66.w,
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: Colors.white.withValues(alpha: 0.35),
-                    width: 1.5,
+                    width: 2,
                   ),
                 ),
-                padding: EdgeInsets.all(8.r),
+                padding: EdgeInsets.all(14.r),
                 child: Image.asset(AppImages.idinty, color: Colors.white),
+              ),
+              SizedBox(height: 12.h),
+              Text(
+                AppTranslations.getText(context, 'Identity verification'),
+                style: GoogleFonts.cairo(
+                  fontSize: 20.sp,
+                  fontWeight: FontWeight.w800,
+                  color: Colors.white,
+                ),
+              ),
+              SizedBox(height: 6.h),
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: Colors.white.withValues(alpha: 0.14),
+                  borderRadius: BorderRadius.circular(20.r),
+                ),
+                child: Text(
+                  AppTranslations.getText(
+                    context,
+                    'Not yet verified, please complete',
+                  ),
+                  style: GoogleFonts.cairo(
+                    fontSize: 12.sp,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.9),
+                  ),
+                ),
               ),
             ],
           ),
@@ -344,7 +346,7 @@ class _InfoCard extends StatelessWidget {
           Text(
             AppTranslations.getText(
               context,
-              'Steps to complete orders',
+              'Steps to complete money transfers',
             ),
             style: GoogleFonts.cairo(
               fontSize: 13.sp,

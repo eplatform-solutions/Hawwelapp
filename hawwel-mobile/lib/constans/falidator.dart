@@ -122,7 +122,6 @@
 //   return null; // No error
 // }
 import 'package:flutter/material.dart';
-import 'package:hawwel/constans/digit_utils.dart';
 
 // Future<bool> validatePhoneWithCountry({
 //   required String phone,
@@ -143,10 +142,8 @@ String buildPhoneNumberWithCountryCode({
   required String phone,
   required String phoneCode,
 }) {
-  final normalizedPhoneCode = normalizeAuthDigits(phoneCode);
-  final dialDigits = normalizedPhoneCode.replaceAll(RegExp(r'\D'), '');
-  String cleanPhone = normalizePhoneLikeInput(phone).trim();
-  cleanPhone = cleanPhone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+  final dialDigits = phoneCode.replaceAll(RegExp(r'\D'), '');
+  String cleanPhone = phone.trim().replaceAll(RegExp(r'[\s\-\(\)]'), '');
 
   if (cleanPhone.startsWith('00')) {
     cleanPhone = '+${cleanPhone.substring(2)}';
@@ -193,8 +190,7 @@ Future<bool> validatePhoneWithCountry({
       return false;
     }
 
-    String normalizedPhone = normalizePhoneLikeInput(phone).trim();
-    normalizedPhone = normalizedPhone.replaceAll(RegExp(r'[\s\-\(\)]'), '');
+    String normalizedPhone = phone.trim().replaceAll(RegExp(r'[\s\-\(\)]'), '');
     if (normalizedPhone.startsWith('00')) {
       normalizedPhone = '+${normalizedPhone.substring(2)}';
     }
@@ -288,22 +284,6 @@ String? validatePassword(String? value, BuildContext context) {
     return 'password_number';
   }
 
-  if (!RegExp(r'''[!@#$%^&*(),.?":{}|<>_\-+=\[\]/\\~`;]''').hasMatch(value)) {
-    return 'password_symbol';
-  }
-
-  return null;
-}
-
-// For an EXISTING credential (e.g. the old password on a change-password
-// screen) - only checks it was typed. The complexity rules in
-// [validatePassword] are for a password being newly chosen, and older
-// accounts can plausibly have passwords that predate those rules; the
-// backend is what actually verifies the old password is correct.
-String? validateNotEmptyPassword(String? value, BuildContext context) {
-  if (value == null || value.isEmpty) {
-    return 'password_required';
-  }
   return null;
 }
 

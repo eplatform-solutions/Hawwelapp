@@ -1,4 +1,4 @@
-import 'package:hawwel/featue/sender_information/data/model.dart';
+import 'package:usdt/featue/sender_information/data/model.dart';
 
 abstract class ReceiversDisplayState {}
 
@@ -18,7 +18,5 @@ class ReceiversDisplaySuccess extends ReceiversDisplayState {
 
 class ReceiversDisplayFailure extends ReceiversDisplayState {
   final String error;
-  final int? statusCode;
-
-  ReceiversDisplayFailure(this.error, {this.statusCode});
+  ReceiversDisplayFailure(this.error);
 }

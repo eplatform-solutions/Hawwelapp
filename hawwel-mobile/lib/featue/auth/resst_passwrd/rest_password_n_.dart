@@ -2,16 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/widgets/password_requirements_hint.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-import 'package:hawwel/featue/auth/resst_passwrd/cubit/cubit.dart';
-import 'package:hawwel/featue/auth/resst_passwrd/cubit/cubit_stat.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/auth/resst_passwrd/cubit/cubit.dart';
+import 'package:usdt/featue/auth/resst_passwrd/cubit/cubit_stat.dart';
 
 class Restpassword extends StatefulWidget {
   const Restpassword({super.key});
@@ -83,7 +81,25 @@ class _ConferampasswordState extends State<Restpassword> {
                       padding: EdgeInsets.fromLTRB(20.w, 12.h, 20.w, 28.h),
                       child: Row(
                         children: [
-                          AppBackButton(),
+                          GestureDetector(
+                            onTap: () => Navigator.pop(context),
+                            child: Container(
+                              width: 38.r,
+                              height: 38.r,
+                              decoration: BoxDecoration(
+                                color: branding.buttonText
+                                    .withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(12.r),
+                              ),
+                              child: Icon(
+                                isArabic
+                                    ? Icons.arrow_forward_ios_rounded
+                                    : Icons.arrow_back_ios_new_rounded,
+                                color: branding.buttonText,
+                                size: 18,
+                              ),
+                            ),
+                          ),
                           Expanded(
                             child: Text(
                               AppTranslations.getText(
@@ -105,14 +121,8 @@ class _ConferampasswordState extends State<Restpassword> {
 
                 // ── Body ────────────────────────────────────────────────
                 Expanded(
-                  // Clamping (no overscroll bounce): Flutter swallows a tap
-                  // that lands while a scroll animation is running, and the
-                  // bounce-back after dragging the button out from under the
-                  // keyboard was exactly that - the first press "did nothing".
                   child: SingleChildScrollView(
-                    physics: const ClampingScrollPhysics(),
-                    keyboardDismissBehavior:
-                        ScrollViewKeyboardDismissBehavior.onDrag,
+                    physics: const BouncingScrollPhysics(),
                     padding:
                         EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
                     child: Form(
@@ -173,7 +183,7 @@ class _ConferampasswordState extends State<Restpassword> {
                           ),
                           SizedBox(height: 8.h),
                           TextFieldCustom(
-                            validator: (v) => validateNotEmptyPassword(v, context),
+                            validator: (v) => validatePassword(v, context),
                             controller: cubit.oldpassword,
                             hintText:
                                 AppTranslations.getText(context, 'password'),
@@ -202,7 +212,6 @@ class _ConferampasswordState extends State<Restpassword> {
                           ),
                           SizedBox(height: 8.h),
                           TextFieldCustom(
-                            validator: (v) => validatePassword(v, context),
                             controller: cubit.newpassword,
                             hintText:
                                 AppTranslations.getText(context, 'password'),
@@ -220,42 +229,15 @@ class _ConferampasswordState extends State<Restpassword> {
                                   setState(() => _newVisible = !_newVisible),
                             ),
                           ),
-                          const PasswordRequirementsHint(),
 
                           SizedBox(height: 36.h),
 
                           // ── Submit button ─────────────────────────────
                           GestureDetector(
-                            // Opaque: the whole button area must register
-                            // the tap, not only the painted child.
-                            behavior: HitTestBehavior.opaque,
                             onTap: state is ChangePasswordLoading
                                 ? null
                                 : () {
-                                    // Commit any pending keyboard input
-                                    // before reading the controllers.
-                                    FocusManager.instance.primaryFocus
-                                        ?.unfocus();
                                     if (!_formKey.currentState!.validate()) {
-                                      // The field widget hides its error text
-                                      // once something is typed, so a failed
-                                      // rule looked like a dead button - say
-                                      // which rule failed.
-                                      final ruleKey =
-                                          validateNotEmptyPassword(
-                                                  cubit.oldpassword.text,
-                                                  context) ??
-                                              validatePassword(
-                                                  cubit.newpassword.text,
-                                                  context);
-                                      if (ruleKey != null) {
-                                        _snack(
-                                          branding.buttonBg,
-                                          AppTranslations.getTextStatic(
-                                              context, ruleKey),
-                                          AppImages.eerorrimage,
-                                        );
-                                      }
                                       setState(() {});
                                       return;
                                     }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/cubit_state.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/repo/repo.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/cubit_state.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/repo/repo.dart';
 
 class UpdateReceiverCubit extends Cubit<UpdateReceiverState> {
   final UpdateReceiverRepo repo;

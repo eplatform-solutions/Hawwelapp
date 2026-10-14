@@ -1,9 +1,9 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/repo/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/repo/repo.dart';
 
 class UpdateReceiverRepoImpl implements UpdateReceiverRepo {
   final ApiService _apiService;

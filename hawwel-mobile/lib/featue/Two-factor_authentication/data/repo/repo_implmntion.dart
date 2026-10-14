@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/featue/Two-factor_authentication/data/repo/modal.dart';
-import 'package:hawwel/featue/Two-factor_authentication/data/repo/repo.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/featue/Two-factor_authentication/data/repo/modal.dart';
+import 'package:usdt/featue/Two-factor_authentication/data/repo/repo.dart';
 import 'dart:developer';
 
 class Change2FARepositoryImpl implements Change2FARepository {
@@ -78,11 +78,7 @@ class Change2FARepositoryImpl implements Change2FARepository {
       final lang = prefs.getString("app_language") ?? "ar";
 
       // 📩 رسائل السيرفر
-      // Validation middlewares answer with a plain-string msg, not {ar,en}.
-      final rawMsg = response.data["msg"];
-      final Map<String, dynamic>? msgMap = rawMsg is Map
-          ? Map<String, dynamic>.from(rawMsg)
-          : (rawMsg is String ? {"ar": rawMsg, "en": rawMsg} : null);
+      final msgMap = response.data["msg"] as Map<String, dynamic>?;
 
       // ✅ اختيار الرسالة حسب لغة التطبيق
       final message =

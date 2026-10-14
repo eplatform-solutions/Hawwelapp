@@ -138,17 +138,6 @@ class NotificationExtraData {
   final String network;
   final String fullName;
   final String toCountry;
-  final String blockingReason;
-  final String kycId;
-  final String rejectionReason;
-  final String removeVerifyingReason;
-
-  /// Reason attached to this notification, whichever KYC decision it was.
-  String get decisionReason {
-    if (blockingReason.trim().isNotEmpty) return blockingReason.trim();
-    if (rejectionReason.trim().isNotEmpty) return rejectionReason.trim();
-    return removeVerifyingReason.trim();
-  }
 
   // الحقول المترجمة مفصولة (عربي / إنجليزي)
   final String cityAr;
@@ -168,10 +157,6 @@ class NotificationExtraData {
     required this.network,
     required this.fullName,
     required this.toCountry,
-    required this.blockingReason,
-    this.kycId = '',
-    this.rejectionReason = '',
-    this.removeVerifyingReason = '',
     required this.cityAr,
     required this.cityEn,
     required this.areaAr,
@@ -191,10 +176,6 @@ class NotificationExtraData {
       network: json['network']?.toString() ?? '',
       fullName: json['fullName']?.toString() ?? '',
       toCountry: json['toCountry']?.toString() ?? '',
-      blockingReason: json['blockingReason']?.toString() ?? '',
-      kycId: json['kycId']?.toString() ?? '',
-      rejectionReason: json['rejectionReason']?.toString() ?? '',
-      removeVerifyingReason: json['removeVerifyingReason']?.toString() ?? '',
 
       // الوصول للبيانات من داخل الـ Map لكل حقل مترجم
       cityAr: json['city'] != null ? (json['city']['ar'] ?? '') : '',

@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/profail/data/cubit_image/cubit_stat.dart';
-import 'package:hawwel/featue/profail/data/repo_image/repo.dart';
+import 'package:usdt/featue/profail/data/cubit_image/cubit_stat.dart';
+import 'package:usdt/featue/profail/data/repo_image/repo.dart';
  
  
 class ChangeImageCubit extends Cubit<ChangeImageState> {

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
-import 'package:hawwel/featue/paymant/improve_paymant.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/paymant/improve_paymant.dart';
 
 class Paymentsend extends StatefulWidget {
   const Paymentsend({super.key});
@@ -22,12 +21,6 @@ class _PaymentsendState extends State<Paymentsend> {
   @override
   Widget build(BuildContext context) {
     final branding = appBrandingNotifier.value;
-    final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
-    const paymentSymbol = 'USDC';
-    final paymentDisplaySymbol = SendCurrencyHelper.displayLabelForSymbol(
-      paymentSymbol,
-      isArabic: isArabic,
-    );
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -75,14 +68,10 @@ class _PaymentsendState extends State<Paymentsend> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SendCurrencyHelper.buildCoinIcon(
-                    symbol: paymentSymbol,
-                    height: 20.h,
-                    width: 20.w,
-                  ),
+                  Image.asset(AppImages.usdt, height: 20.h, width: 20.w),
                   SizedBox(width: 8.w),
                   Text(
-                    paymentDisplaySymbol,
+                    'USDC',
                     style: GoogleFonts.cairo(
                       fontSize: 20.sp,
                       fontWeight: FontWeight.bold,
@@ -190,7 +179,7 @@ class _PaymentsendState extends State<Paymentsend> {
                                                 ),
                                                 SizedBox(width: 5.w),
                                                 Text(
-                                                  paymentDisplaySymbol,
+                                                  'USDC',
                                                   style: GoogleFonts.cairo(
                                                     fontSize: 20.sp,
                                                     fontWeight: FontWeight.bold,

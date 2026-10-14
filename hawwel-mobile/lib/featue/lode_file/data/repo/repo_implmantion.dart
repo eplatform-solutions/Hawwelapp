@@ -1,9 +1,9 @@
 // import 'dart:developer';
 // import 'package:dartz/dartz.dart';
 // import 'package:dio/dio.dart';
-// import 'package:hawwel/constans/api_servise.dart';
-// import 'package:hawwel/constans/failear.dart';
-// import 'package:hawwel/featue/lode_file/data/repo/repo.dart';
+// import 'package:usdt/constans/api_servise.dart';
+// import 'package:usdt/constans/failear.dart';
+// import 'package:usdt/featue/lode_file/data/repo/repo.dart';
 
 // class KycRepoImpl implements KycRepo {
 //   final ApiService api;
@@ -46,12 +46,13 @@
 //     }
 //   }
 // }
+import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/lode_file/data/repo/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/lode_file/data/repo/repo.dart';
 import 'package:http_parser/http_parser.dart'; // مهم جداً للتعرف على نوع الملف
 
 class KycRepoImpl implements KycRepo {
@@ -60,25 +61,21 @@ class KycRepoImpl implements KycRepo {
   KycRepoImpl(this.api);
 
   @override
-  Future<Either<Failur, String>> uploadKyc(
-    String firstFilePath,
-    String secondFilePath,
-  ) async {
+  Future<Either<Failur, String>> uploadKyc(String filePath) async {
     try {
-      Future<MultipartFile> buildPart(String filePath, String fieldName) async {
-        final extension = filePath.split('.').last.toLowerCase();
-        final mimeSubtype = extension == 'jpg' ? 'jpeg' : extension;
-        final type = extension == 'pdf' ? 'application' : 'image';
-        return MultipartFile.fromFile(
-          filePath,
-          filename: '$fieldName.$extension',
-          contentType: MediaType(type, mimeSubtype),
-        );
-      }
+      log("📤 [REPO] بدء رفع الملف: $filePath");
+
+      // تجهيز نوع الملف لضمان عدم حدوث خطأ Invalid Real File Type
+      String extension = filePath.split('.').last.toLowerCase();
+      String mimeSubtype = extension == 'jpg' ? 'jpeg' : extension;
+      String type = (extension == 'pdf') ? 'application' : 'image';
 
       final formData = FormData.fromMap({
-        "kycFile1": await buildPart(firstFilePath, 'kyc_document_1'),
-        "kycFile2": await buildPart(secondFilePath, 'kyc_document_2'),
+        "kycFile": await MultipartFile.fromFile(
+          filePath,
+          filename: 'kyc_document.$extension',
+          contentType: MediaType(type, mimeSubtype),
+        ),
       });
 
       final response = await api.postdata2(
@@ -88,6 +85,7 @@ class KycRepoImpl implements KycRepo {
       );
 
       final responseData = response.data;
+      log("📥 [REPO] استجابة السيرفر: $responseData");
 
       // 1. جلب لغة التطبيق
       final prefs = await SharedPreferences.getInstance();
@@ -106,16 +104,28 @@ class KycRepoImpl implements KycRepo {
 
       // 3. التحقق من الخطأ المنطقي (هنا الحل لمنع التعليق في الـ Loading)
       if (responseData['error'] == true) {
+        log("⚠️ [REPO] خطأ منطقي من السيرفر: $serverMessage");
         // نرجعه كـ Left ليتحول الـ Cubit فوراً لحالة Failure
         return Left(ServierFailur(serverMessage, response.statusCode ?? 400));
       }
 
+      // 4. حالة النجاح الحقيقي
+      log("✅ [REPO] رفع الملف بنجاح");
       return Right(serverMessage);
     } catch (e) {
       if (e is DioException) {
+        log("❌ [REPO] Dio Error:");
+        log("  ↳ Status Code : ${e.response?.statusCode}");
+        log("  ↳ Status Msg  : ${e.response?.statusMessage}");
+        log("  ↳ Response    : ${e.response?.data}");
+        log("  ↳ Request URL : ${e.requestOptions.uri}");
+        log("  ↳ Request Data: ${e.requestOptions.data}");
+        log("  ↳ Dio Message : ${e.message}");
         return Left(ServierFailur.fromDioError(e));
       }
 
+      log("❌ [REPO] Unexpected Error: $e");
+      log("  ↳ Type: ${e.runtimeType}");
       return Left(ServierFailur("حدث خطأ غير متوقع: ${e.toString()}", 500));
     }
   }

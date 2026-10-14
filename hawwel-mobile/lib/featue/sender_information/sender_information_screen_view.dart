@@ -3,25 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/country_defaults_helper.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/style.dart';
-import 'package:hawwel/constans/widgets/app_back_button.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/auth/login/login_screen_view.dart';
-import 'package:hawwel/featue/Transfer_details/Transfer_details_view.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit/cubit.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit/cubit_stat.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/featue/Transfer_details/Transfer_details_view.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit/cubit.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit/cubit_stat.dart';
 
-import 'package:hawwel/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
+import 'package:usdt/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
 
-import 'package:hawwel/featue/sender_information/data/repo/cubit/cubit.dart';
-import 'package:hawwel/featue/sender_information/data/repo/cubit/cubit_state.dart';
+import 'package:usdt/featue/sender_information/data/repo/cubit/cubit.dart';
+import 'package:usdt/featue/sender_information/data/repo/cubit/cubit_state.dart';
 
 class Senderinformation extends StatefulWidget {
   const Senderinformation({super.key});
@@ -97,39 +93,8 @@ class _SenderinformationState extends State<Senderinformation>
 
     return Scaffold(
       backgroundColor: branding.screenBg,
-      body: BlocListener<ReceiversDisplayCubit, ReceiversDisplayState>(
-        listener: (context, state) async {
-          if (state is ReceiversDisplayFailure && state.statusCode == 401) {
-            await Functions().deleteToken();
-            if (!context.mounted) return;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                backgroundColor: Colors.transparent,
-                elevation: 0,
-                behavior: SnackBarBehavior.floating,
-                margin: EdgeInsets.zero,
-                padding: EdgeInsets.zero,
-                content: CustomSnackBar(
-                  backgroundColor: branding.error,
-                  message: AppTranslations.getTextStatic(
-                    context,
-                    'session_expired_login_again',
-                  ),
-                  imagePath: AppImages.eerorrimage,
-                ),
-              ),
-            );
-            await Future<void>.delayed(const Duration(milliseconds: 350));
-            if (!context.mounted) return;
-            Navigator.pushAndRemoveUntil(
-              context,
-              MaterialPageRoute(builder: (_) => const Loginview()),
-              (_) => false,
-            );
-          }
-        },
-        child: Column(
-          children: [
+      body: Column(
+        children: [
           // ── Header ──────────────────────────────────────────────
           _buildHeader(context, branding, isArabic),
 
@@ -208,14 +173,18 @@ class _SenderinformationState extends State<Senderinformation>
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    pickerCountry != null
-                                        ? CountryDefaultsHelper.countryFlag(
-                                            pickerCountry.countryCode,
-                                            size: 16,
+                                    pickerCountry?.countryCode == 'SY'
+                                        ? Image.asset(
+                                            'asset/syrianewsyria.png',
+                                            width: 20.w,
+                                            height: 14.h,
+                                            fit: BoxFit.cover,
                                           )
-                                        : const Text(
-                                            '🌍',
-                                            style: TextStyle(fontSize: 16),
+                                        : Text(
+                                            pickerCountry?.flagEmoji ?? '🌍',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                            ),
                                           ),
                                     SizedBox(width: 4.w),
                                     Text(
@@ -501,8 +470,7 @@ class _SenderinformationState extends State<Senderinformation>
               ),
             ),
           ),
-          ],
-        ),
+        ],
       ),
     );
   }
@@ -533,7 +501,24 @@ class _SenderinformationState extends State<Senderinformation>
           child: Row(
             children: [
               // Back button
-              AppBackButton(),
+              GestureDetector(
+                onTap: () => Navigator.maybePop(context),
+                child: Container(
+                  width: 38.w,
+                  height: 38.h,
+                  decoration: BoxDecoration(
+                    color: branding.buttonText.withValues(alpha: 0.15),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Icon(
+                    isArabic
+                        ? Icons.arrow_forward_ios_rounded
+                        : Icons.arrow_back_ios_new_rounded,
+                    color: branding.buttonText,
+                    size: 16,
+                  ),
+                ),
+              ),
               Expanded(
                 child: Text(
                   AppTranslations.getText(context, 'sender_data'),
@@ -628,7 +613,7 @@ class _SenderinformationState extends State<Senderinformation>
           countryCode: pickerCountry!.countryCode,
         );
 
-        if (!context.mounted) return;
+        if (!mounted) return;
 
         if (!isPhoneValid) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -656,7 +641,6 @@ class _SenderinformationState extends State<Senderinformation>
           country: pickerCountry,
         );
 
-        if (!context.mounted) return;
         if (context.read<CurrencyCubit>().state.amount.isEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

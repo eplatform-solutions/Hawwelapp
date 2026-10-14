@@ -1,18 +1,10 @@
 import 'dart:developer';
-
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart' show kDebugMode;
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/transfer_execution/data/cubit/repo/repo.dart';
-
-void _safeLog(String message) {
-  if (kDebugMode) {
-    log(message);
-  }
-}
-
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/transfer_execution/data/cubit/repo/repo.dart';
+ 
 class DepositExternalRepoImpl extends DepositExternalRepo {
   final ApiService apiService;
 
@@ -27,9 +19,9 @@ class DepositExternalRepoImpl extends DepositExternalRepo {
     required num amount,
     required String contractAddress,
   }) async {
-    _safeLog('External payment request started');
-
     try {
+      log("🚀 POST /deposits/external");
+
       final response = await apiService.postdata(
         endpoint: "/deposits/external",
         needtoken: true,
@@ -43,24 +35,21 @@ class DepositExternalRepoImpl extends DepositExternalRepo {
         },
       );
 
+      log("✅ RESPONSE: ${response.data}");
+
       if (response.data["error"] == false) {
-        _safeLog('External payment request succeeded');
         return right(response.data);
       }
 
-      _safeLog('External payment request failed');
       final errorMessage =
-          response.data["msg"]?["ar"] ??
-          "حدث خطأ أثناء إتمام الدفع الخارجي";
+          response.data["msg"]?["ar"] ?? "حدث خطأ أثناء تنفيذ الإيداع";
 
       return left(
         ServierFailur(errorMessage, response.statusCode ?? 500),
       );
     } on DioException catch (e) {
-      _safeLog('External payment request failed');
       return left(ServierFailur.fromDioError(e));
     } catch (e) {
-      _safeLog('External payment request failed');
       return left(ServierFailur(e.toString(), 600));
     }
   }

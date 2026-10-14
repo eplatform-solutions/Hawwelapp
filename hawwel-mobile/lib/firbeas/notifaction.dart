@@ -6,7 +6,7 @@
 // import 'package:firebase_core/firebase_core.dart';
 // import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:hawwel/constans/token.dart';
+// import 'package:usdt/constans/token.dart';
 
 // class Notifications {
 //   static final FlutterLocalNotificationsPlugin _localNotifications =
@@ -125,7 +125,7 @@
 //     final dioClient = dio.Dio();
 
 //     final response = await dioClient.post(
-//       'https://api.7awalaty.com/notifications/register-token',
+//       'https://api-stage.7awalaty.com/notifications/register-token',
 //       data: {'token': fcmToken, 'language': language, 'platform': 'android'},
 //       options: dio.Options(
 //         headers: {
@@ -183,9 +183,9 @@
 // import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:hawwel/constans/token.dart';
-// import 'package:hawwel/featue/notifation/notifacation_view.dart';
-// import 'package:hawwel/main.dart';
+// import 'package:usdt/constans/token.dart';
+// import 'package:usdt/featue/notifation/notifacation_view.dart';
+// import 'package:usdt/main.dart';
 
 // class Notifications {
 //   // هذا الـ Stream هو المسؤول عن إرسال البيانات للشاشات وهي مفتوحة
@@ -305,7 +305,7 @@
 
 //     try {
 //       final response = await dioClient.post(
-//         'https://api.7awalaty.com/notifications/register-token',
+//         'https://api-stage.7awalaty.com/notifications/register-token',
 //         data: {'token': fcmToken, 'language': language, 'platform': 'android'},
 //         options: dio.Options(
 //           headers: {
@@ -362,9 +362,9 @@
 // import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:hawwel/constans/token.dart';
-// import 'package:hawwel/featue/notifation/notifacation_view.dart';
-// import 'package:hawwel/main.dart';
+// import 'package:usdt/constans/token.dart';
+// import 'package:usdt/featue/notifation/notifacation_view.dart';
+// import 'package:usdt/main.dart';
 
 // class Notifications {
 //   static final StreamController<Map<String, dynamic>> _onMessageStream =
@@ -540,7 +540,7 @@
 //     if (fcmToken == null || authToken == null) return;
 //     try {
 //       await dio.Dio().post(
-//         'https://api.7awalaty.com/notifications/register-token',
+//         'https://api-stage.7awalaty.com/notifications/register-token',
 //         data: {'token': fcmToken, 'language': language, 'platform': 'android'},
 //         options: dio.Options(headers: {'Authorization': 'Bearer $authToken'}),
 //       );
@@ -612,8 +612,6 @@
 //   );
 // }
 //////////////////////////////////////////////////////////////
-library;
-
 // import 'dart:async';
 // import 'dart:convert';
 // import 'dart:developer' as developer;
@@ -623,9 +621,9 @@ library;
 // import 'package:firebase_messaging/firebase_messaging.dart';
 // import 'package:flutter/material.dart';
 // import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-// import 'package:hawwel/constans/token.dart';
-// import 'package:hawwel/featue/notifation/notifacation_view.dart';
-// import 'package:hawwel/main.dart';
+// import 'package:usdt/constans/token.dart';
+// import 'package:usdt/featue/notifation/notifacation_view.dart';
+// import 'package:usdt/main.dart';
 
 // class Notifications {
 //   static final StreamController<Map<String, dynamic>> _onMessageStream =
@@ -776,7 +774,7 @@ library;
 //     if (fcmToken == null || authToken == null) return;
 //     try {
 //       await dio.Dio().post(
-//         'https://api.7awalaty.com/notifications/register-token',
+//         'https://api-stage.7awalaty.com/notifications/register-token',
 //         data: {'token': fcmToken, 'language': language, 'platform': 'android'},
 //         options: dio.Options(headers: {'Authorization': 'Bearer $authToken'}),
 //       );
@@ -826,19 +824,13 @@ import 'dart:io'; // تم إضافة مكتبة الـ IO لمعرفة المن�
 import 'package:dio/dio.dart' as dio;
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart' show kDebugMode, kIsWeb;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/token.dart';
-import 'package:hawwel/featue/notifation/notifacation_view.dart';
-import 'package:hawwel/featue/notifation/notification_navigation.dart';
-import 'package:hawwel/featue/support_chat/data/unread_chat_state.dart';
-import 'package:hawwel/featue/support_chat/support_chat_view.dart';
-import 'package:hawwel/constans/widgets/floating_chat_button.dart'
-    show CurrentRouteObserver;
-import 'package:hawwel/main.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/token.dart';
+import 'package:usdt/featue/notifation/notifacation_view.dart';
+import 'package:usdt/main.dart';
 
 class Notifications {
   static final StreamController<Map<String, dynamic>> _onMessageStream =
@@ -851,46 +843,13 @@ class Notifications {
       FlutterLocalNotificationsPlugin();
 
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
-    'high_importance_channel_v2',
+   'high_importance_channel_v2',
     'usdt Notifications',
     description: 'Important notifications for usdt',
     importance: Importance.max,
-    playSound: true, // أضف هذا السطر
-    enableVibration: true,
+    playSound: true,        // أضف هذا السطر
+  enableVibration: true
   );
-
-  static void _safeLog(String message) {
-    if (kDebugMode) {
-      developer.log(message);
-    }
-  }
-
-  static Future<String?> _safeGetFcmToken() async {
-    try {
-      if (!kIsWeb && Platform.isIOS) {
-        // On iOS, APNS token can arrive a bit later than app startup.
-        for (var i = 0; i < 8; i++) {
-          final apns = await FirebaseMessaging.instance.getAPNSToken();
-          if (apns != null && apns.isNotEmpty) break;
-          await Future<void>.delayed(const Duration(milliseconds: 500));
-        }
-      }
-      return await FirebaseMessaging.instance.getToken();
-    } on FirebaseException catch (e) {
-      if (e.code == 'apns-token-not-set') {
-        _safeLog('APNS token is not ready yet; skipping FCM token for now.');
-        return null;
-      }
-      rethrow;
-    } catch (e) {
-      // Some plugin versions may throw PlatformException-like errors here.
-      if (e.toString().contains('apns-token-not-set')) {
-        _safeLog('APNS token is not ready yet; skipping FCM token for now.');
-        return null;
-      }
-      rethrow;
-    }
-  }
 
   static Future<void> init() async {
     // 1. طلب تصاريح الـ iOS
@@ -914,14 +873,6 @@ class Notifications {
           AndroidFlutterLocalNotificationsPlugin
         >()
         ?.createNotificationChannel(_channel);
-
-    if (!kIsWeb && Platform.isAndroid) {
-      await _localNotifications
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >()
-          ?.requestNotificationsPermission();
-    }
 
     const androidSettings = AndroidInitializationSettings(
       '@mipmap/ic_launcher',
@@ -952,14 +903,9 @@ class Notifications {
     FirebaseMessaging.onMessageOpenedApp.listen(
       (message) => _navigateFromData(message.data),
     );
-    // FCM rotates tokens (reinstall, restore, periodic refresh); push the
-    // new one straight to the server or every notification bounces.
-    FirebaseMessaging.instance.onTokenRefresh.listen((_) {
-      registerFCMToken(
-        loggedIn: Functions.loginStateNotifier.value,
-        language: 'ar',
-      );
-    });
+
+    final token = await FirebaseMessaging.instance.getToken();
+    developer.log('FCM Token: $token');
   }
 
   static String _formatBody(
@@ -982,11 +928,9 @@ class Notifications {
       nestedData = rawData;
     }
 
-    final String rawBody = notificationBody ?? rawData['body'] ?? "";
+    String body = notificationBody ?? rawData['body'] ?? "";
 
     final String amount = (nestedData['amount'] ?? rawData['amount'] ?? "")
-        .toString();
-    final String paid = (nestedData['paid'] ?? rawData['paid'] ?? "")
         .toString();
     final String symbol = (nestedData['symbol'] ?? rawData['symbol'] ?? "")
         .toString();
@@ -994,78 +938,25 @@ class Notifications {
         .toString();
     final String network = (nestedData['network'] ?? rawData['network'] ?? "")
         .toString();
-    // Each KYC decision stores its reason under its own key; take whichever
-    // one this notification carries.
-    String blockingReason = "";
-    for (final key in const [
-      'blockingReason',
-      'rejectionReason',
-      'removeVerifyingReason',
-    ]) {
-      final value = (nestedData[key] ?? rawData[key] ?? "").toString().trim();
-      if (value.isNotEmpty) {
-        blockingReason = value;
-        break;
-      }
-    }
-
-    // The body sent from the backend is usually a translation key (e.g.
-    // "notification_underpaid_deposit"), not literal text - resolve it the
-    // same way the in-app notification list does, so the two never show
-    // different wording for the same event.
-    // getTextStatic (not getText) because this runs outside any widget's
-    // build method, where Provider's context.watch would throw.
-    final ctx = navigatorKey.currentContext;
-    String body = ctx != null
-        ? AppTranslations.getTextStatic(ctx, rawBody)
-        : rawBody;
 
     body = body.replaceAll('{{amount}}', amount);
-    body = body.replaceAll('{{paid}}', paid);
     body = body.replaceAll('{{symbol}}', symbol);
     body = body.replaceAll('{{address}}', address);
     body = body.replaceAll('{{network}}', network);
-    if (body.contains('{{reasonClause}}')) {
-      final isArabic =
-          ctx != null && Localizations.localeOf(ctx).languageCode == 'ar';
-      final reasonClause = blockingReason.isEmpty
-          ? ''
-          : (isArabic
-              ? ' السبب: $blockingReason.'
-              : ' Reason: $blockingReason.');
-      body = body.replaceAll('{{reasonClause}}', reasonClause);
-    }
 
-    if (body.isEmpty && (rawBody.contains("Amount Deposit") || amount.isNotEmpty)) {
-      return "تم استلام دفع خارجي: $amount $symbol\nالشبكة: $network\nالعنوان: $address";
+    if (body.contains("Amount Deposit") ||
+        body.contains("إيداع") ||
+        amount.isNotEmpty) {
+      return " تم إيداع: $amount $symbol\n الشبكة: $network\n العنوان: $address";
     }
 
     return body.isEmpty ? "لديك تنبيه جديد" : body;
   }
 
   static void _handleForegroundMessage(RemoteMessage message) {
-    _safeLog('Notification received (foreground)');
+    print("🔔 Notification Received! Dataممممممممممممممممم: ${message.data}");
     final data = message.data;
     _onMessageStream.add(data);
-
-    // Re-derive the true count from the server rather than bump()-ing it -
-    // the backend now sends this push for every chat message regardless of
-    // whether the customer's socket is also live, so a bump() here could
-    // double-count a message the socket already bumped for. Only valid to
-    // do this synchronously here because the foreground handler runs in
-    // the same isolate as the rest of the app; a background/terminated
-    // push runs in a separate isolate with no access to this notifier, so
-    // its count is picked up by the next resume-triggered refresh instead.
-    if ((data['type'] ?? '') == 'chat_message') {
-      ChatUnreadState.refreshFromServer();
-      // The user is already looking at the live conversation - the socket
-      // already rendered this message, so the OS banner would just be a
-      // redundant alert for something on-screen.
-      if (CurrentRouteObserver.currentRouteName.value ==
-          SupportChatView.routeName) {
-        return;
-      }
-    }
 
     _localNotifications.show(
       message.hashCode,
@@ -1078,7 +969,7 @@ class Notifications {
           importance: Importance.max,
           priority: Priority.high,
           icon: '@mipmap/ic_launcher',
-
+          
           styleInformation: const BigTextStyleInformation(''),
         ),
         // إضافة تفاصيل الـ iOS هنا لعرض الإشعار في الـ Foreground
@@ -1092,22 +983,11 @@ class Notifications {
     );
   }
 
-  static Future<void> _navigateFromData(Map<String, dynamic> data) async {
+  static void _navigateFromData(Map<String, dynamic> data) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final ctx = navigatorKey.currentContext;
-      if (ctx == null) {
-        navigatorKey.currentState?.push(
-          MaterialPageRoute(builder: (_) => const Notifation()),
-        );
-        return;
-      }
-      NotificationNavigation.openFromNotificationData(ctx, data).then((opened) {
-        if (!opened) {
-          navigatorKey.currentState?.push(
-            MaterialPageRoute(builder: (_) => const Notifation()),
-          );
-        }
-      });
+      navigatorKey.currentState?.push(
+        MaterialPageRoute(builder: (_) => const Notifation()),
+      );
     });
   }
 
@@ -1115,42 +995,68 @@ class Notifications {
     required bool loggedIn,
     required String language,
   }) async {
+    developer.log('🚀 بدء عملية تسجيل الـ FCM Token...');
+
     if (!loggedIn) {
+      developer.log('⚠️ المستخدم غير مسجل دخول، تم إلغاء العملية.');
       return;
     }
 
     if (kIsWeb) {
+      developer.log('⚠️ FCM غير مدعوم على الويب، تم التخطي.');
       return;
     }
 
-    _safeLog('FCM token registration attempted');
-
     try {
-      final fcmToken = await _safeGetFcmToken();
+      // 1. جلب الـ FCM Token
+      final fcmToken = await FirebaseMessaging.instance.getToken();
+      // 2. جلب الـ Auth Token الخاص بسيرفركم
       final authToken = await Functions().getToken();
+      // 3. تحديد المنصة
       final platform = Platform.isIOS ? 'ios' : 'android';
 
+      developer.log('📱 المنصة الحالية: $platform');
+      developer.log('🔑 FCM Token المستخرج: $fcmToken');
+      developer.log(
+        '🎟️ Auth Token المستخدم: ${authToken?.substring(0, 10)}...',
+      ); // طباعة أول 10 أحرف فقط للأمان
+
       if (fcmToken == null || authToken == null) {
-        _safeLog('FCM token registration failed');
+        developer.log('❌ خطأ: أحد التوكنات فارغ (FCM or Auth Token is null)');
         return;
       }
+
+      // 4. إرسال البيانات للسيرفر
+      developer.log(
+        '📡 جاري الإرسال للسيرفر: ${ApiService.baseURL}/notifications/register-token',
+      );
 
       final response = await dio.Dio().post(
         '${ApiService.baseURL}/notifications/register-token',
         data: {'token': fcmToken, 'language': language, 'platform': platform},
         options: dio.Options(
           headers: {'Authorization': 'Bearer $authToken'},
-          validateStatus: (status) => true,
+          validateStatus: (status) =>
+              true, // لكي نستقبل الرد حتى لو كان فيه خطأ من السيرفر
         ),
       );
 
+      // 5. طباعة رد السيرفر بالكامل
+      developer.log('✅ رد السيرفر (Status Code): ${response.statusCode}');
+      developer.log('📄 محتوى رد السيرفر (Body): ${response.data}');
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        _safeLog('FCM token registration succeeded');
+        developer.log('🎊 تم تسجيل التوكن بنجاح في قاعدة البيانات!');
       } else {
-        _safeLog('FCM token registration failed');
+        developer.log(
+          '⚠️ السيرفر رفض الطلب أو هناك مشكلة في البيانات المرسلة.',
+        );
       }
-    } catch (_) {
-      _safeLog('FCM token registration failed');
+    } catch (e) {
+      developer.log("❌ فشل كامل في عملية التسجيل: $e");
+      if (e is dio.DioException) {
+        developer.log("🚨 تفاصيل خطأ Dio: ${e.response?.data}");
+      }
     }
   }
 }

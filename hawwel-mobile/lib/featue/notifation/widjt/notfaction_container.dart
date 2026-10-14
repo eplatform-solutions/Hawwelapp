@@ -1,18 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
+import 'package:usdt/constans/app_branding.dart';
 
 class NotificationCard extends StatelessWidget {
   final String title;
   final String body;
   final String time;
   final Color? color;
-  final IconData? statusIcon;
-  final Color? statusIconColor;
-  final Color? statusIconBgColor;
   final VoidCallback? onTap;
-  final bool isRead;
 
   const NotificationCard({
     super.key,
@@ -20,21 +16,43 @@ class NotificationCard extends StatelessWidget {
     required this.body,
     required this.time,
     this.color,
-    this.statusIcon,
-    this.statusIconColor,
-    this.statusIconBgColor,
     this.onTap,
-    this.isRead = true,
   });
+
+  // icon + background based on status color
+  _StatusStyle _resolveStyle(AppBrandingConfig branding) {
+    final c = color ?? branding.divider;
+    final isGreen = c == branding.gradientEndColorValue;
+    final isRed = c == branding.iconPrimary;
+
+    if (isGreen) {
+      return _StatusStyle(
+        icon: Icons.check_circle_rounded,
+        iconColor: const Color(0xFF22C55E),
+        bgColor: const Color(0xFF22C55E).withValues(alpha: 0.1),
+        accentColor: const Color(0xFF22C55E),
+      );
+    } else if (isRed) {
+      return _StatusStyle(
+        icon: Icons.cancel_rounded,
+        iconColor: const Color(0xFFEF4444),
+        bgColor: const Color(0xFFEF4444).withValues(alpha: 0.1),
+        accentColor: const Color(0xFFEF4444),
+      );
+    } else {
+      return _StatusStyle(
+        icon: Icons.info_rounded,
+        iconColor: const Color(0xFFF59E0B),
+        bgColor: const Color(0xFFF59E0B).withValues(alpha: 0.1),
+        accentColor: const Color(0xFFF59E0B),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final branding = appBrandingNotifier.value;
-    final accentColor = color ?? branding.divider;
-    final icon = statusIcon ?? Icons.info_rounded;
-    final iconColor = statusIconColor ?? accentColor;
-    final iconBgColor =
-        statusIconBgColor ?? accentColor.withValues(alpha: 0.12);
+    final style = _resolveStyle(branding);
     final bool isArabic = Localizations.localeOf(context).languageCode == 'ar';
 
     return Directionality(
@@ -51,7 +69,7 @@ class NotificationCard extends StatelessWidget {
                 color: branding.cardBg,
                 borderRadius: BorderRadius.circular(18.r),
                 border: Border.all(
-                  color: accentColor.withValues(alpha: 0.2),
+                  color: style.accentColor.withValues(alpha: 0.2),
                   width: 1,
                 ),
                 boxShadow: [
@@ -70,7 +88,7 @@ class NotificationCard extends StatelessWidget {
                     Container(
                       width: 4.w,
                       decoration: BoxDecoration(
-                        color: accentColor,
+                        color: style.accentColor,
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(18.r),
                           bottomLeft: Radius.circular(18.r),
@@ -87,10 +105,14 @@ class NotificationCard extends StatelessWidget {
                         width: 40.w,
                         height: 40.h,
                         decoration: BoxDecoration(
-                          color: iconBgColor,
+                          color: style.bgColor,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(icon, color: iconColor, size: 22.sp),
+                        child: Icon(
+                          style.icon,
+                          color: style.iconColor,
+                          size: 22.sp,
+                        ),
                       ),
                     ),
 
@@ -104,33 +126,14 @@ class NotificationCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                if (!isRead) ...[
-                                  Container(
-                                    width: 7.w,
-                                    height: 7.w,
-                                    decoration: BoxDecoration(
-                                      color: accentColor,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  SizedBox(width: 6.w),
-                                ],
-                                Expanded(
-                                  child: Text(
-                                    title,
-                                    style: GoogleFonts.cairo(
-                                      fontSize: 13.sp,
-                                      fontWeight: isRead
-                                          ? FontWeight.w600
-                                          : FontWeight.w800,
-                                      color: branding.primaryText,
-                                      height: 1.3,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            Text(
+                              title,
+                              style: GoogleFonts.cairo(
+                                fontSize: 13.sp,
+                                fontWeight: FontWeight.w700,
+                                color: branding.primaryText,
+                                height: 1.3,
+                              ),
                             ),
                             if (body.isNotEmpty) ...[
                               SizedBox(height: 4.h),
@@ -190,4 +193,17 @@ class NotificationCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _StatusStyle {
+  final IconData icon;
+  final Color iconColor;
+  final Color bgColor;
+  final Color accentColor;
+  const _StatusStyle({
+    required this.icon,
+    required this.iconColor,
+    required this.bgColor,
+    required this.accentColor,
+  });
 }

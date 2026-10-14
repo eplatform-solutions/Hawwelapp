@@ -1,10 +1,10 @@
 // // import 'dart:developer';
 // // import 'package:dartz/dartz.dart';
 // // import 'package:dio/dio.dart';
-// // import 'package:hawwel/constans/api_servise.dart';
-// // import 'package:hawwel/constans/failear.dart';
-// // import 'package:hawwel/featue/sender_information/data/model.dart';
-// // import 'package:hawwel/featue/sender_information/data/repo/repo.dart';
+// // import 'package:usdt/constans/api_servise.dart';
+// // import 'package:usdt/constans/failear.dart';
+// // import 'package:usdt/featue/sender_information/data/model.dart';
+// // import 'package:usdt/featue/sender_information/data/repo/repo.dart';
 
 // // class ReceiversDisplayRepoImpl extends ReceiversDisplayRepo {
 // //  final ApiService _apiService;
@@ -62,10 +62,10 @@
 // import 'dart:developer';
 // import 'package:dartz/dartz.dart';
 // import 'package:dio/dio.dart';
-// import 'package:hawwel/constans/api_servise.dart';
-// import 'package:hawwel/constans/failear.dart';
-// import 'package:hawwel/featue/sender_information/data/model.dart';
-// import 'package:hawwel/featue/sender_information/data/repo/repo.dart';
+// import 'package:usdt/constans/api_servise.dart';
+// import 'package:usdt/constans/failear.dart';
+// import 'package:usdt/featue/sender_information/data/model.dart';
+// import 'package:usdt/featue/sender_information/data/repo/repo.dart';
 
 // class ReceiversDisplayRepoImpl extends ReceiversDisplayRepo {
 //   final ApiService _apiService;
@@ -103,11 +103,10 @@
 import 'dart:developer';
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/constans/localization/app_locale.dart';
-import 'package:hawwel/featue/sender_information/data/model.dart';
-import 'package:hawwel/featue/sender_information/data/repo/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/sender_information/data/model.dart';
+import 'package:usdt/featue/sender_information/data/repo/repo.dart';
 
 class ReceiversDisplayRepoImpl extends ReceiversDisplayRepo {
   final ApiService _apiService;
@@ -147,8 +146,7 @@ class ReceiversDisplayRepoImpl extends ReceiversDisplayRepo {
     } on DioException catch (e) {
       log("❌ Dio Error => ${e.response?.data}");
       // الاعتماد على الميثود الاحترافية اللي عندك بملف الـ Failure
-      final lang = await AppLocaleHelper.getLanguageCode();
-      return left(ServierFailur.fromDioError(e, lang: lang));
+      return left(ServierFailur.fromDioError(e));
     } catch (e) {
       log("💥 Unexpected Error => $e");
       return left(ServierFailur("حدث خطأ غير متوقع، حاول لاحقاً", 500));

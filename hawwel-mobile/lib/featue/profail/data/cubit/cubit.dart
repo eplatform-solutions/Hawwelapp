@@ -1,16 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/profail/data/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/profail/data/repo/repo.dart';
+import 'package:usdt/featue/profail/data/cubit/cubit_stat.dart';
+import 'package:usdt/featue/profail/data/repo/repo.dart';
 
 class Userinfogcubit extends Cubit<UserinfoState> {
   Userinfogcubit(this.repo) : super(UserinfoInitialState());
 
   final Repouserinfo repo;
-  bool _isFetching = false;
 
   Future<void> fetchUserInfo() async {
-    if (_isFetching) return;
-    _isFetching = true;
     emit(UserinfoLoadingState());
 
     var result = await repo.get_user_info();
@@ -24,6 +21,5 @@ class Userinfogcubit extends Cubit<UserinfoState> {
       ),
       (user) => emit(UserinfoSuccessState(user: user)),
     );
-    _isFetching = false;
   }
 }

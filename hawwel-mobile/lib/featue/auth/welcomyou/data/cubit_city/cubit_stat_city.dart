@@ -1,4 +1,4 @@
-// import 'package:hawwel/featue/auth/welcomyou/data/model_city.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/model_city.dart';
 
 // abstract class CitiesState {}
 
@@ -20,7 +20,7 @@
 //   final String error;
 //   CitiesFailure(this.error);
 // }
-import 'package:hawwel/featue/auth/welcomyou/data/model_city.dart';
+import 'package:usdt/featue/auth/welcomyou/data/model_city.dart';
 
 abstract class CitiesState {}
 

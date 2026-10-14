@@ -3,21 +3,21 @@
 // import 'package:flutter_bloc/flutter_bloc.dart';
 // import 'package:flutter_screenutil/flutter_screenutil.dart';
 // import 'package:google_fonts/google_fonts.dart';
-// import 'package:hawwel/constans/appr_images.dart';
-// import 'package:hawwel/constans/localization/app_tranzaction.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit/cubit.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit/cubit_stat.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit_airea/cubit.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit_airea/cubit_stat.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit_city/cubit_city.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit_city/cubit_stat_city.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit_conversion_methods/cubit.dart';
-// import 'package:hawwel/featue/auth/welcomyou/data/cubit_conversion_methods/cubit_stat.dart';
-// import 'package:hawwel/featue/auth/welcomyou/widjt/trkalthoel.dart';
-// import 'package:hawwel/featue/auth/welcomyou/widjt/trsltstakbl.dart';
-// import 'package:hawwel/featue/notifation/notifacation_view.dart';
-// import 'package:hawwel/featue/sender_information/sender_information_screen_view.dart';
+// import 'package:usdt/constans/appr_images.dart';
+// import 'package:usdt/constans/localization/app_tranzaction.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit/cubit.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit/cubit_stat.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit_airea/cubit.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit_airea/cubit_stat.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit_amount_to_send.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit_city/cubit_city.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit_city/cubit_stat_city.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit_conversion_methods/cubit.dart';
+// import 'package:usdt/featue/auth/welcomyou/data/cubit_conversion_methods/cubit_stat.dart';
+// import 'package:usdt/featue/auth/welcomyou/widjt/trkalthoel.dart';
+// import 'package:usdt/featue/auth/welcomyou/widjt/trsltstakbl.dart';
+// import 'package:usdt/featue/notifation/notifacation_view.dart';
+// import 'package:usdt/featue/sender_information/sender_information_screen_view.dart';
 
 // class Welcomyou extends StatefulWidget {
 //   const Welcomyou({super.key});

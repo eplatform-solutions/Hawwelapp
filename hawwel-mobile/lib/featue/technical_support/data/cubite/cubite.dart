@@ -1,6 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hawwel/featue/technical_support/data/cubite/cubite_state.dart';
-import 'package:hawwel/featue/technical_support/data/repo/repo.dart';
+import 'package:usdt/featue/technical_support/data/cubite/cubite_state.dart';
+import 'package:usdt/featue/technical_support/data/repo/repo.dart';
  
 class SupportCubit extends Cubit<SupportState> {
   final SupportRepo repo;

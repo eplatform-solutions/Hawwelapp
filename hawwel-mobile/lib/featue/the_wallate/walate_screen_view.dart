@@ -1,11 +1,10 @@
-// ignore_for_file: camel_case_types
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/featue/paymant/payment_send.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/featue/bootom_navigator.dart';
+import 'package:usdt/featue/paymant/payment_send.dart';
 
 class wallateview extends StatefulWidget {
   const wallateview({super.key});
@@ -26,9 +25,6 @@ class _wallateviewState extends State<wallateview> {
         body: Stack(
           children: [
             Container(
-              height: double.infinity,
-              width: double.infinity,
-              color: branding.badge,
               child: Padding(
                 padding: EdgeInsets.symmetric(
                   horizontal: 140.0.w,
@@ -39,7 +35,7 @@ class _wallateviewState extends State<wallateview> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppTranslations.getText(context, 'payment_instructions'),
+                      AppTranslations.getText(context, 'wallet'),
                       style: GoogleFonts.cairo(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -49,6 +45,9 @@ class _wallateviewState extends State<wallateview> {
                   ],
                 ),
               ),
+              height: double.infinity,
+              width: double.infinity,
+              color: branding.badge,
             ),
             Positioned(
               top: 120.h, // <-- هنا بتتحكم بالبعد من الأعلى

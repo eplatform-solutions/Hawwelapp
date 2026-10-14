@@ -1,20 +1,18 @@
 // import 'package:best_price/core/utils/logger.dart';
 
 import 'package:dio/dio.dart';
-import 'package:hawwel/constans/localization/app_locale.dart';
 
 abstract class Failur {
   final String errMassage;
   final int statusCode;
-  final String? errorCode;
 
-  const Failur(this.errMassage, this.statusCode, {this.errorCode});
+  const Failur(this.errMassage, this.statusCode);
 }
 
 class ServierFailur extends Failur {
-  ServierFailur(super.errMassage, super.statusCode, {super.errorCode});
+  ServierFailur(super.errMassage, super.statusCode);
 
-  factory ServierFailur.fromDioError(DioException dioException, {String? lang}) {
+  factory ServierFailur.fromDioError(DioException dioException) {
     switch (dioException.type) {
       case DioExceptionType.connectionTimeout:
         return ServierFailur(
@@ -40,7 +38,6 @@ class ServierFailur extends Failur {
         return ServierFailur.fromResponse(
           dioException.response?.statusCode ?? 604,
           dioException.response?.data,
-          lang: lang,
         );
       case DioExceptionType.cancel:
         return ServierFailur(
@@ -78,47 +75,39 @@ class ServierFailur extends Failur {
   //         'Ops There was an Error, Please try again', statusCode);
   //   }
   // }
-  factory ServierFailur.fromResponse(
-    int statusCode,
-    dynamic response, {
-    String? lang,
-  }) {
-    final activeLang = lang ?? 'en';
-    String errorMessage = AppLocaleHelper.genericErrorFallback(activeLang);
+  factory ServierFailur.fromResponse(int statusCode, dynamic response) {
+    String errorMessage = "حدث خطأ ما، حاول لاحقاً";
 
     if (response is Map) {
-      final msg = response['msg'];
-      final localized = AppLocaleHelper.messageFromResponse(msg, activeLang);
+      // 1. استخراج حقل msg
+      var msg = response['msg'];
 
-      if (localized.isNotEmpty) {
-        errorMessage = localized;
-      } else if (msg is String && msg.isNotEmpty) {
+      // 2. التحقق: هل msg عبارة عن خريطة (Map) لغات؟
+      if (msg is Map) {
+        errorMessage = msg['ar'] ?? msg['en'] ?? "Opps there was an error";
+      }
+      // 3. هل msg عبارة عن نص (String) مباشر؟
+      else if (msg is String) {
         errorMessage = msg;
-      } else {
+      }
+      // 4. هل يوجد حقل اسمه message أو error كبديل؟
+      else {
         errorMessage =
             response['message']?.toString() ??
             response['error']?.toString() ??
-            AppLocaleHelper.genericErrorFallback(activeLang);
+            "Opps there was an error";
       }
-    } else if (response is String && response.isNotEmpty) {
+    } else if (response is String) {
       errorMessage = response;
     }
 
+    // التوزيع حسب الـ Status Code مع الاحتفاظ بالرسالة المستخرجة
     if (statusCode == 404) {
-      return ServierFailur(
-        activeLang == 'ar'
-            ? 'الصفحة المطلوبة غير موجودة (404)'
-            : 'Requested page not found (404)',
-        statusCode,
-      );
+      return ServierFailur('الصفحة المطلوبة غير موجودة (404)', statusCode);
     } else if (statusCode == 500) {
-      return ServierFailur(
-        activeLang == 'ar'
-            ? 'خطأ في خادم النظام (500)'
-            : 'Internal server error (500)',
-        statusCode,
-      );
+      return ServierFailur('خطأ في خادم النظام (500)', statusCode);
     } else {
+      // لأي حالة أخرى (400, 401, 403, 200 مع error:true) نرجع الرسالة التي استخرجناها
       return ServierFailur(errorMessage, statusCode);
     }
   }

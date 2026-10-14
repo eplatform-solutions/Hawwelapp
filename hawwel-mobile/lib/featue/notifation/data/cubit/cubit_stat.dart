@@ -1,4 +1,4 @@
-import 'package:hawwel/featue/notifation/data/model.dart';
+import 'package:usdt/featue/notifation/data/model.dart';
 
 abstract class NotificationsState {}
 

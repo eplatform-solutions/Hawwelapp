@@ -12,7 +12,7 @@ class AppImages {
   static const String tslembled = 'asset/Vector (25).png';
   static const String ahtermadena = 'asset/Frame (1).png';
   static const String ahtermantka = 'asset/Vector (26).png';
-  static const String syria = 'asset/syrianewsyria.png';
+  static const String syria = 'asset/image 3.png';
   static const String trsltstkbl1 = 'asset/Vector (27).png';
   static const String cercl = 'asset/Vector (28).png';
   static const String tahoeldakle = 'asset/Vector (29).png';

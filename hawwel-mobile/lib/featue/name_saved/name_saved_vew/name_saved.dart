@@ -5,22 +5,19 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:stylish_pull_to_refresh/stylish_pull_to_refresh.dart';
-import 'package:hawwel/constans/appr_images.dart';
-import 'package:hawwel/constans/country_defaults_helper.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit/cubit.dart';
-import 'package:hawwel/featue/auth/welcomyou/data/cubit/cubit_stat.dart';
-import 'package:hawwel/constans/falidator.dart';
-import 'package:hawwel/constans/localization/app_tranzaction.dart';
-import 'package:hawwel/constans/app_branding.dart';
-import 'package:hawwel/constans/style.dart';
-import 'package:hawwel/featue/auth/login/widjt/snack_bara.dart';
-import 'package:hawwel/featue/auth/login/widjt/textfildlogin.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/cubit/cubit.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/cubit/cubit_stat.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/cubit.dart';
-import 'package:hawwel/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/cubit_state.dart';
-import 'package:hawwel/featue/sender_information/data/repo/cubit/cubit.dart';
-import 'package:hawwel/featue/sender_information/data/repo/cubit/cubit_state.dart';
+import 'package:usdt/constans/appr_images.dart';
+import 'package:usdt/constans/falidator.dart';
+import 'package:usdt/constans/localization/app_tranzaction.dart';
+import 'package:usdt/constans/app_branding.dart';
+import 'package:usdt/constans/style.dart';
+import 'package:usdt/featue/auth/login/widjt/snack_bara.dart';
+import 'package:usdt/featue/auth/login/widjt/textfildlogin.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/cubit/cubit.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/cubit/cubit_stat.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/cubit.dart';
+import 'package:usdt/featue/name_saved/name_saved_vew/datat/data_edit_information/cubit/cubit_state.dart';
+import 'package:usdt/featue/sender_information/data/repo/cubit/cubit.dart';
+import 'package:usdt/featue/sender_information/data/repo/cubit/cubit_state.dart';
 
 class Namesaved extends StatefulWidget {
   const Namesaved({super.key});
@@ -33,25 +30,23 @@ class _NamesavedState extends State<Namesaved> {
   final TextEditingController search = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  late Country selectedCountry;
+  Country selectedCountry = Country(
+    phoneCode: '963',
+    countryCode: 'SY',
+    e164Sc: 0,
+    geographic: true,
+    level: 1,
+    name: 'Syria',
+    example: '944123456',
+    displayName: 'Syria',
+    displayNameNoCountryCode: 'Syria',
+    e164Key: '',
+  );
 
   @override
   void initState() {
     super.initState();
-    selectedCountry = CountryDefaultsHelper.defaultPhonePickerCountry();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _syncPhoneCountryFromApi());
     context.read<ReceiversDisplayCubit>().getAllReceiversDisplay();
-  }
-
-  void _syncPhoneCountryFromApi() {
-    if (!mounted) return;
-    final countriesState = context.read<CountriesCubit>().state;
-    if (countriesState is! CountriesSuccess) return;
-    final synced = CountryDefaultsHelper.defaultPhonePickerCountry(
-      preferredApiCountryCode: countriesState.selected.code,
-    );
-    if (selectedCountry.countryCode == synced.countryCode) return;
-    setState(() => selectedCountry = synced);
   }
 
   String buildFullPhoneNumber({
@@ -113,11 +108,10 @@ class _NamesavedState extends State<Namesaved> {
                       setSheet(() {
                         filtered = all.where((c) {
                           final name =
-                              CountryDefaultsHelper.localizedCountryName(
+                              CountryLocalizations.of(
                                 ctx,
-                                c.countryCode,
-                                fallback: c.name,
-                              );
+                              )?.countryName(countryCode: c.countryCode) ??
+                              c.name;
                           return name.toLowerCase().contains(
                                 val.toLowerCase(),
                               ) ||
@@ -134,16 +128,20 @@ class _NamesavedState extends State<Namesaved> {
                     itemBuilder: (ctx, i) {
                       final c = filtered[i];
                       final name =
-                          CountryDefaultsHelper.localizedCountryName(
+                          CountryLocalizations.of(
                             ctx,
-                            c.countryCode,
-                            fallback: c.name,
-                          );
+                          )?.countryName(countryCode: c.countryCode) ??
+                          c.name;
                       return ListTile(
-                        leading: CountryDefaultsHelper.countryFlag(
-                          c.countryCode,
-                          size: 22,
-                        ),
+                        leading: c.countryCode == 'SY'
+                            ? Image.asset(
+                                'asset/syrianewsyria.png',
+                                width: 28.w,
+                              )
+                            : Text(
+                                c.flagEmoji,
+                                style: const TextStyle(fontSize: 22),
+                              ),
                         title: Text(
                           name,
                           style: GoogleFonts.cairo(
@@ -198,11 +196,10 @@ class _NamesavedState extends State<Namesaved> {
         break;
       }
     }
-    if (detected != null) {
+    if (detected != null)
       setState(() => selectedCountry = detected!);
-    } else {
+    else
       cubit.phoneController.text = fullPhone;
-    }
     cubit.nameController.text = receiver.fullName ?? '';
 
     showDialog(
@@ -253,10 +250,15 @@ class _NamesavedState extends State<Namesaved> {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            CountryDefaultsHelper.countryFlag(
-                              selectedCountry.countryCode,
-                              size: 18.sp,
-                            ),
+                            selectedCountry.countryCode == 'SY'
+                                ? Image.asset(
+                                    'asset/syrianewsyria.png',
+                                    width: 22.w,
+                                  )
+                                : Text(
+                                    selectedCountry.flagEmoji,
+                                    style: TextStyle(fontSize: 18.sp),
+                                  ),
                             SizedBox(width: 6.w),
                             Text(
                               '+${selectedCountry.phoneCode}',
@@ -315,7 +317,6 @@ class _NamesavedState extends State<Namesaved> {
                     phone: cubit.phoneController.text,
                     countryCode: selectedCountry.countryCode,
                   );
-                  if (!dialogCtx.mounted) return;
                   if (!isValid) return;
                   final full = buildFullPhoneNumber(
                     phone: cubit.phoneController.text,
@@ -844,7 +845,7 @@ class _NamesavedState extends State<Namesaved> {
               ),
               SizedBox(width: 10.w),
               Text(
-                AppTranslations.getText(ctx, 'add_new_recipient'),
+                AppTranslations.getText(ctx, 'new user'),
                 style: GoogleFonts.cairo(
                   fontSize: 17.sp,
                   fontWeight: FontWeight.w700,
@@ -895,10 +896,17 @@ class _NamesavedState extends State<Namesaved> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              CountryDefaultsHelper.countryFlag(
-                                selectedCountry.countryCode,
-                                size: 16.sp,
-                              ),
+                              selectedCountry.countryCode == 'SY'
+                                  ? Image.asset(
+                                      'asset/syrianewsyria.png',
+                                      width: 20.w,
+                                      height: 14.h,
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Text(
+                                      selectedCountry.flagEmoji,
+                                      style: TextStyle(fontSize: 16.sp),
+                                    ),
                               SizedBox(width: 5.w),
                               Text(
                                 '+${selectedCountry.phoneCode}',

@@ -2,10 +2,10 @@ import 'dart:developer';
 
 import 'package:dartz/dartz.dart';
 import 'package:dio/dio.dart';
-import 'package:hawwel/constans/api_servise.dart';
-import 'package:hawwel/constans/failear.dart';
-import 'package:hawwel/featue/notifation/data/model.dart';
-import 'package:hawwel/featue/notifation/data/repo/repo.dart';
+import 'package:usdt/constans/api_servise.dart';
+import 'package:usdt/constans/failear.dart';
+import 'package:usdt/featue/notifation/data/model.dart';
+import 'package:usdt/featue/notifation/data/repo/repo.dart';
 
 class NotificationsRepoImpl extends NotificationsRepo {
   final ApiService _apiService;
