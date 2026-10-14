@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Deploy latest admin UI to production WITHOUT git on server (rsync + remote build).
-# Run from your Mac inside the dasco workspace.
+# Run from your Mac inside this repository.
 
 set -euo pipefail
 

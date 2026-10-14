@@ -2,7 +2,7 @@
 // MyNavbar.vue (desktop) and MySlideover.vue (mobile) so both always show
 // the exact same set of tabs. `permission` is the codeName enforced by the
 // matching page's own API calls on the backend (see helpers/permissions
-// `authorizeAdmin` in dasco-backend-dashboard) - a tab with no `permission`
+// `authorizeAdmin` in hawwel-admin-api) - a tab with no `permission`
 // value is always visible to any authenticated admin.
 export const useNavItems = () => {
   const adminItems = [

@@ -6,7 +6,7 @@ export default defineNuxtConfig({
     public: {
       BASE_URL: process.env.BASE_URL,
       URL_FILES: process.env.URL_FILES,
-      // The customer-facing API (dasco-backend) - distinct from BASE_URL,
+      // The customer-facing API (hawwel-api) - distinct from BASE_URL,
       // which is this dashboard's own admin API. Chat lives on the
       // customer-facing one since that's the only backend the mobile app
       // talks to directly.

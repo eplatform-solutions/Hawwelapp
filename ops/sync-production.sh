@@ -8,6 +8,10 @@ set -euo pipefail
 REMOTE_HOST="${REMOTE_HOST:-root@72.62.52.191}"
 REMOTE_ROOT="${REMOTE_ROOT:-/opt/hawwel}"
 LOCAL_ROOT="${LOCAL_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+# Folder names of the two APIs on the server. They still carry the pre-rename names; change
+# them here (and in the server's pm2 setup) if the server folders are ever renamed.
+REMOTE_API_DIR="${REMOTE_API_DIR:-dasco-backend}"
+REMOTE_ADMIN_API_DIR="${REMOTE_ADMIN_API_DIR:-dasco-backend-dashboard}"
 
 DRY_RUN=false
 RESTART_PM2=false
@@ -120,10 +124,10 @@ echo "Restart PM2: ${RESTART_PM2}"
 echo "Run smoke  : ${RUN_SMOKE}"
 
 # 1) Backend API
-sync_dir "${LOCAL_ROOT}/dasco-backend/" "${REMOTE_ROOT}/dasco-backend/"
+sync_dir "${LOCAL_ROOT}/hawwel-api/" "${REMOTE_ROOT}/${REMOTE_API_DIR}/"
 
 # 2) Admin API
-sync_dir "${LOCAL_ROOT}/dasco-backend-dashboard/" "${REMOTE_ROOT}/dasco-backend-dashboard/"
+sync_dir "${LOCAL_ROOT}/hawwel-admin-api/" "${REMOTE_ROOT}/${REMOTE_ADMIN_API_DIR}/"
 
 # 3) Admin UI (Nuxt source)
 sync_dir "${LOCAL_ROOT}/hawwel-dashboard/" "${REMOTE_ROOT}/hawwel-dashboard/"
@@ -143,16 +147,16 @@ echo ""
 echo "==> Running remote post-sync checks"
 ssh "${REMOTE_HOST}" "bash -lc '
 set -euo pipefail
-mkdir -p ${REMOTE_ROOT}/dasco-backend-dashboard/assets/images/{payment_methods,app_identity,transfers}
-mkdir -p ${REMOTE_ROOT}/dasco-backend/assets/images/{users,kyc,transfers}
-chmod -R 755 ${REMOTE_ROOT}/dasco-backend-dashboard/assets/images
-chmod -R 755 ${REMOTE_ROOT}/dasco-backend/assets/images
+mkdir -p ${REMOTE_ROOT}/${REMOTE_ADMIN_API_DIR}/assets/images/{payment_methods,app_identity,transfers}
+mkdir -p ${REMOTE_ROOT}/${REMOTE_API_DIR}/assets/images/{users,kyc,transfers}
+chmod -R 755 ${REMOTE_ROOT}/${REMOTE_ADMIN_API_DIR}/assets/images
+chmod -R 755 ${REMOTE_ROOT}/${REMOTE_API_DIR}/assets/images
 '"
 
 if [[ "$RUN_RELEASE_GATE" == true ]]; then
   ssh "${REMOTE_HOST}" "bash -lc '
 set -euo pipefail
-bash ${REMOTE_ROOT}/dasco-backend-dashboard/scripts/release-gate-audit.sh ${REMOTE_ROOT%/*}
+bash ${REMOTE_ROOT}/${REMOTE_ADMIN_API_DIR}/scripts/release-gate-audit.sh ${REMOTE_ROOT%/*}
 '"
 fi
 

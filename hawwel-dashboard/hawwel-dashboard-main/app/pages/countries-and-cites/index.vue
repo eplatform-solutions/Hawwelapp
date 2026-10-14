@@ -988,7 +988,7 @@ const stateBind = ref({
 const bindCheckLoading = ref(false);
 
 // A payment method bound at the country level is now checked directly by
-// the app (no city/region needed - see dasco-backend's transferByParameter),
+// the app (no city/region needed - see hawwel-api's transferByParameter),
 // so no prerequisite check is needed there. A payment method bound at the
 // CITY level still only ever reaches real users by cascading down into an
 // actual region - the app has no city-level check, only country-level or

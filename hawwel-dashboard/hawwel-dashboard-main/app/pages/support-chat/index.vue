@@ -146,7 +146,7 @@ const messagesEl = ref(null);
 
 let socketInstance = null;
 
-// Chat lives on the customer-facing backend (dasco-backend), not this
+// Chat lives on the customer-facing backend (hawwel-api), not this
 // dashboard's own admin API - it's the only repo that talks to both the
 // mobile app and (for this feature) the browser dashboard. CHAT_API_URL
 // already points there.

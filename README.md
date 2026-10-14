@@ -4,10 +4,10 @@ All Hawwel code in one repository.
 
 | Folder | What it is | Runs on |
 | --- | --- | --- |
-| `dasco-backend` | Client API (mobile app) | VPS, pm2 `hawwel-api` → api.7awalaty.com |
-| `dasco-backend-dashboard` | Admin API | VPS, pm2 `hawwel-admin-api` → admin-api.7awalaty.com |
+| `hawwel-api` | Client API (mobile app) | VPS, pm2 `hawwel-api` → api.7awalaty.com |
+| `hawwel-admin-api` | Admin API | VPS, pm2 `hawwel-admin-api` → admin-api.7awalaty.com |
 | `hawwel-dashboard` | Admin dashboard UI (Nuxt) | VPS, pm2 `hawwel-admin-ui` → admin.7awalaty.com |
-| `dasco-mobile-new` | Mobile app (Flutter) | App Store / Google Play |
+| `hawwel-mobile` | Mobile app (Flutter) | App Store / Google Play |
 | `hawwel-website` | Public website | hawwelapp.com |
 | `ops` | Deploy and maintenance scripts | Run from a developer machine |
 

@@ -365,7 +365,7 @@ const tableHeads = [
     "Actions",
 ];
 
-// Kept in step with constants/compliance in dasco-backend-dashboard; the API
+// Kept in step with constants/compliance in hawwel-admin-api; the API
 // rejects anything else, so these are the only values worth offering.
 const statusOptions = ["open", "cleared", "confirmed"];
 const typeOptions = [
