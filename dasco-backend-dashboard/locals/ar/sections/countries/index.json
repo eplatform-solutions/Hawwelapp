@@ -1,0 +1,12 @@
+{
+    "Creating New Country Process Has Been Successfully !!": "عملية إنشاء بلد جديد تمت بنجاح !!",
+    "Sorry, This Country Already Exist !!": "عذراً ، هذا البلد موجود مسبقاً !!",
+    "Get Country Data Process Has Been Successfully !!": "عملية جلب بيانات البلد تمت بنجاح !!",
+    "Sorry, This Country Is Not Exist !!": "عذراً ، هذا البلد غير موجود !!",
+    "Get All Countries Data Process Has Been Successfully !!": "عملية جلب بيانات كل البلدان تمت بنجاح !!",
+    "Sorry, No Countries Were Found !!": "عذراً، لم يتم العثور على أي بلدان !!",
+    "Deleting Country Process Has Been Successfully !!": "عملية حذف بلد تمت بنجاح",
+    "Sorry, Please Send Valid Payment Methods Data !!": "عذراً ، يرجى إرسال بيانات طرق دفع صالحة !!",
+    "Sorry, Some Payment Methods Are Not Exist !!": "عذراً ، بعض طرق الدفع غير موجودة !!",
+    "Enabling Payment Methods For This Country Process Has Been Successfully !!": "عملية تفعيل طرق الدفع لهذا البلد تمت بنجاح !!"
+}

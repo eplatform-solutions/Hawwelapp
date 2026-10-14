@@ -1,0 +1,9 @@
+{
+    "Get All Transfers For This User Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "عملية جلب كل الطلبات لهذا المستخدم بداخل الصفحة: 1{{pageNumber}} تمت بنجاح !!",
+    "Sorry, No Transfers Were Found !!": "عذراً، لم يتم العثور على أي طلبات !!",
+    "Updating Transfer Payment Proof Process Has Been Successfully !!": "تم حفظ صورة إثبات الاستلام بنجاح !!",
+    "Updating Transfer Receiving Place Process Has Been Successfully !!": "تم حفظ صورة مكان الاستلام بنجاح !!",
+    "Sorry, Payment Proof Is Allowed For Full-Paid Or Delivery Transfers Only !!": "عذراً، يمكن رفع إثبات الاستلام للطلبات المدفوعة أو قيد التسليم فقط !!",
+    "Sorry, Receiving Place Image Is Allowed Before The Transfer Is Received Only !!": "عذراً، يمكن رفع صورة مكان الاستلام قبل تسليم الطلب فقط !!",
+    "Sorry, This Image Kind Is Not Exist !!": "عذراً، نوع الصورة غير موجود !!"
+}

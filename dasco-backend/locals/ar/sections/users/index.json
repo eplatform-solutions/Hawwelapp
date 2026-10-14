@@ -1,0 +1,14 @@
+{
+    "Get User Info Process Has Been Successfully !!": "عملية جلب بيانات المستخدم تمت بنجاح !!",
+    "Sorry, This Email Is Already Exist !!": "عذراً ، هذا الإيميل موجود مسبقاً !!",
+    "Sorry, This Mobile Phone Is Already Exist !!": "عذراً ، رقم الجوال هذا موجود مسبقاً !!",
+    "Updating User Info Process Has Been Successfuly !!": "عملية تحديث بيانات المستخدم تمت بنجاح !!",
+    "Changing User Image Process Has Been Successfully !!": "عملية تغيير صورة المستخدم تمت بنجاح !!",
+    "Changing Password Process Has Been Successfully !!": "عملية تغيير كلمة السر تمت بنجاح !!",
+    "Sorry, This Password Uncorrect !!": "عذراً ، كلمة السر هذه غير صحيحة !!",
+    "Changing 2FA Status Process Has Been Successfully !!": "عملية تغيير حالة المصادقة الثنائية تمت بنجاح !!",
+    "Changing 2FA Methods Process Has Been Successfully !!": "عملية تغيير طرق المصادقة الثنائية تمت بنجاح !!",
+    "Your account deletion request has been received. Our team will review and process it according to our Privacy Policy and compliance requirements.": "تم استلام طلب حذف الحساب. سيقوم فريقنا بمراجعته ومعالجته وفقًا لسياسة الخصوصية ومتطلبات الامتثال.",
+    "Your account deletion request is already pending.": "يوجد طلب حذف حساب قيد المراجعة بالفعل.",
+    "Sorry, SMS Verification Is Not Available For Your Phone Number, So Two-Factor Authentication By Phone Can't Be Enabled !!": "عذراً ، رسائل التحقق SMS غير متاحة لرقم هاتفك ، لذا لا يمكن تفعيل المصادقة الثنائية عبر الهاتف !!"
+}

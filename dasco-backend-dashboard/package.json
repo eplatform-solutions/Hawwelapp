@@ -1,0 +1,87 @@
+{
+  "name": "hawwel-admin-dashboard-server-side",
+  "version": "1.0.0",
+  "author": "Anas Adnan Derk",
+  "license": "ISC",
+  "description": "Hawwel admin dashboard backend API using Node.js, Expressjs, and MongoDB",
+  "private": true,
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anas-derk/hawwel-dashboard-server-side"
+  },
+  "scripts": {
+    "start": "cross-env NODE_ENV=production node index",
+    "dev:memory": "node run-local-memory.js",
+    "dev:sync": "node run-local-sync.js",
+    "seed:syria": "node scripts/seed-syria-locations.js",
+    "seed:prod:baseline": "node scripts/seed-production-baseline.js",
+    "test:security-fixes": "node scripts/manual-test-security-fixes.js",
+    "test:redis-fail-open": "node scripts/manual-test-redis-fail-open.js",
+    "test:transfer-status-proof": "node scripts/manual-test-transfer-status-proof.js",
+    "test:money-precision": "node scripts/manual-test-money-precision.js",
+    "audit:payment-logos": "node scripts/audit-payment-method-logos.js",
+    "normalize:payment-logos": "node scripts/normalize-payment-method-logos.js",
+    "cleanup:operational-bootstrap": "node scripts/cleanup-operational-bootstrap-data.js",
+    "migrate:groups-to-role-permissions": "node scripts/migrate-groups-to-role-permissions.js",
+    "mongo:rs:init": "node scripts/ensure-single-node-replica-set.js",
+    "mongo:tx:verify": "node scripts/verify-mongo-transactions.js",
+    "dev": "nodemon",
+    "test": "cross-env NODE_ENV=test node index",
+    "staging": "cross-env NODE_ENV=staging node index",
+    "test:compliance-alerts": "node scripts/manual-test-compliance-alerts.js",
+    "seed:permissions": "node seeders/permissions/create_initial_permissions/index.js"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "bcryptjs": "^3.0.2",
+    "body-parser": "^2.2.0",
+    "cors": "^2.8.5",
+    "countries-list": "^3.2.2",
+    "crypto-js": "^4.2.0",
+    "decimal.js": "^10.6.0",
+    "dotenv": "^17.2.3",
+    "ejs": "^3.1.10",
+    "express": "^5.1.0",
+    "express-rate-limit": "^8.1.0",
+    "file-type": "^21.3.1",
+    "firebase-admin": "^13.10.0",
+    "ioredis": "^5.10.0",
+    "jsonwebtoken": "^9.0.2",
+    "libphonenumber-js": "^1.12.34",
+    "mongoose": "^8.19.1",
+    "multer": "^1.4.5-lts.1",
+    "node-code-generator": "^1.0.3",
+    "nodemailer": "^7.0.9",
+    "nodemon": "^3.1.10",
+    "rate-limiter-flexible": "^9.1.1",
+    "sharp": "^0.34.4",
+    "uuid": "^13.0.0",
+    "web3": "^4.4.0"
+  },
+  "engines": {
+    "node": ">=20.11.0",
+    "npm": ">=10.2.4"
+  },
+  "nodemonConfig": {
+    "watch": [
+      "*.*",
+      ".env",
+      "*"
+    ],
+    "ignore": [
+      "node_modules",
+      "assets/images"
+    ],
+    "ext": "*",
+    "verbose": true,
+    "env": {
+      "NODE_ENV": "development"
+    },
+    "restartable": "rs"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "mongodb-memory-server": "^9.2.0"
+  }
+}

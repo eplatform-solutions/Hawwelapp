@@ -1,0 +1,92 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    color-scheme: light;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  html[lang="ar"] body {
+    font-family: "Tajawal", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  html[lang="en"] body {
+    font-family: "Inter", "Tajawal", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
+
+  body {
+    @apply bg-brand-bg text-brand-text;
+    margin: 0;
+    min-height: 100vh;
+  }
+
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(214, 196, 154, 0.55);
+    border-radius: 6px;
+  }
+
+  h1, h2, h3, h4 {
+    @apply text-brand-primary;
+    letter-spacing: -0.01em;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  ::selection {
+    background: #D6C49A;
+    color: #0E2B2B;
+  }
+}
+
+@layer components {
+  .container-app {
+    @apply mx-auto w-full max-w-content px-5 sm:px-8;
+  }
+
+  .prose-soft p {
+    @apply text-brand-text/85 leading-relaxed;
+  }
+
+  .legal-section h2 {
+    @apply text-xl sm:text-2xl font-bold text-brand-primary mt-10 mb-3;
+  }
+
+  .legal-section h3 {
+    @apply text-base font-semibold text-brand-primary mt-6 mb-2;
+  }
+
+  .legal-section p {
+    @apply text-brand-text/85 leading-relaxed mb-4;
+  }
+
+  .legal-section ul {
+    @apply list-disc ms-6 mb-4 space-y-1.5 text-brand-text/85;
+  }
+
+  .legal-section ol {
+    @apply list-decimal ms-6 mb-4 space-y-1.5 text-brand-text/85;
+  }
+}
+
+@layer utilities {
+  .skip-link {
+    @apply absolute left-4 top-4 z-[100] -translate-y-32 rounded-lg bg-brand-primary px-4 py-2 text-white shadow-card transition-transform focus:translate-y-0;
+  }
+
+  /* Logical-property helpers (work in both LTR and RTL) */
+  .ms-auto-rtl-safe {
+    margin-inline-start: auto;
+  }
+}

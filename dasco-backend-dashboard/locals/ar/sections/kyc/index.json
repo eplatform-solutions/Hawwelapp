@@ -1,0 +1,19 @@
+{
+    "Get KYC For This User Process Has Been Successfully !!": "عملية جلب ال KYC لهذا المستخدم تمت بنجاح !!",
+    "Sorry, This KYC Not Exist !!": "هذه الـ KYC غير موجودة !!",
+    "Get All KYCs Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "عملية جلب جميع الـ KYCs داخل الصفحة: {{pageNumber}} تمت بنجاح !!",
+    "Sorry, No KYCs Were Found !!": "عذراً، لم يتم العثور على أي KYCs !!",
+    "Sorry, This KYC Is Already Approved !!": "عذراً، هذه ال KYC قد تمت الموافقة عليها مسبقاً !!",
+    "Sorry, This KYC Status Is Not Under Review !!": "عذراً، حالة هذه ال KYC ليست قيد المراجعة !!",
+    "Approving On This KYC Process Has Been Successfully !!": "عملية الموافقة على هذه ال KYC تمت بنجاح !!",
+    "Sorry, This KYC Is Already Rejected !!": "عذراً ، هذه ال KYC قد تم رفضها مسبقاً !!",
+    "Rejecting KYC Process Has Been Successfully !!": "عملية رفض هذه ال KYC تمت بنجاح !!",
+    "Sorry, This KYC Is Already Remove verified !!": "عذراً هذه KYC ، تمت إلغاء الموافقة عليها مسبقاً !!",
+    "Sorry, This KYC Is Not verified !!": "عذراً ، هذه KYC لم يتم الموافقة عليها !!",
+    "Remove KYC Verifying Process Has Been Successfully !!": "عملية إلغاء الموافقة على هذه KYC تمت بنجاح !!",
+    "Sorry, This KYC Is Already Blocked !!": "عذراً ، هذه KYC قد تم حظرها مسبقاً !!",
+    "Blocking KYC Process Has Been Successfully !!": "عملية حظر هذه KYC تمت بنجاح !!",
+    "Sorry, This KYC Is Already Cancel Blocked !!": "عذراً ، هذه KYC قد تم إلغاء حظرها مسبقاً !!",
+    "Sorry, This KYC Is Not Blocked !!": "عذراً ، هذه KYC ليست محظورة !!",
+    "Cancel Blocking KYC Process Has Been Successfully !!": "عملية إلغاء حظر هذه KYC تمت بنجاح !!"
+}

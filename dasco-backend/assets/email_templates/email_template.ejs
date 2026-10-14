@@ -1,0 +1,77 @@
+<%
+    const isAr = language !== "en";
+    const brand = isAr ? "حوّل" : "Hawwel";
+    const logoUrl = process.env.EMAIL_LOGO_URL || "https://api.7awalaty.com/assets/images/email/logo.png";
+    const supportEmail = process.env.SUPPORT_EMAIL || "support@hawwelapp.com";
+    const minutes = typeof expiryMinutes !== "undefined" ? expiryMinutes : 10;
+    const t = isAr ? {
+        title: "رمز التحقق",
+        intro: "استخدم الرمز التالي لإكمال العملية في حوّل:",
+        expiry: `ينتهي هذا الرمز خلال ${minutes} دقائق.`,
+        warning: "لا تشارك هذا الرمز مع أي شخص. فريق حوّل لن يطلبه منك أبداً.",
+        notYou: "إذا لم تطلب هذا الرمز، تجاهل هذه الرسالة وغيّر كلمة المرور إن كنت تشك بأي نشاط غير معتاد.",
+        help: "للمساعدة تواصل معنا على",
+    } : {
+        title: "Your verification code",
+        intro: "Use the code below to continue on Hawwel:",
+        expiry: `This code expires in ${minutes} minutes.`,
+        warning: "Never share this code with anyone. The Hawwel team will never ask you for it.",
+        notYou: "If you did not request this code, ignore this email and change your password if you notice any unusual activity.",
+        help: "Need help? Contact us at",
+    };
+    const dir = isAr ? "rtl" : "ltr";
+    const align = isAr ? "right" : "left";
+%>
+<!DOCTYPE html>
+<html lang="<%= isAr ? 'ar' : 'en' %>" dir="<%= dir %>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= t.title %></title>
+</head>
+<body style="margin:0; padding:0; background-color:#F7F6F1;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F7F6F1;">
+        <tr>
+            <td align="center" style="padding:24px 12px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px; background-color:#FFFFFF; border:1px solid #E5E2D6; border-radius:12px; overflow:hidden;">
+                    <tr>
+                        <td align="center" style="background-color:#0E2B2B; padding:24px;">
+                            <img src="<%= logoUrl %>" width="72" height="87" alt="Hawwel" style="display:block; border:0; outline:none;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td dir="<%= dir %>" style="padding:32px 28px 8px 28px; font-family:Tahoma, Arial, sans-serif; color:#13201F; text-align:<%= align %>;">
+                            <h1 style="margin:0 0 12px 0; font-size:22px; line-height:1.4; color:#0E2B2B;"><%= t.title %></h1>
+                            <p style="margin:0 0 20px 0; font-size:16px; line-height:1.7;"><%= t.intro %></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td align="center" style="padding:0 28px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                                <tr>
+                                    <td dir="ltr" style="background-color:#F7F6F1; border:1px solid #D6C49A; border-radius:10px; padding:14px 28px; font-family:'Courier New', Courier, monospace; font-size:34px; font-weight:bold; letter-spacing:10px; color:#0E2B2B;">
+                                        <%= generatedCode %>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td dir="<%= dir %>" style="padding:20px 28px 28px 28px; font-family:Tahoma, Arial, sans-serif; color:#13201F; text-align:<%= align %>;">
+                            <p style="margin:0 0 16px 0; font-size:15px; line-height:1.7; text-align:center;"><%= t.expiry %></p>
+                            <p style="margin:0 0 8px 0; font-size:14px; line-height:1.7; font-weight:bold; color:#1F6F5B;"><%= t.warning %></p>
+                            <p style="margin:0; font-size:14px; line-height:1.7; color:#66706D;"><%= t.notYou %></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td dir="<%= dir %>" style="border-top:1px solid #E5E2D6; padding:16px 28px; font-family:Tahoma, Arial, sans-serif; font-size:12px; line-height:1.7; color:#66706D; text-align:center;">
+                            <%= t.help %> <a href="mailto:<%= supportEmail %>" style="color:#1F6F5B; text-decoration:none;"><%= supportEmail %></a><br>
+                            &copy; <%= new Date().getFullYear() %> <%= brand %>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

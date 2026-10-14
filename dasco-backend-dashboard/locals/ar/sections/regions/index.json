@@ -1,0 +1,10 @@
+{
+    "Creating New Region Process Has Been Successfully !!": "عملية إنشاء منطقة جديدة تمت بنجاح !!",
+    "Sorry, This Region Is Not Exist !!": "عذراً ، هذه المنطقة غير موجودة !!",
+    "Sorry, No Regions Were Found !!": "عذراً، لم يتم العثور على أي مناطق !!",
+    "Get All Regions Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "عملية جلب كل المناطق بداخل الصفحة: {{pageNumber}} تمت بنجاح !!",
+    "Sorry, Some Payment Methods Are Not Exist !!": "عذراً ، بعض طرق الدفع غير موجودة !!",
+    "Sorry, Please Send Valid Region Name Data !!": "عذراً ، يرجى إرسال اسم منطقة صالح !!",
+    "Updating Region Data Process Has Been Successfully !!": "عملية تحديث بيانات المنطقة تمت بنجاح !!",
+    "Deleting Region Process Has Been Successfully !!": "عملية حذف منطقة تمت بنجاح"
+}

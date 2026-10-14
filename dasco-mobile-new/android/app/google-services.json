@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "129918768198",
+    "project_id": "hawel-aefe9",
+    "storage_bucket": "hawel-aefe9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:129918768198:android:2750bb4e6ac17b65182647",
+        "android_client_info": {
+          "package_name": "com.hawwel.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAN9NVexz27ixmrAsd7XsBhBVX_c5Mhtpo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

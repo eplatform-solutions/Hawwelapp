@@ -1,0 +1,11 @@
+{
+    "Creating New City Process Has Been Successfully !!": "عملية إنشاء مدينة جديدة تمت بنجاح !!",
+    "Sorry, This City Is Not Exist !!": "عذراً ، هذه المدينة غير موجود !!",
+    "Sorry, No Cities Were Found !!": "عذراً، لم يتم العثور على أي مدن !!",
+    "Get All Cities Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "عملية جلب كل المدن بداخل الصفحة: {{pageNumber}} تمت بنجاح !!",
+    "Updating City Data Process Has Been Successfully !!": "عملية تحديث بيانات المدينة تمت بنجاح !!",
+    "Deleting City Process Has Been Successfully !!": "عملية حذف مدينة تمت بنجاح",
+    "Sorry, Please Send Valid Payment Methods Data !!": "عذراً ، يرجى إرسال بيانات طرق دفع صالحة !!",
+    "Sorry, Some Payment Methods Are Not Exist !!": "عذراً ، بعض طرق الدفع غير موجودة !!",
+    "Enabling Payment Methods For This City Process Has Been Successfully !!": "عملية تفعيل طرق الدفع لهذه المدينة تمت بنجاح !!"
+}

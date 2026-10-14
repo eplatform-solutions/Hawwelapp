@@ -1,0 +1,5 @@
+.env
+.env.*
+node_modules
+assets/images/payment_methods
+assets/images/app_identity

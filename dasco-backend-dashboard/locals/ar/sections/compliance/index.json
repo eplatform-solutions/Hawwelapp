@@ -1,0 +1,8 @@
+{
+    "Get All Compliance Alerts Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "تمت عملية جلب إنذارات الامتثال داخل الصفحة: {{pageNumber}} بنجاح !!",
+    "Get Compliance Alerts Stats Process Has Been Successfully !!": "تمت عملية جلب إحصائيات إنذارات الامتثال بنجاح !!",
+    "Reviewing This Compliance Alert Process Has Been Successfully !!": "تمت عملية مراجعة إنذار الامتثال هذا بنجاح !!",
+    "Sorry, This Compliance Alert Is Not Exist !!": "عذرًا، إنذار الامتثال هذا غير موجود !!",
+    "Sorry, This Compliance Alert Is Already Reviewed !!": "عذرًا، تمت مراجعة إنذار الامتثال هذا مسبقًا !!",
+    "Sorry, Invalid Compliance Alert Status !!": "عذرًا، حالة إنذار الامتثال غير صالحة !!"
+}

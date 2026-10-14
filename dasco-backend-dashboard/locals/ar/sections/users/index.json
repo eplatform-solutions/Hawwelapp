@@ -1,0 +1,8 @@
+{
+    "Get User Info Process Has Been Successfully !!": "عملية جلب بيانات المستخدم تمت بنجاح !!",
+    "Get Users Count Process Has Been Successfully !!": "عملية جلب عدد المستخدمين تمت بنجاح !!",
+    "Sorry, No Users Were Found !!": "عذراً، لم يتم العثور على أي مستخدمين !!",
+    "Get All Users Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "عملية جلب كل المستخدمين بداخل الصفحة: {{pageNumber}} تمت بنجاح !!",
+    "Updating User Info Process Has Been Successfuly !!": "عملية تحديث بيانات المستخدم تمت بنجاح !!",
+    "Deleting User Process Has Been Successfully !!": "عملية حذف المستخدم تمت بنجاح !!"
+}

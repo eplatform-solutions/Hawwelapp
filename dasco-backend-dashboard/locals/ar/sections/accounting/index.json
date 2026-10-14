@@ -1,0 +1,8 @@
+{
+    "Get Daily Restrictions Process Has Been Successfully !!": "عملية جلب بيانات القيود اليومية بنجاح !!",
+    "Get All Daily Restrictions Transfers Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "عملية جلب بيانات جميع طلبات القيود اليومية داخل الصفحة رقم {{pageNumber}} بنجاح !!",
+    "Get Accounting Restrictions Process Has Been Successfully !!": "عملية جلب بيانات قيود المحاسبة بنجاح !!",
+    "Get Financial Restrictions Global Stats Process Has Been Successfully !!": "عملية جلب إحصائيات القيود المالية العالمية بنجاح !!",
+    "Get Financial Restrictions Users Stats Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "عملية جلب إحصائيات القيود المالية للمستخدمين بداخل الصفحة: {{pageNumber}} بنجاح !!",
+    "No Data Found !!": "لا توجد بيانات !!"
+}

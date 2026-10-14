@@ -1,0 +1,11 @@
+{
+    "Sorry, This Role Already Exist !!": "عذراً ، هذا الدور موجود مسبقاً !!",
+    "Sorry, Permission Not Found: {{permissionId}} !!": "عذراً ، صلاحية غير موجودة: {{permissionId}}",
+    "Create New Role Process Has Been Successfully !!": "عملية إنشاء دور جديد تمت بنجاح !!",
+    "Sorry, This Role Is Not Exist !!": "عذراً ، هذا الدور غير موجود !!",
+    "Get Role Data Process Has Been Successfully !!": "عملية جلب بيانات الدور تمت بنجاح !!",
+    "Get All Roles Data Process Has Been Successfully !!": "عملية جلب بيانات كل الأدوار تمت بنجاح !!",
+    "Sorry, Can't Find And Roles !!": "عذراً ، لا يوجد أي أدوار !!",
+    "Updating Role Data Process Has Been Successfully !!": "عملية تحديث بيانات الدور تمت بنجاح !!",
+    "Deleting Role Process Has Been Successfully !!": "عملية حذف دور تمت بنجاح !!"
+}

@@ -1,0 +1,14 @@
+const CONVERSATION_STATUSES = ["open", "closed"];
+
+const DEFAULT_CONVERSATION_STATUS = CONVERSATION_STATUSES[0];
+
+const SENDER_TYPES = ["customer", "admin"];
+
+const MAX_MESSAGE_LENGTH = 2000;
+
+module.exports = {
+    CONVERSATION_STATUSES,
+    DEFAULT_CONVERSATION_STATUS,
+    SENDER_TYPES,
+    MAX_MESSAGE_LENGTH,
+};

@@ -1,0 +1,16 @@
+{
+    "Creating New Payment Method Process Has Been Successfully !!": "عملية إنشاء طريقة دفع جديدة تمت بنجاح !!",
+    "Sorry, This Payment Method Already Exist !!": "عذراً ، طريقة الدفع هذه موجودة مسبقاً !!",
+    "Sorry, This Payment Method Is Not Exist !!": "عذراً ، طريقة الدفع هذه غير موجود !!",
+    "Sorry, No Payment Methods Were Found !!": "عذراً، لم يتم العثور على أي طرق دفع !!",
+    "Get All Payment Methods Inside The Page: {{pageNumber}} Process Has Been Successfully !!": "عملية جلب كل طرق الدفع بداخل الصفحة: {{pageNumber}} تمت بنجاح !!",
+    "Sorry, All This Payment Methods Is Not Exist !!": "عذراً ، كل طرق الدفع هذه غير موجودة !!",
+    "Updating Payment Method Data Process Has Been Successfully !!": "عملية تحديث بيانات طريقة الدفع هذه تمت بنجاح !!",
+    "Changing Payment Method Logo Image Process Has Been Successfully !!": "عملية تغيير صورة شعار طريقة الدفع تمت بنجاح !!",
+    "Deleting Payment Method Process Has Been Successfully !!": "عملية حذف طريقة دفع تمت بنجاح",
+    "Get Payment Method Bindings Process Has Been Successfully !!": "عملية جلب أماكن ربط طريقة الدفع تمت بنجاح !!",
+    "Sorry, This Binding Is Not Exist !!": "عذراً ، هذا الربط غير موجود !!",
+    "Unbinding Payment Method From This Country Process Has Been Successfully !!": "عملية إلغاء ربط طريقة الدفع من هذا البلد تمت بنجاح !!",
+    "Unbinding Payment Method From This City Process Has Been Successfully !!": "عملية إلغاء ربط طريقة الدفع من هذه المدينة تمت بنجاح !!",
+    "Unbinding Payment Method From This Region Process Has Been Successfully !!": "عملية إلغاء ربط طريقة الدفع من هذه المنطقة تمت بنجاح !!"
+}

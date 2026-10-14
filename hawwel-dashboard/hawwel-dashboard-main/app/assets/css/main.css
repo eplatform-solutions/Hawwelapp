@@ -1,0 +1,799 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+.ar-dir {
+    direction: rtl !important;
+}
+
+.en-dir {
+    direction: ltr !important;
+}
+
+.toast-rtl {
+    direction: rtl;
+    text-align: right;
+}
+
+.toast-ltr {
+    direction: ltr;
+    text-align: left;
+}
+
+* {
+    font-family: "Cairo", sans-serif;
+    font-optical-sizing: auto;
+    font-weight: 400;
+    font-style: normal;
+    font-variation-settings: "slnt" 0;
+}
+
+input {
+
+    /* border: none !important; */
+    outline: none !important;
+
+    /* box-shadow: none !important; */
+}
+
+input:focus {
+    /* border: none !important; */
+    outline: none !important;
+    /* box-shadow: none !important; */
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    height: 0 !important;
+    width: 0 !important;
+}
+
+input[type="number"] {
+    -moz-appearance: textfield !important;
+    appearance: textfield !important;
+}
+
+input[type="number"]::-ms-clear,
+input[type="number"]::-ms-reveal {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+}
+
+input[type="number"]::-o-clear,
+input[type="number"]::-o-reveal {
+    display: none !important;
+}
+
+.bg-main-color-page {
+    background: linear-gradient(121.22deg, rgba(155, 155, 155, 0.567) 0%, rgba(185, 167, 121, 0.7) 91.33%);
+}
+
+.bg-box-green {
+    background: linear-gradient(96.97deg, #097F6E 0.91%, #B9A779 99.21%);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 12px 26px rgba(9, 127, 110, 0.22);
+}
+
+.bg-box-green-2 {
+    background: linear-gradient(112.84deg, #097F6E 0.77%, #B9A779 98.81%);
+    border-radius: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 10px 22px rgba(9, 127, 110, 0.2);
+}
+
+.bg-box-gray {
+    background: linear-gradient(99.22deg, #F5F5F5 1.77%, #8F8F8F 100%);
+    box-shadow: 0px 4px 4px 0px #00000040;
+}
+
+.bg-role-table {
+    background: linear-gradient(115.53deg, rgba(155, 155, 155, 0.567) 4.34%, rgba(185, 167, 121, 0.28) 99.7%);
+}
+
+.bg-cc {
+    background: linear-gradient(120.87deg, rgba(155, 155, 155, 0.567) 0.3%, rgba(185, 167, 121, 0.7) 91.6%);
+}
+
+.bg-cites {
+    background: linear-gradient(97.31deg, #097F6E 0.17%, #B9A779 99.52%);
+}
+
+/* .custom-shape-divider-top-1766929401 {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    overflow: hidden;
+    line-height: 0;
+}
+
+.custom-shape-divider-top-1766929401 svg {
+    position: relative;
+    display: block;
+    width: calc(100% + 1.3px);
+    height: 126px;
+}
+
+.custom-shape-divider-top-1766929401 .shape-fill {
+    fill: #ffffff00;
+} */
+
+.bg-cites {
+    background: linear-gradient(97.31deg, #097F6E 0.17%, #B9A779 99.52%);
+}
+
+.bg-main-city {
+    background-color: #c4c1ba;
+}
+
+.triangle-gradient {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 115px;
+    background-color: #c4c1ba;
+
+    clip-path: polygon(0 0, 100% 0, 50% 100%, 0 0);
+}
+
+.vti__dropdown-list .flag.sy {
+    background-image: url('../images/syria-flag.png') !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: center !important;
+}
+
+.vti__dropdown-list .flag.sy img {
+    content: url('../images/syria-flag.png') !important;
+}
+
+.vti__dropdown .flag.sy {
+    background-image: url('../images/syria-flag.png') !important;
+}
+
+.vti__flag.sy,
+.vti__dropdown-list .vti__flag.sy,
+.vti__selection .vti__flag.sy,
+[data-country-code="sy"] .vti__flag {
+    background-image: url('../images/syria-flag.png') !important;
+    background-position: center center !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+.vti__flag.sy::before,
+.vti__flag.sy::after {
+    display: none !important;
+}
+
+.my-shadow-box-modal {
+    box-shadow: 0px 4px 4px 0px #00000040;
+}
+
+.bg-coutnry {
+    background: linear-gradient(120.87deg, rgba(155, 155, 155, 0.567) 0.3%, rgba(185, 167, 121, 0.7) 91.6%);
+}
+
+.bg-green-2 {
+    background: linear-gradient(105.55deg, #097F6E 1.48%, #B9A779 100%);
+}
+
+/* إضافة class للـ gradient */
+.custom-green-gradient {
+    background: linear-gradient(105.55deg, #097F6E 1.48%, #B9A779 100%) !important;
+}
+
+/* أو بشكل أكثر تحديداً */
+.hover-custom-gradient:hover {
+    background: linear-gradient(105.55deg, #097F6E 1.48%, #B9A779 100%) !important;
+    color: white !important;
+}
+
+.bg-box-bray-2 {
+    background: linear-gradient(162.72deg, #F5F5F5 11.86%, #8F8F8F 105.97%);
+}
+
+.bg-table-green-2 {
+    background: linear-gradient(93.14deg, #097F6E 0.16%, #B9A779 100.11%);
+}
+
+.pag-shadow {
+    box-shadow: 0px 4px 4px 0px #00000040;
+}
+
+.flex-container-fix {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+}
+
+:root {
+    --brand-primary: #097F6E;
+    --brand-secondary: #B9A779;
+    --brand-dark: #6B1F2A;
+    --surface-1: rgba(255, 255, 255, 0.74);
+    --surface-2: rgba(255, 255, 255, 0.88);
+    --text-main: #1f2328;
+    --shadow-soft: 0 10px 30px rgba(20, 24, 30, 0.12);
+    --shadow-card: 0 8px 24px rgba(20, 24, 30, 0.1);
+}
+
+body {
+    color: var(--text-main);
+}
+
+.surface-panel {
+    background: var(--surface-1);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 16px;
+    box-shadow: var(--shadow-soft);
+}
+
+.brand-btn {
+    background: linear-gradient(130deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+    color: #fff !important;
+    border: none;
+    border-radius: 12px;
+    padding: 0.4rem 0.85rem;
+    font-weight: 700;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+    box-shadow: 0 8px 18px rgba(9, 127, 110, 0.25);
+}
+
+.brand-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(9, 127, 110, 0.3);
+}
+
+.brand-btn:active {
+    transform: translateY(0);
+}
+
+.side-shell {
+    background: linear-gradient(160deg, rgba(185, 167, 121, 0.95) 0%, rgba(218, 205, 171, 0.92) 100%);
+    border-left: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow: -6px 0 20px rgba(0, 0, 0, 0.08);
+}
+
+.side-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    width: 100%;
+    min-height: 38px;
+    border-radius: 12px;
+    padding: 0.38rem 0.65rem;
+    font-weight: 700 !important;
+    font-size: 14px;
+    transition: all 0.18s ease;
+}
+
+.side-link:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateX(-2px);
+}
+
+.side-link.is-active {
+    color: var(--brand-primary) !important;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 0 0 1px rgba(9, 127, 110, 0.22);
+}
+
+.side-shell a {
+    border-radius: 12px;
+    padding: 0.38rem 0.65rem;
+    transition: all 0.18s ease;
+}
+
+.side-shell a:hover {
+    background: rgba(255, 255, 255, 0.35);
+    transform: translateX(-2px);
+}
+
+.side-shell a.router-link-active {
+    color: var(--brand-primary) !important;
+    background: rgba(255, 255, 255, 0.5);
+    box-shadow: inset 0 0 0 1px rgba(9, 127, 110, 0.22);
+}
+
+.side-sub-link {
+    display: block;
+    border-radius: 10px;
+    padding: 0.32rem 0.55rem;
+    font-size: 12px;
+    color: #333;
+    transition: all 0.18s ease;
+}
+
+.side-sub-link:hover {
+    background: rgba(255, 255, 255, 0.32);
+}
+
+.side-sub-link.is-active {
+    color: var(--brand-primary);
+    background: rgba(255, 255, 255, 0.48);
+}
+
+table {
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow-card);
+}
+
+thead tr {
+    background: rgba(9, 127, 110, 0.08);
+}
+
+tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.65);
+}
+
+tbody tr:hover {
+    background: rgba(9, 127, 110, 0.08);
+}
+
+.remittance-row-unpaid {
+    background: rgba(239, 68, 68, 0.12) !important;
+}
+
+.remittance-row-unpaid:nth-child(even) {
+    background: rgba(239, 68, 68, 0.16) !important;
+}
+
+.remittance-row-unpaid:hover {
+    background: rgba(239, 68, 68, 0.22) !important;
+}
+
+.remittance-row-expired {
+    background: rgba(248, 113, 113, 0.14) !important;
+}
+
+.remittance-row-expired:nth-child(even) {
+    background: rgba(248, 113, 113, 0.18) !important;
+}
+
+.remittance-row-expired:hover {
+    background: rgba(248, 113, 113, 0.25) !important;
+}
+
+.quick-card {
+    width: min(100%, 720px);
+    margin-inline: auto;
+    padding-inline: 1rem;
+    padding-block: 0.9rem;
+}
+
+.quick-card-compact {
+    width: min(100%, 660px);
+    margin-inline: auto;
+}
+
+.stat-card {
+    width: 100%;
+    min-height: 156px;
+    padding: 1rem 1rem 0.85rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.9rem;
+    text-align: center;
+}
+
+.stat-card__title {
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 700;
+    color: #1f1f1f;
+}
+
+.stat-card__value {
+    font-size: 26px;
+    line-height: 1.3;
+    font-weight: 800;
+    color: #111;
+}
+
+@media (min-width: 1024px) {
+    .lg\:basis-\[85\%\] {
+        flex-basis: calc(100% - 220px) !important;
+        max-width: calc(100% - 220px) !important;
+    }
+
+    body.dashboard-sidebar-collapsed .lg\:basis-\[85\%\] {
+        flex-basis: calc(100% - 76px) !important;
+        max-width: calc(100% - 76px) !important;
+    }
+}
+
+/* Transfer status pill + consolidated row-actions menu, shared by
+   employee-transfers.vue and remittances.vue. */
+
+.transfer-status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    padding: 4px 10px 4px 8px;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+
+.transfer-status-pill .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.85);
+    flex: none;
+}
+
+.transfer-actions {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* wallets-management page */
+
+.wm-filter-input {
+    background: #fff;
+    border: 1px solid rgba(20, 24, 30, 0.12);
+    border-radius: 10px;
+    padding: 0.45rem 0.8rem;
+    font-size: 12px;
+    font-weight: 700;
+    color: #1f2328;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.wm-filter-input:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+    box-shadow: 0 0 0 3px rgba(9, 127, 110, 0.14);
+}
+
+@media (min-width: 640px) {
+    .wm-filter-input {
+        font-size: 14px;
+        padding: 0.55rem 1rem;
+    }
+}
+
+.wm-th {
+    color: #1f2328;
+    font-weight: 700;
+    font-size: 14px;
+    text-align: center;
+    padding: 0.7rem 1rem;
+    white-space: nowrap;
+}
+
+.wm-td {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+@media (min-width: 640px) {
+    .wm-th, .wm-td {
+        font-size: 17px;
+        padding: 0.9rem 1.25rem;
+    }
+}
+
+/* Short-content columns (currency, network, status) - fit tightly to their
+   content instead of stretching, so the wide-content columns (address,
+   private key) get the freed-up space. */
+.wm-th-tight, .wm-td-tight {
+    width: 1%;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+}
+
+.wm-currency-badge {
+    display: inline-block;
+    background: rgba(9, 127, 110, 0.1);
+    color: var(--brand-primary);
+    font-weight: 800;
+    border-radius: 100px;
+    padding: 4px 14px;
+    font-size: 14px;
+}
+
+@media (min-width: 640px) {
+    .wm-currency-badge {
+        font-size: 16px;
+    }
+}
+
+.wm-copy-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    color: #1f2328;
+    font-weight: 700;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.18s ease;
+}
+
+.wm-copy-btn:hover {
+    color: var(--brand-primary);
+}
+
+@media (min-width: 640px) {
+    .wm-copy-btn {
+        font-size: 15px;
+    }
+}
+
+.wm-status-pill {
+    font-size: 13px !important;
+    padding: 5px 12px 5px 10px !important;
+}
+
+@media (min-width: 640px) {
+    .wm-status-pill {
+        font-size: 14px !important;
+    }
+}
+
+/* support-chat page */
+
+.chat-shell {
+    display: flex;
+    gap: 16px;
+    height: 72vh;
+    min-height: 480px;
+}
+
+.chat-list {
+    width: 100%;
+    max-width: 300px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: var(--shadow-card, 0 8px 24px rgba(20, 24, 30, 0.1));
+    overflow-y: auto;
+    flex-shrink: 0;
+}
+
+.chat-list-item {
+    display: block;
+    width: 100%;
+    text-align: inherit;
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(20, 24, 30, 0.08);
+    cursor: pointer;
+    background: transparent;
+    transition: background 0.15s ease;
+}
+
+.chat-list-item:hover {
+    background: rgba(9, 127, 110, 0.06);
+}
+
+.chat-list-item--active {
+    background: rgba(9, 127, 110, 0.12);
+}
+
+.chat-list-item__name {
+    font-weight: 800;
+    font-size: 15px;
+    color: #1f2328;
+}
+
+.chat-unread-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--brand-primary);
+    flex-shrink: 0;
+}
+
+.chat-list-item__preview {
+    font-size: 13.5px;
+    color: #6b6252;
+    margin-top: 3px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-list-item__time {
+    font-size: 11.5px;
+    color: #9a9182;
+    margin-top: 4px;
+}
+
+.chat-thread {
+    flex: 1;
+    min-width: 0;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: var(--shadow-card, 0 8px 24px rgba(20, 24, 30, 0.1));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.chat-thread__header {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(20, 24, 30, 0.08);
+}
+
+/* Deliberately direction-neutral (ltr) for row layout only, like
+   WhatsApp/Telegram - "my" messages always sit on the same physical side
+   regardless of the page's Arabic/English direction. The Arabic text
+   inside each bubble still renders correctly RTL via chat-bubble__body's
+   own direction below. */
+.chat-thread__messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    direction: ltr;
+}
+
+.chat-bubble-row {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.chat-bubble-row--mine {
+    justify-content: flex-end;
+}
+
+.chat-bubble {
+    max-width: 68%;
+    padding: 10px 16px;
+    border-radius: 16px;
+    font-size: 15.5px;
+    line-height: 1.65;
+}
+
+.chat-bubble__sender {
+    font-size: 12px;
+    font-weight: 800;
+    opacity: 0.85;
+    margin-bottom: 2px;
+    direction: rtl;
+    text-align: right;
+}
+
+.chat-bubble__body {
+    /* Auto-detects RTL/LTR per message from its actual content (Arabic vs
+       English), instead of forcing one direction for every message. */
+    unicode-bidi: plaintext;
+}
+
+.chat-bubble--theirs {
+    background: #F2EDE1;
+    color: #1f2328;
+    border-bottom-left-radius: 4px;
+}
+
+.chat-bubble--mine {
+    background: linear-gradient(130deg, var(--brand-primary) 0%, var(--brand-secondary) 100%);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.chat-bubble__time {
+    font-size: 11px;
+    opacity: 0.7;
+    margin-top: 4px;
+    text-align: end;
+    direction: ltr;
+}
+
+/* ✓ delivered / ✓✓ read marks on admin bubbles */
+.chat-bubble__ticks {
+    margin-left: 4px;
+    letter-spacing: -2px;
+    font-weight: 700;
+}
+
+.chat-bubble__ticks--read {
+    color: #7fe3ff;
+}
+
+.chat-thread__composer {
+    display: flex;
+    gap: 10px;
+    padding: 14px 16px;
+    border-top: 1px solid rgba(20, 24, 30, 0.08);
+}
+
+.chat-composer-input {
+    flex: 1;
+    background: #F2EDE1;
+    border: 1px solid rgba(20, 24, 30, 0.12);
+    border-radius: 10px;
+    padding: 11px 16px;
+    font-size: 15px;
+    color: #1f2328;
+}
+
+.chat-composer-input:focus {
+    outline: none;
+    border-color: var(--brand-primary);
+}
+
+@media (max-width: 768px) {
+    .chat-shell {
+        flex-direction: column;
+        height: auto;
+    }
+    .chat-list {
+        max-width: 100%;
+        max-height: 240px;
+    }
+    .chat-thread {
+        height: 60vh;
+    }
+}
+
+.transfer-actions-primary-btn {
+    font-size: 12px;
+    font-weight: 700;
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+/* Wider rows, and the whole row is clickable to open the details panel -
+   the per-row action surface is just the one primary button now; every
+   other action (including secondary ones) lives inside that panel as a
+   proper full-size button instead of a cramped menu. */
+.transfer-table td,
+.transfer-table th {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+}
+
+.transfer-table tbody tr {
+    cursor: pointer;
+}
+
+.transfer-modal-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+.transfer-modal-actions button,
+.transfer-modal-actions a {
+    font-family: "Cairo", sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}

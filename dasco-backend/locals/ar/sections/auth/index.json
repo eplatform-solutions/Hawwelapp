@@ -1,0 +1,12 @@
+{
+    "Sorry, Can't Create New User Because It Is Already Exist !!": "عذراً ، لا يمكن إنشاء مستخدم جديد لأنه موجود مسبقاً !! ",
+    "Creating New User Process Has Been Successfuly !!": "عملية إنشاء مستخدم جديد تمت بنجاح !!",
+    "Logining Process Has Been Successfully !!": "عملية تسجيل الدخول تمت بنجاح !!",
+    "Sorry, Can't Login Now, Beacause You Activate 2FA !!": "عذراً ، لا يمكن تسجيل الدخول الآن ، لأنك قمت بتفعيل المصادقة الثنائية !!",
+    "Sorry, Email Or Password Incorrect !!": "عذراً ، البريد الالكتروني أو كلمة السر غير صحيح / صحيحة !!",
+    "Forget Password Process Has Been Successfully !!": "معالجة نسيان كلمة المرور تم بنجاح !!",
+    "Reseting Password Process Has Been Successfully !!": "عملية إعادة تعيين كلمة السر تمت بنجاح !!",
+    "Sorry, We Could Not Send The Verification Code Right Now, Please Try Again Later !!": "عذراً ، تعذّر إرسال رمز التحقق حالياً ، يرجى المحاولة لاحقاً !!",
+    "Sorry, No Delivery Channel Is Available For Your Two-Factor Code, Please Contact Technical Support !!": "عذراً ، لا توجد قناة متاحة لإرسال رمز المصادقة الثنائية ، يرجى التواصل مع الدعم الفني !!",
+    "Sorry, Verification Codes Can't Be Sent To This Phone Number, Please Contact Technical Support To Reset Your Password !!": "عذراً ، لا يمكن إرسال رموز التحقق إلى هذا الرقم ، يرجى التواصل مع الدعم الفني لإعادة تعيين كلمة المرور !!"
+}

@@ -1,0 +1,8 @@
+{
+    "Creating New KYC Request Process Has Been Successfully !!": "عملية إنشاء طلب KYC جديد تمت بنجاح !!",
+    "Get KYC For This User Process Has Been Successfully !!": "عملية جلب ال KYC لهذا المستخدم تمت بنجاح !!",
+    "Sorry, This KYC Not Exist !!": "هذه الـ KYC غير موجودة !!",
+    "Sorry, Can't Create New KYC Request Because Exist Previous Request And Status Is: Verified !!": "عذراً ، لا يمكن إنشاء طلب KYC جديد بسبب وجود طلب سابق وحالته: تم التوثيق !!",
+    "Sorry, Can't Create New KYC Request Because Exist Previous Request And Status Is: Under Review !!": "عذراً ، لا يمكن إنشاء طلب KYC جديد بسبب وجود طلب سابق وحالته: تحت المراجعة !!",
+    "Sorry, Can't Create New KYC Request Because Exist Previous Request And Status Is: Blocked !!": "عذراً ، لا يمكن إنشاء طلب KYC جديد بسبب وجود طلب سابق وحالته: تم الحظر !!"
+}

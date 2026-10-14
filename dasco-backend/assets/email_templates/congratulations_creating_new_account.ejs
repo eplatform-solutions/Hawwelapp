@@ -1,0 +1,58 @@
+<%
+    const isAr = language !== "en";
+    const brand = isAr ? "حوّل" : "Hawwel";
+    const logoUrl = process.env.EMAIL_LOGO_URL || "https://api.7awalaty.com/assets/images/email/logo.png";
+    const supportEmail = process.env.SUPPORT_EMAIL || "support@hawwelapp.com";
+    const t = isAr ? {
+        title: "أهلاً بك في حوّل",
+        intro: "تم إنشاء حسابك بنجاح.",
+        next: "الخطوة التالية: أكمل التحقق من هويتك داخل التطبيق، وبعد الموافقة عليها يمكنك إنشاء حوالتك الأولى ومتابعتها خطوة بخطوة.",
+        notYou: "إذا لم تقم بإنشاء هذا الحساب، تواصل معنا فوراً.",
+        help: "للمساعدة تواصل معنا على",
+    } : {
+        title: "Welcome to Hawwel",
+        intro: "Your account has been created successfully.",
+        next: "Next step: complete identity verification in the app. Once it is approved you can create your first transfer and track it step by step.",
+        notYou: "If you did not create this account, contact us right away.",
+        help: "Need help? Contact us at",
+    };
+    const dir = isAr ? "rtl" : "ltr";
+    const align = isAr ? "right" : "left";
+%>
+<!DOCTYPE html>
+<html lang="<%= isAr ? 'ar' : 'en' %>" dir="<%= dir %>">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= t.title %></title>
+</head>
+<body style="margin:0; padding:0; background-color:#F7F6F1;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#F7F6F1;">
+        <tr>
+            <td align="center" style="padding:24px 12px;">
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:560px; background-color:#FFFFFF; border:1px solid #E5E2D6; border-radius:12px; overflow:hidden;">
+                    <tr>
+                        <td align="center" style="background-color:#0E2B2B; padding:24px;">
+                            <img src="<%= logoUrl %>" width="72" height="87" alt="Hawwel" style="display:block; border:0; outline:none;">
+                        </td>
+                    </tr>
+                    <tr>
+                        <td dir="<%= dir %>" style="padding:32px 28px; font-family:Tahoma, Arial, sans-serif; color:#13201F; text-align:<%= align %>;">
+                            <h1 style="margin:0 0 12px 0; font-size:22px; line-height:1.4; color:#0E2B2B;"><%= t.title %></h1>
+                            <p style="margin:0 0 12px 0; font-size:16px; line-height:1.7;"><%= t.intro %></p>
+                            <p style="margin:0 0 20px 0; font-size:16px; line-height:1.7;"><%= t.next %></p>
+                            <p style="margin:0; font-size:14px; line-height:1.7; color:#66706D;"><%= t.notYou %></p>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td dir="<%= dir %>" style="border-top:1px solid #E5E2D6; padding:16px 28px; font-family:Tahoma, Arial, sans-serif; font-size:12px; line-height:1.7; color:#66706D; text-align:center;">
+                            <%= t.help %> <a href="mailto:<%= supportEmail %>" style="color:#1F6F5B; text-decoration:none;"><%= supportEmail %></a><br>
+                            &copy; <%= new Date().getFullYear() %> <%= brand %>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>
