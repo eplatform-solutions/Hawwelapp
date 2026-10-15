@@ -48,7 +48,19 @@ async function putWalletInfo(req, res) {
     }
 }
 
+async function postCreateSystemWallets(req, res) {
+    try {
+        const result = await blockchainWalletsOperationsManagmentFunctions.createSystemWallets(req.data._id, req.body.type, req.body, req.query.language);
+        handleResponse(result, res);
+    }
+    catch (err) {
+        console.log(`[blockchain-wallets] create system wallets failed: ${err?.message || err}`);
+        res.status(500).json(getResponseObject(getSuitableTranslations("Internal Server Error !!", req.query.language), true, {}));
+    }
+}
+
 module.exports = {
     getAllClientsWalletsInsideThePage,
-    putWalletInfo
+    putWalletInfo,
+    postCreateSystemWallets
 }

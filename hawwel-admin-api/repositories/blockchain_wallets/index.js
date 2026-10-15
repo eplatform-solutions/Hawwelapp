@@ -16,6 +16,10 @@ const { decryptWalletPrivateKey } = require("../../helpers/wallet_encryption");
 
 const { dashboardDB } = require("../../database/connections");
 
+const { SUPPORTED_NETWORKS } = require("../../constants/blockchain");
+
+const web3 = require("web3");
+
 async function getAllClientsWalletsInsideThePage(adminId, pageNumber, pageSize, filters, language) {
     try {
         const admin = await adminModel.findById(adminId, { __v: false, password: false });
@@ -201,7 +205,65 @@ async function updateWalletInfo(adminId, walletId, newData, language, dbSession 
     }
 }
 
+// Creates the system wallets of one type (central or network-fee-funding) the first time:
+// one record per symbol and network, as the client API expects. Afterwards they are edited,
+// not created again.
+async function createSystemWallets(adminId, type, data, language) {
+    const admin = await adminModel.findById(adminId, { __v: false, password: false });
+    if (!admin) {
+        return {
+            msg: getSuitableTranslations("Sorry, This Admin Is Not Exist !!", language),
+            error: true,
+            code: "ADMIN_NOT_FOUND",
+            data: {},
+        }
+    }
+    const populatedAdmin = await populateRole(admin);
+    const authorizationResult = authorizeAdmin(populatedAdmin, "quick_control_managment", language);
+    if (authorizationResult.error) {
+        return authorizationResult;
+    }
+    if (await dashBlockchainWalletModel.exists({ type })) {
+        return {
+            msg: getSuitableTranslations("Sorry, These Wallets Already Exist, Edit Them Instead !!", language),
+            error: true,
+            data: {},
+        }
+    }
+    let address = data.address;
+    let privateKey;
+    if (type === "network-fee-funding") {
+        privateKey = data.privateKey.startsWith("0x") ? data.privateKey : `0x${data.privateKey}`;
+        address = web3.eth.accounts.privateKeyToAccount(privateKey).address;
+    }
+    // The schema's pre-save hook encrypts the private key of network-fee-funding wallets.
+    const wallets = ["USDT", "USDC"].flatMap((symbol) => SUPPORTED_NETWORKS.map((network) => (
+        new dashBlockchainWalletModel({ type, symbol, network, address, ...(privateKey ? { privateKey } : {}) })
+    )));
+    const dbSession = await dashboardDB.startSession();
+    try {
+        dbSession.startTransaction();
+        for (const wallet of wallets) {
+            await wallet.save({ session: dbSession });
+        }
+        await dbSession.commitTransaction();
+    }
+    catch (err) {
+        await dbSession.abortTransaction();
+        throw err;
+    }
+    finally {
+        await dbSession.endSession();
+    }
+    return {
+        msg: getSuitableTranslations("Creating Blockchain Wallets Process Has Been Successfully !!", language),
+        error: false,
+        data: { address: address.toLowerCase() },
+    }
+}
+
 module.exports = {
     getAllClientsWalletsInsideThePage,
-    updateWalletInfo
+    updateWalletInfo,
+    createSystemWallets
 }

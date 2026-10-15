@@ -302,6 +302,13 @@
                                         </div>
                                     </div>
 
+                                    <div v-if="!wallets.length" class="flex justify-center">
+                                        <UButton @click="showCreateWalletModal('central')"
+                                            class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
+                                            {{ $t('Add central wallet') }}
+                                        </UButton>
+                                    </div>
+
                                 </div>
                             </div>
 
@@ -352,6 +359,14 @@
                                             </div>
                                         </div>
 
+                                        <div v-if="!myDataInfo.networkFeeFundingBlockchainWallets.length"
+                                            class="flex justify-center">
+                                            <UButton @click="showCreateWalletModal('network-fee-funding')"
+                                                class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
+                                                {{ $t('Add network fee funding wallet') }}
+                                            </UButton>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>
@@ -392,6 +407,45 @@
                                 <UButton type="submit" :loading="stateEditPay.loading" :disabled="stateEditPay.loading"
                                     class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
                                     {{ $t('Edit') }}
+                                </UButton>
+                            </div>
+                        </form>
+                    </div>
+                </template>
+            </UModal>
+
+            <!-- modal for creating the system wallets (central / network fee funding) -->
+            <UModal v-model:open="openCreateWallet">
+                <template #content>
+                    <div class="bg-box-gray p-5 overflow-auto">
+                        <div class="flex justify-between items-center pb-2 border-b border-dashed border-black mb-5"
+                            :class="{ 'flex-row-reverse': locale == 'ar' }">
+                            <div class="text-black text-[16px]/8 font-bold!">
+                                {{ createWalletData.type == 'central' ? $t('Add central wallet') : $t('Add network fee funding wallet') }}
+                            </div>
+                            <div>
+                                <button @click="openCreateWallet = !openCreateWallet" class="cursor-pointer">
+                                    <UIcon class="size-10" name="i-heroicons-x-mark-solid" />
+                                </button>
+                            </div>
+                        </div>
+                        <form @submit.prevent="createWallet" :class="{ 'ar-dir': locale == 'ar' }">
+                            <div class="flex flex-col gap-2 mb-5">
+                                <label for="create-wallet-value" class="text-black font-bold! text-[14px]/8">
+                                    {{ createWalletData.type == 'central' ? $t('Type address') : $t('Type Private Key') }}
+                                </label>
+                                <input id="create-wallet-value" v-model="createWalletData.value" required
+                                    :type="createWalletData.type == 'central' ? 'text' : 'password'" autocomplete="off"
+                                    class="bg-[#B9A779] rounded-xl py-2 px-4 w-full text-black text-[12px]/5 sm:text-[16px]/8" />
+                                <div class="text-black text-[12px]/5">
+                                    {{ $t('This wallet is used for USDT and USDC on all supported networks') }}
+                                </div>
+                            </div>
+                            <div class="flex justify-center">
+                                <UButton type="submit" :loading="stateEditWallet.loading"
+                                    :disabled="stateEditWallet.loading"
+                                    class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
+                                    {{ $t('Add') }}
                                 </UButton>
                             </div>
                         </form>
@@ -1191,6 +1245,69 @@ async function editWallet(type = '') {
             openEditWallet.value = false;
         else
             openEditWalletFee.value = false;
+    }
+    catch (error) {
+        stateEditWallet.value.loading = false;
+        stateEditWallet.value.error = true;
+
+        const errorMessage = handelErrorType(error);
+        if (errorMessage == "Unauthorized") {
+            store.updateToken(null);
+            router.push("/login");
+        }
+
+        stateEditWallet.value.msg = {
+            ar: errorMessage,
+            en: errorMessage
+        };
+    }
+}
+
+const openCreateWallet = ref(false);
+const createWalletData = ref({
+    type: "central",
+    value: ""
+});
+
+function showCreateWalletModal(type) {
+    createWalletData.value = { type, value: "" };
+    openCreateWallet.value = true;
+}
+
+async function createWallet() {
+    stateEditWallet.value.loading = true;
+    stateEditWallet.value.error = false;
+    stateEditWallet.value.success = false;
+    stateEditWallet.value.msg = { en: "", ar: "" };
+
+    const { type, value } = createWalletData.value;
+    const data = type == "central" ? { type, address: value.trim() } : { type, privateKey: value.trim() };
+    const token = store.getToken;
+
+    try {
+        const response = await axios.post(`${BASE_URL}/blockchain-wallets/create-system-wallets`, data, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        stateEditWallet.value = {
+            loading: false,
+            error: !!response.data.error,
+            success: !response.data.error,
+            msg: {
+                ar: response.data.msg.ar,
+                en: response.data.msg.en,
+            }
+        };
+        if (response.data.error) {
+            return;
+        }
+
+        // Do not keep a typed private key in memory longer than needed.
+        createWalletData.value.value = "";
+        openCreateWallet.value = false;
+        getAllInfo();
     }
     catch (error) {
         stateEditWallet.value.loading = false;

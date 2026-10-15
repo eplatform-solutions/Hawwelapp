@@ -158,4 +158,27 @@ blockchainWalletsRouter.put("/update/:walletId",
     blockchainWalletsController.putWalletInfo
 );
 
+blockchainWalletsRouter.post("/create-system-wallets",
+    validateJWT,
+    (req, res, next) => {
+        const bodyData = req.body;
+        validateIsExistValueForFieldsAndDataTypes([
+            { fieldName: "Type", fieldValue: bodyData?.type, dataTypes: ["string"], isRequiredValue: true },
+            { fieldName: "Address", fieldValue: bodyData?.address, dataTypes: ["string"], isRequiredValue: bodyData?.type === "central" },
+            { fieldName: "Private Key", fieldValue: bodyData?.privateKey, dataTypes: ["string"], isRequiredValue: bodyData?.type === "network-fee-funding" },
+        ], res, next);
+    },
+    (req, res, next) => {
+        const bodyData = req.body;
+        if (bodyData.type === "central") {
+            return validateAddress(bodyData.address, undefined, res, next);
+        }
+        if (bodyData.type === "network-fee-funding") {
+            return validatePrivateKey(bodyData.privateKey, undefined, res, next);
+        }
+        res.status(400).json(getResponseObject("Sorry, Please Send Valid Wallet Type ( central Or network-fee-funding ) !!", true, {}));
+    },
+    blockchainWalletsController.postCreateSystemWallets
+);
+
 module.exports = blockchainWalletsRouter;
