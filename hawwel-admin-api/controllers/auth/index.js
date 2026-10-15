@@ -31,10 +31,15 @@ async function postLogin(req, res) {
         if (result.data?.token) {
             return res.json(result);
         }
-        const code = result.data.code;
-        delete result.data.code;
-        delete result.data.user;
+        const code = result.data?.code;
+        delete result.data?.code;
+        delete result.data?.user;
         res.json(result);
+        // Only a login that passed the password check and needs 2FA has a code. Without this
+        // guard a wrong password still emailed an empty "code" to whatever address was typed.
+        if (!code) {
+            return;
+        }
         if (email) {
             try {
                 return await sendVerificationCodeToUserEmail(email, code, language);
