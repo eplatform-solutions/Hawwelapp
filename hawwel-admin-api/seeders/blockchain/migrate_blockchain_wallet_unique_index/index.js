@@ -14,7 +14,11 @@ async function migrate_blockchain_wallet_unique_index() {
     try {
         await dashboardDB.openUri(process.env.DASH_DB_URL);
         const collection = blockchainWalletModel.collection;
-        const indexes = await collection.indexes();
+        // On a fresh database the collection does not exist yet; there is no old index to drop.
+        const indexes = await collection.indexes().catch((err) => {
+            if (err?.codeName === "NamespaceNotFound") return [];
+            throw err;
+        });
         const hasOldIndex = indexes.some((idx) => idx.name === OLD_INDEX_NAME);
         if (hasOldIndex) {
             await collection.dropIndex(OLD_INDEX_NAME);
