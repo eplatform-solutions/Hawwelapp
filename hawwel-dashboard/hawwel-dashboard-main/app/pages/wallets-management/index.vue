@@ -11,6 +11,16 @@
             icon="i-heroicons-check-badge-16-solid">
         </use-toast>
 
+        <use-toast v-if="stateSystemWallet.error" head="Failed"
+            :body="locale == 'en' ? stateSystemWallet.msg.en : stateSystemWallet.msg.ar" color="error"
+            icon="i-heroicons-exclamation-circle-16-solid">
+        </use-toast>
+
+        <use-toast v-if="stateSystemWallet.success" head="Success"
+            :body="locale == 'en' ? stateSystemWallet.msg.en : stateSystemWallet.msg.ar" color="success"
+            icon="i-heroicons-check-badge-16-solid">
+        </use-toast>
+
         <div class="lg:flex flex-container-fix" :class="{ 'flex-row-reverse': locale == 'en' }"
             style="display: -webkit-box !important;">
 
@@ -39,6 +49,18 @@
                         </div>
                     </div>
 
+                    <div v-if="!balancesLoading && !balancesError && (!centralBalances.length || !fundingBalances.length)"
+                        class="flex flex-wrap justify-center gap-3 mb-4">
+                        <UButton v-if="!centralBalances.length" @click="showSystemWalletModal('create', 'central')"
+                            class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-box-green cursor-pointer">
+                            {{ $t('Add central wallet') }}
+                        </UButton>
+                        <UButton v-if="!fundingBalances.length" @click="showSystemWalletModal('create', 'network-fee-funding')"
+                            class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-box-green cursor-pointer">
+                            {{ $t('Add network fee funding wallet') }}
+                        </UButton>
+                    </div>
+
                     <div class="flex flex-wrap justify-center items-start gap-6">
 
                         <div v-if="centralBalances.length > 0" class="overflow-auto max-w-full">
@@ -60,6 +82,9 @@
                                         <th class="text-black text-[12px]/5 sm:text-[14px]/7 font-bold! text-center px-5 py-2 whitespace-nowrap">
                                             {{ $t("Wallet Address") }}
                                         </th>
+                                        <th class="text-black text-[12px]/5 sm:text-[14px]/7 font-bold! text-center px-3 py-2 whitespace-nowrap">
+                                            {{ $t("Edit") }}
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -79,6 +104,12 @@
                                             <button @click="copyToClipboard(item.address)"
                                                 class="underline text-[11px]/5 sm:text-[12px]/6 font-bold! text-black cursor-pointer en-dir">
                                                 {{ item.address }}
+                                            </button>
+                                        </td>
+                                        <td class="text-center px-3 py-3">
+                                            <button @click="showSystemWalletModal('edit', item.type, item.walletId)" class="cursor-pointer"
+                                                :title="$t('Edit wallet')">
+                                                <UIcon class="size-5 text-black" name="i-heroicons-pencil-square" />
                                             </button>
                                         </td>
                                     </tr>
@@ -105,6 +136,9 @@
                                         <th class="text-black text-[12px]/5 sm:text-[14px]/7 font-bold! text-center px-5 py-2 whitespace-nowrap">
                                             {{ $t("Wallet Address") }}
                                         </th>
+                                        <th class="text-black text-[12px]/5 sm:text-[14px]/7 font-bold! text-center px-3 py-2 whitespace-nowrap">
+                                            {{ $t("Edit") }}
+                                        </th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -124,6 +158,12 @@
                                             <button @click="copyToClipboard(item.address)"
                                                 class="underline text-[11px]/5 sm:text-[12px]/6 font-bold! text-black cursor-pointer en-dir">
                                                 {{ item.address }}
+                                            </button>
+                                        </td>
+                                        <td class="text-center px-3 py-3">
+                                            <button @click="showSystemWalletModal('edit', item.type, item.walletId)" class="cursor-pointer"
+                                                :title="$t('Edit wallet')">
+                                                <UIcon class="size-5 text-black" name="i-heroicons-pencil-square" />
                                             </button>
                                         </td>
                                     </tr>
@@ -288,6 +328,46 @@
 
     </div>
 
+    <!-- modal for adding / editing the system wallets (central, network fee funding) -->
+    <UModal v-model:open="openSystemWallet">
+        <template #content>
+            <div class="bg-box-gray p-5 overflow-auto">
+                <div class="flex justify-between items-center pb-2 border-b border-dashed border-black mb-5"
+                    :class="{ 'flex-row-reverse': locale == 'ar' }">
+                    <div class="text-black text-[16px]/8 font-bold!">
+                        <template v-if="systemWalletForm.mode == 'edit'">{{ $t('Edit wallet') }}</template>
+                        <template v-else-if="systemWalletForm.type == 'central'">{{ $t('Add central wallet') }}</template>
+                        <template v-else>{{ $t('Add network fee funding wallet') }}</template>
+                    </div>
+                    <div>
+                        <button @click="openSystemWallet = !openSystemWallet" class="cursor-pointer">
+                            <UIcon class="size-10" name="i-heroicons-x-mark-solid" />
+                        </button>
+                    </div>
+                </div>
+                <form @submit.prevent="saveSystemWallet" :class="{ 'ar-dir': locale == 'ar' }">
+                    <div class="flex flex-col gap-2 mb-5">
+                        <label for="system-wallet-value" class="text-black font-bold! text-[14px]/8">
+                            {{ systemWalletForm.type == 'central' ? $t('Type address') : $t('Type Private Key') }}
+                        </label>
+                        <input id="system-wallet-value" v-model="systemWalletForm.value" required autocomplete="off"
+                            :type="systemWalletForm.type == 'central' ? 'text' : 'password'"
+                            class="bg-[#B9A779] rounded-xl py-2 px-4 w-full text-black text-[12px]/5 sm:text-[16px]/8" />
+                        <div v-if="systemWalletForm.mode == 'create'" class="text-black text-[12px]/5">
+                            {{ $t('This wallet is used for USDT and USDC on all supported networks') }}
+                        </div>
+                    </div>
+                    <div class="flex justify-center">
+                        <UButton type="submit" :loading="stateSystemWallet.loading" :disabled="stateSystemWallet.loading"
+                            class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
+                            {{ systemWalletForm.mode == 'edit' ? $t('Edit') : $t('Add') }}
+                        </UButton>
+                    </div>
+                </form>
+            </div>
+        </template>
+    </UModal>
+
     <!-- modal for show logo -->
     <UModal v-model:open="openModel">
 
@@ -404,6 +484,53 @@ async function getWalletBalances() {
     }
     finally {
         balancesLoading.value = false;
+    }
+}
+
+// System wallets (central / network fee funding): created once, then edited row by row.
+const openSystemWallet = ref(false);
+const systemWalletForm = ref({ mode: "create", type: "central", walletId: "", value: "" });
+const stateSystemWallet = ref({ loading: false, error: false, success: false, msg: { ar: "", en: "" } });
+
+function showSystemWalletModal(mode, type, walletId = "") {
+    systemWalletForm.value = { mode, type, walletId, value: "" };
+    openSystemWallet.value = true;
+}
+
+async function saveSystemWallet() {
+    stateSystemWallet.value = { loading: true, error: false, success: false, msg: { ar: "", en: "" } };
+
+    const { mode, type, walletId, value } = systemWalletForm.value;
+    const field = type == "central" ? { address: value.trim() } : { privateKey: value.trim() };
+    const headers = { 'Authorization': `Bearer ${store.getToken}` };
+
+    try {
+        const response = mode == "create"
+            ? await axios.post(`${BASE_URL}/blockchain-wallets/create-system-wallets`, { type, ...field }, { headers })
+            : await axios.put(`${BASE_URL}/blockchain-wallets/update/${walletId}`, field, { headers });
+
+        stateSystemWallet.value = {
+            loading: false,
+            error: !!response.data.error,
+            success: !response.data.error,
+            msg: { ar: response.data.msg.ar, en: response.data.msg.en }
+        };
+        if (response.data.error) {
+            return;
+        }
+
+        // Do not keep a typed private key in memory longer than needed.
+        systemWalletForm.value.value = "";
+        openSystemWallet.value = false;
+        getWalletBalances();
+    }
+    catch (error) {
+        const errorMessage = handelErrorType(error);
+        if (errorMessage == "Unauthorized") {
+            store.updateToken(null);
+            router.push("/login");
+        }
+        stateSystemWallet.value = { loading: false, error: true, success: false, msg: { ar: errorMessage, en: errorMessage } };
     }
 }
 

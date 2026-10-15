@@ -52,21 +52,6 @@
                 icon="i-heroicons-check-badge-16-solid">
             </use-toast>
 
-            <use-toast v-if="stateEditWallet.error" head="Failed"
-                :body="locale == 'en' ? stateEditWallet.msg.en : stateEditWallet.msg.ar" color="error"
-                icon="i-heroicons-exclamation-circle-16-solid">
-            </use-toast>
-
-            <use-toast v-if="stateEditWallet.success" head="Success"
-                :body="locale == 'en' ? stateEditWallet.msg.en : stateEditWallet.msg.ar" color="success"
-                icon="i-heroicons-check-badge-16-solid">
-            </use-toast>
-
-            <use-toast v-if="stateCopy.active" head="Success"
-                :body="locale == 'en' ? stateCopy.msg.en : stateCopy.msg.ar" color="success"
-                icon="i-heroicons-check-badge-16-solid">
-            </use-toast>
-
             <div>
                 <div class="lg:flex" :class="{ 'flex-row-reverse': locale == 'en' }">
                     <div class="basis-full lg:basis-[85%] bg-main-color-page min-h-screen"
@@ -259,118 +244,6 @@
                                 </div>
                             </div>
 
-                            <div class="flex justify-center mb-2">
-                                <div class="sm:text-[16px]/8 text-[12px]/6 text-black font-bold!">
-                                    {{ $t('Main Wallet Addresses') }}
-                                </div>
-                            </div>
-
-                            <div>
-                                    <div class="bg-box-green quick-card mb-5">
-
-                                    <div v-for="item in wallets" :key="item._id"
-                                        class="flex gap-4 items-center justify-between"
-                                        :class="{ 'flex-row-reverse': locale == 'ar' }">
-                                        <div class="flex flex-col gap-2" :class="{ 'items-end': locale == 'ar' }">
-                                            <div class="text-black text-[16px]/8 font-bold!">
-                                                {{ item.symbol }} ({{ item.network }})
-                                            </div>
-                                            <div class="text-white text-[11px]/8 font-bold!">
-                                                {{ item.address }}
-                                            </div>
-                                        </div>
-                                        <div class="flex gap-3">
-                                            <button @click="showEditWalletModal(item)" class="cursor-pointer">
-                                                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M2 15.9706H3.41421L12.7279 6.65685L11.3137 5.24264L2 14.5564V15.9706ZM18 17.9706H0V13.7279L13.435 0.29289C13.8256 -0.09763 14.4587 -0.09763 14.8492 0.29289L17.6777 3.12132C18.0682 3.51184 18.0682 4.14501 17.6777 4.53553L6.24264 15.9706H18V17.9706ZM12.7279 3.82843L14.1421 5.24264L15.5563 3.82843L14.1421 2.41421L12.7279 3.82843Z"
-                                                        fill="black" />
-                                                </svg>
-                                            </button>
-                                            <button @click="copyToClipboard(item.address)" class="cursor-pointer">
-                                                <svg width="21" height="23" viewBox="0 0 21 23" fill="none"
-                                                    xmlns="http://www.w3.org/2000/svg">
-                                                    <path
-                                                        d="M16.2306 10.1384C16.2306 7.26647 16.2306 5.83052 15.3384 4.93833C14.4462 4.04614 13.0103 4.04614 10.1384 4.04614H7.09223C4.22035 4.04614 2.78441 4.04614 1.8922 4.93833C0.999989 5.83052 0.999989 7.26647 0.999989 10.1384V15.2153C0.999989 18.0871 0.999989 19.5231 1.8922 20.4153C2.78441 21.3075 4.22035 21.3075 7.09223 21.3075H10.1384C13.0103 21.3075 14.4462 21.3075 15.3384 20.4153C16.2306 19.5231 16.2306 18.0871 16.2306 15.2153V10.1384Z"
-                                                        stroke="black" stroke-width="2" />
-                                                    <path
-                                                        d="M16.2306 18.2613C17.9129 18.2613 19.2767 16.8976 19.2767 15.2152V9.12299C19.2767 5.29377 19.2767 3.37917 18.0871 2.18958C16.8975 1 14.9829 1 11.1537 1H7.09222C5.40985 1 4.0461 2.3638 4.0461 4.04612"
-                                                        stroke="black" stroke-width="2" />
-                                                </svg>
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    <div v-if="!wallets.length" class="flex justify-center">
-                                        <UButton @click="showCreateWalletModal('central')"
-                                            class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
-                                            {{ $t('Add central wallet') }}
-                                        </UButton>
-                                    </div>
-
-                                </div>
-                            </div>
-
-                            <div v-if="myDataInfo?.networkFeeFundingBlockchainWallets">
-                                <div class="flex justify-center my-2">
-                                    <div class="sm:text-[16px]/8 text-[12px]/6 text-black font-bold!">
-                                        {{ $t('Network Fee Funding Blockchain Wallet Addresses') }}
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <div class="bg-box-green quick-card">
-
-                                        <div v-for="item in myDataInfo.networkFeeFundingBlockchainWallets"
-                                            :key="item._id" class="flex gap-4 items-center justify-between"
-                                            :class="{ 'flex-row-reverse': locale == 'ar' }">
-                                            <div class="flex flex-col gap-2" :class="{ 'items-end': locale == 'ar' }">
-                                                <div class="text-black text-[16px]/8 font-bold!">
-                                                    {{ item.symbol }} ({{ item.network }})
-                                                </div>
-                                                <div class="text-white text-[11px]/5 font-bold!">
-                                                    {{ item.address }}
-                                                </div>
-                                                <div class="text-white text-[11px]/5 font-bold!">
-                                                    {{ $t("Private key:") }} {{ item.privateKey }}
-                                                </div>
-                                            </div>
-                                            <div class="flex gap-3">
-                                                <button @click="showEditWalletModalFee(item)" class="cursor-pointer">
-                                                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M2 15.9706H3.41421L12.7279 6.65685L11.3137 5.24264L2 14.5564V15.9706ZM18 17.9706H0V13.7279L13.435 0.29289C13.8256 -0.09763 14.4587 -0.09763 14.8492 0.29289L17.6777 3.12132C18.0682 3.51184 18.0682 4.14501 17.6777 4.53553L6.24264 15.9706H18V17.9706ZM12.7279 3.82843L14.1421 5.24264L15.5563 3.82843L14.1421 2.41421L12.7279 3.82843Z"
-                                                            fill="black" />
-                                                    </svg>
-                                                </button>
-                                                <button @click="copyToClipboard(item.address)" class="cursor-pointer">
-                                                    <svg width="21" height="23" viewBox="0 0 21 23" fill="none"
-                                                        xmlns="http://www.w3.org/2000/svg">
-                                                        <path
-                                                            d="M16.2306 10.1384C16.2306 7.26647 16.2306 5.83052 15.3384 4.93833C14.4462 4.04614 13.0103 4.04614 10.1384 4.04614H7.09223C4.22035 4.04614 2.78441 4.04614 1.8922 4.93833C0.999989 5.83052 0.999989 7.26647 0.999989 10.1384V15.2153C0.999989 18.0871 0.999989 19.5231 1.8922 20.4153C2.78441 21.3075 4.22035 21.3075 7.09223 21.3075H10.1384C13.0103 21.3075 14.4462 21.3075 15.3384 20.4153C16.2306 19.5231 16.2306 18.0871 16.2306 15.2153V10.1384Z"
-                                                            stroke="black" stroke-width="2" />
-                                                        <path
-                                                            d="M16.2306 18.2613C17.9129 18.2613 19.2767 16.8976 19.2767 15.2152V9.12299C19.2767 5.29377 19.2767 3.37917 18.0871 2.18958C16.8975 1 14.9829 1 11.1537 1H7.09222C5.40985 1 4.0461 2.3638 4.0461 4.04612"
-                                                            stroke="black" stroke-width="2" />
-                                                    </svg>
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        <div v-if="!myDataInfo.networkFeeFundingBlockchainWallets.length"
-                                            class="flex justify-center">
-                                            <UButton @click="showCreateWalletModal('network-fee-funding')"
-                                                class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
-                                                {{ $t('Add network fee funding wallet') }}
-                                            </UButton>
-                                        </div>
-
-                                    </div>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
 
@@ -405,115 +278,6 @@
                             </div>
                             <div class="flex justify-center">
                                 <UButton type="submit" :loading="stateEditPay.loading" :disabled="stateEditPay.loading"
-                                    class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
-                                    {{ $t('Edit') }}
-                                </UButton>
-                            </div>
-                        </form>
-                    </div>
-                </template>
-            </UModal>
-
-            <!-- modal for creating the system wallets (central / network fee funding) -->
-            <UModal v-model:open="openCreateWallet">
-                <template #content>
-                    <div class="bg-box-gray p-5 overflow-auto">
-                        <div class="flex justify-between items-center pb-2 border-b border-dashed border-black mb-5"
-                            :class="{ 'flex-row-reverse': locale == 'ar' }">
-                            <div class="text-black text-[16px]/8 font-bold!">
-                                {{ createWalletData.type == 'central' ? $t('Add central wallet') : $t('Add network fee funding wallet') }}
-                            </div>
-                            <div>
-                                <button @click="openCreateWallet = !openCreateWallet" class="cursor-pointer">
-                                    <UIcon class="size-10" name="i-heroicons-x-mark-solid" />
-                                </button>
-                            </div>
-                        </div>
-                        <form @submit.prevent="createWallet" :class="{ 'ar-dir': locale == 'ar' }">
-                            <div class="flex flex-col gap-2 mb-5">
-                                <label for="create-wallet-value" class="text-black font-bold! text-[14px]/8">
-                                    {{ createWalletData.type == 'central' ? $t('Type address') : $t('Type Private Key') }}
-                                </label>
-                                <input id="create-wallet-value" v-model="createWalletData.value" required
-                                    :type="createWalletData.type == 'central' ? 'text' : 'password'" autocomplete="off"
-                                    class="bg-[#B9A779] rounded-xl py-2 px-4 w-full text-black text-[12px]/5 sm:text-[16px]/8" />
-                                <div class="text-black text-[12px]/5">
-                                    {{ $t('This wallet is used for USDT and USDC on all supported networks') }}
-                                </div>
-                            </div>
-                            <div class="flex justify-center">
-                                <UButton type="submit" :loading="stateEditWallet.loading"
-                                    :disabled="stateEditWallet.loading"
-                                    class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
-                                    {{ $t('Add') }}
-                                </UButton>
-                            </div>
-                        </form>
-                    </div>
-                </template>
-            </UModal>
-
-            <!-- modal for edit wallet -->
-            <UModal v-model:open="openEditWallet">
-                <template #content>
-                    <div class="bg-box-gray p-5 overflow-auto">
-                        <div class="flex justify-between items-center pb-2 border-b border-dashed border-black mb-5"
-                            :class="{ 'flex-row-reverse': locale == 'ar' }">
-                            <div class="text-black text-[16px]/8 font-bold!">
-                                {{ $t('Edit wallet') }}
-                            </div>
-                            <div>
-                                <button @click="openEditWallet = !openEditWallet" class="cursor-pointer">
-                                    <UIcon class="size-10" name="i-heroicons-x-mark-solid" />
-                                </button>
-                            </div>
-                        </div>
-                        <form @submit.prevent="editWallet()" :class="{ 'ar-dir': locale == 'ar' }">
-                            <div class="flex flex-col gap-2 mb-5">
-                                <label for="wallet-address" class="text-black font-bold! text-[14px]/8">
-                                    {{ $t('Type address') }}
-                                </label>
-                                <input id="wallet-address" type="text" v-model="editWalletItem.address" required
-                                    class="bg-[#B9A779] rounded-xl py-2 px-4 w-full text-black text-[12px]/5 sm:text-[16px]/8" />
-                            </div>
-                            <div class="flex justify-center">
-                                <UButton type="submit" :loading="stateEditWallet.loading"
-                                    :disabled="stateEditWallet.loading"
-                                    class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
-                                    {{ $t('Edit') }}
-                                </UButton>
-                            </div>
-                        </form>
-                    </div>
-                </template>
-            </UModal>
-
-            <!-- modal for edit wallet -->
-            <UModal v-model:open="openEditWalletFee">
-                <template #content>
-                    <div class="bg-box-gray p-5 overflow-auto">
-                        <div class="flex justify-between items-center pb-2 border-b border-dashed border-black mb-5"
-                            :class="{ 'flex-row-reverse': locale == 'ar' }">
-                            <div class="text-black text-[16px]/8 font-bold!">
-                                {{ $t('Edit wallet') }}
-                            </div>
-                            <div>
-                                <button @click="openEditWalletFee = !openEditWalletFee" class="cursor-pointer">
-                                    <UIcon class="size-10" name="i-heroicons-x-mark-solid" />
-                                </button>
-                            </div>
-                        </div>
-                        <form @submit.prevent="editWallet('Fee')" :class="{ 'ar-dir': locale == 'ar' }">
-                            <div class="flex flex-col gap-2 mb-5">
-                                <label for="wallet-address" class="text-black font-bold! text-[14px]/8">
-                                    {{ $t('Type Private Key') }}
-                                </label>
-                                <input id="wallet-address" type="text" v-model="editWalletItemFee.privateKey" required
-                                    class="bg-[#B9A779] rounded-xl py-2 px-4 w-full text-black text-[12px]/5 sm:text-[16px]/8" />
-                            </div>
-                            <div class="flex justify-center">
-                                <UButton type="submit" :loading="stateEditWallet.loading"
-                                    :disabled="stateEditWallet.loading"
                                     class="text-[#6B1F2A] text-[12px]/8 font-bold! px-5 py-0.5 bg-main-color-page cursor-pointer">
                                     {{ $t('Edit') }}
                                 </UButton>
@@ -646,16 +410,6 @@ const stateDeletePay = ref({
     }
 });
 
-const stateEditWallet = ref({
-    loading: false,
-    error: false,
-    success: false,
-    msg: {
-        ar: "",
-        en: ""
-    }
-});
-
 const myDataInfo = ref(null);
 
 const systemSettings = ref({
@@ -667,8 +421,6 @@ const exchangeRates = ref({
     USDT: 0,
     USDC: 0
 });
-
-const wallets = ref([]);
 
 onMounted(() => {
     getAllInfo();
@@ -705,7 +457,6 @@ async function getAllInfo() {
                 exchangeRates.value.USDC = ele.rate;
         });
 
-        wallets.value = res.centralBlockchainWallets || [];
         paymentMethods.value = res.paymentMethods || [];
     }
     finally {
@@ -1156,188 +907,6 @@ async function deletePay() {
             en: errorMessage
         };
     }
-}
-
-const openEditWallet = ref(false);
-const editWalletItem = ref({
-    address: "",
-    _id: ""
-});
-
-const openEditWalletFee = ref(false);
-const editWalletItemFee = ref({
-    privateKey: "",
-    _id: ""
-});
-
-function showEditWalletModal(item) {
-    editWalletItem.value = {
-        address: item.address,
-        _id: item._id
-    };
-    openEditWallet.value = true;
-}
-
-function showEditWalletModalFee(item) {
-    editWalletItemFee.value = {
-        privateKey: item.privateKey,
-        _id: item._id
-    };
-    openEditWalletFee.value = true;
-}
-
-async function editWallet(type = '') {
-
-    stateEditWallet.value.loading = true;
-    stateEditWallet.value.error = false;
-    stateEditWallet.value.success = false;
-    stateEditWallet.value.msg = {
-        en: "",
-        ar: "",
-    };
-
-    let data = {};
-    let apiUrl = '';
-
-    if (type == '') {
-        data.address = editWalletItem.value.address;
-        apiUrl = `${BASE_URL}/blockchain-wallets/update/${editWalletItem.value._id}`;
-    }
-    else {
-        data.privateKey = editWalletItemFee.value.privateKey;
-        apiUrl = `${BASE_URL}/blockchain-wallets/update/${editWalletItemFee.value._id}`;
-    }
-
-    const token = store.getToken;
-
-    try {
-        const response = await axios.put(apiUrl, data, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-
-        // if there is error
-        if (response.data.error) {
-            stateEditWallet.value.loading = false;
-            stateEditWallet.value.error = true;
-            stateEditWallet.value.success = false;
-            stateEditWallet.value.msg = {
-                ar: response.data.msg.ar,
-                en: response.data.msg.en,
-            }
-            return;
-        }
-
-        stateEditWallet.value = {
-            loading: false,
-            error: false,
-            success: true,
-            msg: {
-                ar: response.data.msg.ar,
-                en: response.data.msg.en,
-            }
-        };
-
-        getAllInfo();
-        if (type == '')
-            openEditWallet.value = false;
-        else
-            openEditWalletFee.value = false;
-    }
-    catch (error) {
-        stateEditWallet.value.loading = false;
-        stateEditWallet.value.error = true;
-
-        const errorMessage = handelErrorType(error);
-        if (errorMessage == "Unauthorized") {
-            store.updateToken(null);
-            router.push("/login");
-        }
-
-        stateEditWallet.value.msg = {
-            ar: errorMessage,
-            en: errorMessage
-        };
-    }
-}
-
-const openCreateWallet = ref(false);
-const createWalletData = ref({
-    type: "central",
-    value: ""
-});
-
-function showCreateWalletModal(type) {
-    createWalletData.value = { type, value: "" };
-    openCreateWallet.value = true;
-}
-
-async function createWallet() {
-    stateEditWallet.value.loading = true;
-    stateEditWallet.value.error = false;
-    stateEditWallet.value.success = false;
-    stateEditWallet.value.msg = { en: "", ar: "" };
-
-    const { type, value } = createWalletData.value;
-    const data = type == "central" ? { type, address: value.trim() } : { type, privateKey: value.trim() };
-    const token = store.getToken;
-
-    try {
-        const response = await axios.post(`${BASE_URL}/blockchain-wallets/create-system-wallets`, data, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        });
-
-        stateEditWallet.value = {
-            loading: false,
-            error: !!response.data.error,
-            success: !response.data.error,
-            msg: {
-                ar: response.data.msg.ar,
-                en: response.data.msg.en,
-            }
-        };
-        if (response.data.error) {
-            return;
-        }
-
-        // Do not keep a typed private key in memory longer than needed.
-        createWalletData.value.value = "";
-        openCreateWallet.value = false;
-        getAllInfo();
-    }
-    catch (error) {
-        stateEditWallet.value.loading = false;
-        stateEditWallet.value.error = true;
-
-        const errorMessage = handelErrorType(error);
-        if (errorMessage == "Unauthorized") {
-            store.updateToken(null);
-            router.push("/login");
-        }
-
-        stateEditWallet.value.msg = {
-            ar: errorMessage,
-            en: errorMessage
-        };
-    }
-}
-
-const stateCopy = ref({
-    active: false,
-    msg: {
-        ar: "تم نسخ عنوان المحفظة إلى الحافظة",
-        en: "Wallet address copyed to clipboard"
-    }
-});
-const copyToClipboard = async (text) => {
-    stateCopy.value.active = false;
-    navigator.clipboard.writeText(text);
-    await nextTick();
-    stateCopy.value.active = true;
 }
 
 </script>
