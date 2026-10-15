@@ -35,7 +35,9 @@ check_cert "${API_CERT_DIR}"
 check_cert "${ADMIN_API_CERT_DIR}"
 check_cert "${ADMIN_UI_CERT_DIR}"
 
-cat > "${CONF_AVAIL}" <<EOF
+# Quoted heredoc so nginx variables ($host, $scheme, ...) are written literally;
+# the certificate paths are filled in afterwards.
+cat > "${CONF_AVAIL}" <<'EOF'
 server {
     listen 80;
     server_name api.7awalaty.com;
@@ -58,8 +60,8 @@ server {
     listen 443 ssl http2;
     server_name api.7awalaty.com;
 
-    ssl_certificate ${API_CERT_DIR}/fullchain.pem;
-    ssl_certificate_key ${API_CERT_DIR}/privkey.pem;
+    ssl_certificate __API_CERT_DIR__/fullchain.pem;
+    ssl_certificate_key __API_CERT_DIR__/privkey.pem;
 
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
@@ -83,8 +85,8 @@ server {
     listen 443 ssl http2;
     server_name admin-api.7awalaty.com;
 
-    ssl_certificate ${ADMIN_API_CERT_DIR}/fullchain.pem;
-    ssl_certificate_key ${ADMIN_API_CERT_DIR}/privkey.pem;
+    ssl_certificate __ADMIN_API_CERT_DIR__/fullchain.pem;
+    ssl_certificate_key __ADMIN_API_CERT_DIR__/privkey.pem;
 
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
@@ -108,8 +110,8 @@ server {
     listen 443 ssl http2;
     server_name admin.7awalaty.com;
 
-    ssl_certificate ${ADMIN_UI_CERT_DIR}/fullchain.pem;
-    ssl_certificate_key ${ADMIN_UI_CERT_DIR}/privkey.pem;
+    ssl_certificate __ADMIN_UI_CERT_DIR__/fullchain.pem;
+    ssl_certificate_key __ADMIN_UI_CERT_DIR__/privkey.pem;
 
     add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;
     add_header X-Content-Type-Options "nosniff" always;
@@ -136,6 +138,12 @@ server {
     }
 }
 EOF
+
+sed -i \
+  -e "s#__API_CERT_DIR__#${API_CERT_DIR}#g" \
+  -e "s#__ADMIN_API_CERT_DIR__#${ADMIN_API_CERT_DIR}#g" \
+  -e "s#__ADMIN_UI_CERT_DIR__#${ADMIN_UI_CERT_DIR}#g" \
+  "${CONF_AVAIL}"
 
 ln -sfn "${CONF_AVAIL}" "${CONF_ENABLED}"
 
