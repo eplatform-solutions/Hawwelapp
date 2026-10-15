@@ -10,26 +10,30 @@ const { SUPPORTED_NETWORKS } = require("../../../constants/blockchain");
 
 const blockchainWalletModel = require("../../../models/dashboard/blockchain_wallet");
 
-const INITIAL_CENTRAL_BLOCKCHAIN_WALLETS = [
-    ...SUPPORTED_NETWORKS.map((network) => (
+const web3 = require("web3");
+
+// Customer deposits are swept to this address, so it must come from the operator's own
+// configuration (CENTRAL_WALLET_ADDRESS); it is never written in the code.
+function buildInitialCentralWallets(address) {
+    return ["USDT", "USDC"].flatMap((symbol) => SUPPORTED_NETWORKS.map((network) => (
         {
-            symbol: "USDT",
+            symbol,
             network,
-            address: "0x8c7aE78104e64C7e91699b5af1133c8690547da1",
+            address,
             type: "central",
         }
-    )),
-    ...SUPPORTED_NETWORKS.map((network) => (
-        {
-            symbol: "USDC",
-            network,
-            address: "0x8c7aE78104e64C7e91699b5af1133c8690547da1",
-            type: "central",
-        }
-    )),
-];
+    )));
+}
 
 async function create_initial_blockchain_central_wallets() {
+    const address = (process.env.CENTRAL_WALLET_ADDRESS || "").trim();
+    if (!address) {
+        return "Skipped: CENTRAL_WALLET_ADDRESS is not set, no central wallets were created.";
+    }
+    if (!web3.utils.isAddress(address)) {
+        throw new Error("CENTRAL_WALLET_ADDRESS is not a valid address");
+    }
+    const INITIAL_CENTRAL_BLOCKCHAIN_WALLETS = buildInitialCentralWallets(address);
     try {
         await dashboardDB.openUri(process.env.DASH_DB_URL);
         await blockchainWalletModel.bulkWrite(
